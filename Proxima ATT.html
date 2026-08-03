@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROTON — Orbitais Quânticos |ψ|²</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background: radial-gradient(circle at center, #0a0f25 0%, #03050c 100%);
+    color: #f1f5f9;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ── */
+.header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    padding: 7px 16px;
+    border-bottom: 1px solid rgba(0,204,255,0.25);
+    background: rgba(0,0,20,0.6);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    flex-shrink: 0;
+}
+
+.header h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #00ccff, #00ff88);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    white-space: nowrap;
+    letter-spacing: 1px;
+}
+
+/* Mode tabs — identical to PROTON */
+.mode-toggle { display:flex; align-items:center; gap:0; }
+
+.mode-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(0,204,255,0.2);
+    color: rgba(255,255,255,0.7);
+    padding: 5px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin: 0 3px;
+    font-size: 0.75rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+}
+
+.mode-btn:hover {
+    background: rgba(0,204,255,0.15);
+    color: #fff;
+}
+
+.mode-btn.active {
+    background: rgba(0,204,255,0.35);
+    border-color: #00ccff;
+    color: #fff;
+    box-shadow: 0 0 18px rgba(0,204,255,0.55);
+}
+
+/* Badge NEW */
+.mode-btn.tab-new { position:relative; }
+.mode-btn.tab-new::after {
+    content:'NEW';
+    position:absolute; top:-6px; right:-2px;
+    font-size:0.42rem; font-weight:800; letter-spacing:0.5px;
+    background:#00ff88; color:#03050c;
+    padding:1px 4px; border-radius:3px;
+}
+
+/* ── MAIN LAYOUT ── */
+.main-content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    overflow: hidden;
+    align-items: stretch;
+}
+
+/* ── CANVAS CONTAINER — same as PROTON ── */
+#orbital-canvas-wrap {
+    flex: 1 1 100%;
+    min-width: 0;
+    border: 1px solid rgba(0,204,255,0.15);
+    border-radius: 24px;
+    background: rgba(10,15,30,0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+#orbital-canvas { width:100%; height:100%; display:block; }
+
+/* Floating energy-style display — same pattern as PROTON */
+.info-overlay {
+    position: absolute;
+    top: 15px; right: 15px;
+    background: rgba(10,15,25,0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0,204,255,0.2);
+    border-radius: 16px;
+    padding: 14px 18px;
+    font-family: 'Outfit', sans-serif;
+    z-index: 100;
+    min-width: 155px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+    transition: all 0.3s;
+}
+
+.info-overlay:hover {
+    border-color: rgba(0,204,255,0.5);
+    box-shadow: 0 10px 40px rgba(0,204,255,0.2);
+}
+
+.info-overlay-title {
+    font-size: 0.7rem;
+    color: rgba(0,204,255,0.85);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 7px;
+    font-weight: 600;
+}
+
+.info-overlay-value {
+    font-size: 1.45rem;
+    color: #00ff88;
+    font-weight: 800;
+    text-shadow: 0 0 14px rgba(0,255,136,0.45);
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    letter-spacing: -0.5px;
+}
+
+.info-overlay-unit {
+    font-size: 0.8rem;
+    color: #00ccff;
+    font-weight: 500;
+}
+
+.info-overlay-sub {
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.6);
+    margin-top: 4px;
+    font-family: 'Inter', sans-serif;
+}
+
+.qn-overlay {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0,204,255,0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.qn-item {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.8);
+    font-family: 'Courier New', monospace;
+}
+
+.qn-item b { color: #00ccff; }
+
+/* Rotation hint — same as PROTON */
+.rotation-hint {
+    position: absolute;
+    bottom: 12px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.65);
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    color: #00ccff;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 100;
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Loading overlay */
+.loading-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(10,15,30,0.85);
+    z-index: 200;
+    flex-direction: column; gap: 14px;
+    border-radius: 24px;
+}
+
+.loading-spinner {
+    width: 44px; height: 44px;
+    border: 2px solid rgba(0,204,255,0.15);
+    border-top-color: #00ccff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #00ccff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── CONTROLS PANEL — same glass style as PROTON ── */
+.controls {
+    width: 290px;
+    max-width: 290px;
+    min-width: 250px;
+    height: 100%;
+    background: rgba(15,20,35,0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 16px 18px;
+    border-radius: 24px;
+    border: 1px solid rgba(0,204,255,0.15);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.04);
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex-shrink: 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,204,255,0.3) transparent;
+}
+
+.controls::-webkit-scrollbar { width: 4px; }
+.controls::-webkit-scrollbar-track { background: transparent; }
+.controls::-webkit-scrollbar-thumb { background: rgba(0,204,255,0.3); border-radius: 2px; }
+
+/* Control group — same as PROTON */
+.control-group { margin-bottom: 18px; }
+
+.control-group h3 {
+    color: #00ccff;
+    margin-bottom: 12px;
+    font-size: 0.88rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+/* Atom info card — same as PROTON */
+.atom-info {
+    background: rgba(10,15,30,0.55);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0,204,255,0.15);
+    padding: 14px 16px;
+    border-radius: 16px;
+    margin: 0 0 16px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    transition: all 0.3s;
+}
+
+.atom-info:hover {
+    border-color: rgba(0,204,255,0.4);
+    box-shadow: 0 10px 30px rgba(0,204,255,0.15);
+}
+
+.atom-info h4 {
+    color: #00ccff;
+    margin-bottom: 4px;
+    font-size: 1.05rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.atom-info .orbital-type {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.6);
+}
+
+.atom-info .orbital-big {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #00ff88;
+    text-shadow: 0 0 14px rgba(0,255,136,0.45);
+    font-family: 'Outfit', sans-serif;
+    line-height: 1.1;
+}
+
+/* Buttons — same as PROTON .btn */
+.btn {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #e2e8f0;
+    padding: 9px 12px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    margin: 3px 2px;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    outline: none;
+    width: 100%;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: block;
+    text-align: left;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    color: #fff;
+}
+
+.btn:active { transform: translateY(1px) scale(0.98); }
+
+.btn.active {
+    background: rgba(0,204,255,0.15);
+    border-color: rgba(0,204,255,0.45);
+    color: #00ccff;
+    box-shadow: 0 0 14px rgba(0,204,255,0.25);
+}
+
+/* Render mode buttons — 2 columns */
+.btn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+}
+
+.btn-grid .btn { margin: 0; }
+
+/* Info text — same border-left style as PROTON */
+.info-text {
+    background: rgba(0,100,200,0.12);
+    border-left: 4px solid #00ccff;
+    padding: 10px 12px;
+    border-radius: 4px;
+    margin-top: 10px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.8);
+    font-family: 'Inter', sans-serif;
+}
+
+/* Slider — styled to match PROTON palette */
+.slider-wrap { margin-bottom: 12px; }
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.slider-label {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.6);
+    font-family: 'Outfit', sans-serif;
+}
+
+.slider-val {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #00ff88;
+    font-family: 'Outfit', sans-serif;
+}
+
+input[type=range] {
+    -webkit-appearance: none;
+    width: 100%; height: 3px;
+    background: rgba(0,204,255,0.15);
+    border-radius: 2px;
+    outline: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #00ccff;
+    box-shadow: 0 0 8px rgba(0,204,255,0.6);
+    cursor: pointer;
+}
+
+/* QN big display */
+.qn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.qn-cell {
+    background: rgba(10,15,30,0.5);
+    border: 1px solid rgba(0,204,255,0.12);
+    border-radius: 12px;
+    padding: 8px 4px;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.qn-cell:hover { border-color: rgba(0,204,255,0.35); }
+
+.qn-letter {
+    font-size: 0.6rem;
+    color: rgba(0,204,255,0.75);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.qn-num {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #00ff88;
+    text-shadow: 0 0 10px rgba(0,255,136,0.4);
+    font-family: 'Outfit', sans-serif;
+    display: block;
+    line-height: 1;
+}
+
+.qn-desc {
+    font-size: 0.55rem;
+    color: rgba(255,255,255,0.4);
+    display: block;
+    margin-top: 2px;
+}
+
+/* Color swatches */
+.color-row { display:flex; gap:7px; flex-wrap:wrap; margin-top:6px; }
+
+.color-swatch {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.active { border-color: #fff; transform: scale(1.2); }
+
+/* Node info row */
+.node-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.node-card {
+    background: rgba(10,15,30,0.5);
+    border: 1px solid rgba(0,204,255,0.12);
+    border-radius: 12px;
+    padding: 10px 8px;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.node-card:hover { border-color: rgba(0,204,255,0.35); }
+
+.node-num {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #00ccff;
+    font-family: 'Outfit', sans-serif;
+    display: block;
+}
+
+.node-lbl {
+    font-size: 0.62rem;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
+    display: block;
+    line-height: 1.3;
+}
+
+/* Rules */
+.rule-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.75);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.4;
+}
+
+.rule-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #00ccff;
+    margin-top: 5px;
+    flex-shrink: 0;
+    box-shadow: 0 0 5px rgba(0,204,255,0.5);
+}
+
+/* Mobile responsive */
+@media (max-width: 900px) {
+    body { height: auto; overflow: auto; }
+    .main-content { flex-direction: column; overflow: visible; padding: 6px; }
+    #orbital-canvas-wrap { flex: none; height: 70vw; min-height: 300px; max-height: 460px; }
+    .controls { width: 100%; max-width: 100%; min-width: unset; height: auto; overflow: visible; border-radius: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header">
+    <h1>PROTON — Orbitais Quânticos |ψ|²</h1>
+    <div class="mode-toggle">
+        <button class="mode-btn active">⬡ Orbitais |ψ|²</button>
+    </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main-content">
+
+    <!-- CANVAS -->
+    <div id="orbital-canvas-wrap">
+        <canvas id="orbital-canvas"></canvas>
+
+        <!-- Info overlay — estilo energy-display do PROTON -->
+        <div class="info-overlay">
+            <div class="info-overlay-title">⚡ Energia do nível</div>
+            <div class="info-overlay-value">
+                <span id="ov-energy">−13.6</span>
+                <span class="info-overlay-unit">eV</span>
+            </div>
+            <div class="info-overlay-sub" id="ov-formula">E = −13.6 / n² eV</div>
+            <div class="qn-overlay">
+                <div class="qn-item"><b>|L|</b> = <span id="ov-L">0</span> ℏ &nbsp; <b>Lz</b> = <span id="ov-Lz">0</span> ℏ</div>
+                <div class="qn-item"><b>r<sub>mp</sub></b> = <span id="ov-r">1.0</span> a₀</div>
+                <div class="qn-item"><b>Degen.</b> n² = <span id="ov-deg">1</span></div>
+            </div>
+        </div>
+
+        <div class="rotation-hint">
+            <span class="desktop-hint">🖱 Arraste para rotacionar · Scroll para zoom</span>
+            <span class="mobile-hint" style="display:none">👆 Toque para rotacionar</span>
+        </div>
+
+        <div class="loading-overlay" id="loading">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Calculando |ψ|²</div>
+        </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+
+        <!-- Números quânticos -->
+        <div class="control-group">
+            <h3>📐 Números Quânticos</h3>
+
+            <div class="qn-grid">
+                <div class="qn-cell">
+                    <span class="qn-letter">n — principal</span>
+                    <span class="qn-num" id="disp-n">1</span>
+                    <span class="qn-desc">camada</span>
+                </div>
+                <div class="qn-cell">
+                    <span class="qn-letter">l — angular</span>
+                    <span class="qn-num" id="disp-l">0</span>
+                    <span class="qn-desc">subnível</span>
+                </div>
+                <div class="qn-cell">
+                    <span class="qn-letter">m — magnético</span>
+                    <span class="qn-num" id="disp-m">0</span>
+                    <span class="qn-desc">orientação</span>
+                </div>
+            </div>
+
+            <div class="slider-wrap">
+                <div class="slider-header">
+                    <span class="slider-label">n (principal) 1→5</span>
+                    <span class="slider-val" id="val-n">1</span>
+                </div>
+                <input type="range" id="sl-n" min="1" max="5" value="1" oninput="onNChange(this.value)">
+            </div>
+
+            <div class="slider-wrap">
+                <div class="slider-header">
+                    <span class="slider-label">l (azimutal) 0→n−1</span>
+                    <span class="slider-val" id="val-l">0</span>
+                </div>
+                <input type="range" id="sl-l" min="0" max="0" value="0" oninput="onLChange(this.value)">
+            </div>
+
+            <div class="slider-wrap">
+                <div class="slider-header">
+                    <span class="slider-label">m (magnético) −l→+l</span>
+                    <span class="slider-val" id="val-m">0</span>
+                </div>
+                <input type="range" id="sl-m" min="0" max="0" value="0" oninput="onMChange(this.value)">
+            </div>
+        </div>
+
+        <!-- Orbital atual -->
+        <div class="atom-info">
+            <h4 id="orbital-name">1s</h4>
+            <div class="orbital-big" id="orbital-symbol">1s</div>
+            <div class="orbital-type" id="orbital-type">Orbital s — esférico</div>
+        </div>
+
+        <!-- Paleta -->
+        <div class="control-group">
+            <h3>🎨 Paleta de Cor</h3>
+            <div class="color-row" id="color-row">
+                <div class="color-swatch active" style="background:#6496ff" onclick="setColor('#6496ff','#64c8ff')" title="Azul PROTON"></div>
+                <div class="color-swatch" style="background:#00ccff" onclick="setColor('#00ccff','#64ffc8')" title="Cyan"></div>
+                <div class="color-swatch" style="background:#00ff88" onclick="setColor('#00ff88','#ccffee')" title="Green"></div>
+                <div class="color-swatch" style="background:#ff9664" onclick="setColor('#ff9664','#ffcc88')" title="Orange"></div>
+                <div class="color-swatch" style="background:#c864ff" onclick="setColor('#c864ff','#e8aaff')" title="Violet"></div>
+                <div class="color-swatch" style="background:#64ffc8" onclick="setColor('#64ffc8','#ccffe8')" title="Mint"></div>
+                <div class="color-swatch" style="background:#f5c842" onclick="setColor('#f5c842','#fde68a')" title="Gold"></div>
+            </div>
+        </div>
+
+        <!-- Controles de cena -->
+        <div class="control-group">
+            <h3>⚙️ Controles</h3>
+            <button class="btn" id="btn-rot" onclick="toggleRotate()">⟳ Rotação automática</button>
+            <button class="btn" onclick="resetCamera()">⌖ Resetar câmera</button>
+            <button class="btn" onclick="toggleAxes()">⊕ Eixos XYZ</button>
+            <button class="btn" onclick="triggerRender()">↺ Recalcular</button>
+        </div>
+
+        <!-- Nódulos -->
+        <div class="control-group">
+            <h3>🔵 Nódulos</h3>
+            <div class="node-row">
+                <div class="node-card">
+                    <span class="node-num" id="info-nr">0</span>
+                    <span class="node-lbl">Radiais<br>n − l − 1</span>
+                </div>
+                <div class="node-card">
+                    <span class="node-num" id="info-na">0</span>
+                    <span class="node-lbl">Angulares<br>l</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Momento angular -->
+        <div class="control-group">
+            <h3>⚛️ Momento Angular</h3>
+            <div class="info-text">
+                |<b>L</b>| = √(l(l+1)) ℏ = <b id="info-L">0</b> ℏ<br>
+                L<sub>z</sub> = m ℏ = <b id="info-Lz">0</b> ℏ<br>
+                <br>Degenerescência: n² = <b id="info-deg2">1</b> estados
+            </div>
+        </div>
+
+        <!-- Regras -->
+        <div class="control-group">
+            <h3>📋 Regras Quânticas</h3>
+            <div class="rule-item"><div class="rule-dot"></div><span>n ≥ 1 (inteiro positivo)</span></div>
+            <div class="rule-item"><div class="rule-dot"></div><span>0 ≤ l ≤ n − 1</span></div>
+            <div class="rule-item"><div class="rule-dot"></div><span>−l ≤ m ≤ +l</span></div>
+            <div class="rule-item"><div class="rule-dot"></div><span>Nódulos radiais = n − l − 1</span></div>
+            <div class="rule-item"><div class="rule-dot"></div><span>Nódulos angulares = l</span></div>
+            <div class="rule-item"><div class="rule-dot"></div><span>Nódulos totais = n − 1</span></div>
+        </div>
+
+        <!-- Descrição -->
+        <div class="control-group">
+            <h3>📖 Descrição</h3>
+            <div class="info-text" id="info-desc">
+                Orbital 1s: distribuição esférica perfeita. Estado fundamental do hidrogênio. Densidade máxima no núcleo. Zero nódos radiais ou angulares.
+            </div>
+        </div>
+
+    </div><!-- /controls -->
+</div><!-- /main-content -->
+
+<script>
+// ====================================================
+// QUANTUM MATH — Cálculo rigoroso de |ψ_nlm|²
+// ====================================================
+function fact(n) {
+    if(n<=1) return 1;
+    let r=1; for(let i=2;i<=n;i++) r*=i; return r;
+}
+
+function laguerreAssoc(n, alpha, x) {
+    if(n===0) return 1;
+    if(n===1) return 1+alpha-x;
+    let L0=1, L1=1+alpha-x, Lk=0;
+    for(let k=2;k<=n;k++){
+        Lk=((2*k-1+alpha-x)*L1-(k-1+alpha)*L0)/k;
+        L0=L1; L1=Lk;
+    }
+    return Lk;
+}
+
+function legendreAssoc(l, m, x) {
+    let pmm=1;
+    if(m>0){
+        let somx2=Math.sqrt((1-x)*(1+x));
+        let fact_val=1;
+        for(let i=1;i<=m;i++){
+            pmm*=(-1)*fact_val*somx2; fact_val+=2;
+        }
+    }
+    if(l===m) return pmm;
+    let pmmp1=x*(2*m+1)*pmm;
+    if(l===m+1) return pmmp1;
+    let pll=0;
+    for(let ll=m+2;ll<=l;ll++){
+        pll=((2*ll-1)*x*pmmp1-(ll+m-1)*pmm)/(ll-m);
+        pmm=pmmp1; pmmp1=pll;
+    }
+    return pll;
+}
+
+function radialWF(n, l, r, Z) {
+    const a0=1;
+    const rho=2*Z*r/(n*a0);
+    const num=fact(n-l-1);
+    const den=2*n*fact(n+l);
+    const norm=Math.sqrt(Math.pow(2*Z/(n*a0),3)*num/den);
+    const laguerre=laguerreAssoc(n-l-1, 2*l+1, rho);
+    return norm*Math.exp(-rho/2)*Math.pow(rho,l)*laguerre;
+}
+
+function sphericalHarmonic(l, m, theta, phi) {
+    const cosT=Math.cos(theta);
+    const am=Math.abs(m);
+    const Plm=legendreAssoc(l,am,cosT);
+    const norm=Math.sqrt((2*l+1)/(4*Math.PI)*fact(l-am)/fact(l+am));
+    if(m===0) return norm*Plm;
+    if(m>0) return Math.SQRT2*norm*Plm*Math.cos(m*phi);
+    return Math.SQRT2*norm*Plm*Math.sin(-m*phi);
+}
+
+function psi2(n, l, m, x, y, z) {
+    const r=Math.sqrt(x*x+y*y+z*z);
+    if(r<1e-10) return (l===0)?Math.pow(radialWF(n,0,1e-10,1)*sphericalHarmonic(0,0,0,0),2):0;
+    const theta=Math.acos(Math.max(-1,Math.min(1,z/r)));
+    const phi=Math.atan2(y,x);
+    const R=radialWF(n,l,r,1);
+    const Y=sphericalHarmonic(l,m,theta,phi);
+    return R*R*Y*Y;
+}
+
+// ====================================================
+// MARCHING CUBES — completo
+// ====================================================
+const edgeTable=[0,273,545,816,2082,2323,2611,2880,1042,1283,1587,1826,3120,3329,3649,3920,324,85,869,628,2406,2167,2983,2740,1366,1127,1943,1700,3444,3173,4021,3748,644,917,165,436,2722,2963,2227,2466,1686,1927,1207,1446,3764,3973,3285,3492,960,801,549,388,3006,2815,2579,2416,2006,1815,1595,1432,4064,3841,3685,3460,2060,2269,2577,2884,14,223,527,800,3102,3279,3615,3920,1054,1231,1583,1824,1096,1305,1629,1836,338,115,467,272,3402,3179,3567,3340,1394,1139,1559,1304,1416,1161,1597,1340,692,965,213,484,2770,3011,2275,2514,1734,1975,1255,1494,1768,1977,1313,1520,1008,849,597,436,3054,2863,2627,2464,2038,1815,1627,1432,4076,3853,3697,3472,2144,2417,2721,2992,170,411,731,1000,3186,3427,3763,4032,1238,1447,1783,2020,3408,3537,3793,3984,464,273,53,860,2530,2307,2123,1932,1478,1255,1087,862,3576,3321,3209,3016,788,1061,309,580,2834,3043,2307,2578,1782,2023,1303,1510,3816,4025,3337,3544,1104,945,693,532,3150,2959,2723,2560,2118,1895,1675,1480,4152,3929,3773,3548,2276,2485,2793,3068,346,523,859,1096,3258,3435,3803,4008,1350,1495,1863,2068,3576,3721,4025,4232,1172,1045,801,740,2618,2459,2251,2156,1594,1435,1259,1196,3720,3529,3417,3288,1428,1669,917,1156,2970,3179,2443,2714,1958,2167,1447,1686,3984,4161,3513,3752,1744,1553,1301,1108,3790,3567,3347,3188,2726,2471,2283,2092,4804,4549,4393,4200];
+
+const triTable=[[-1],[0,8,3,-1],[0,1,9,-1],[1,8,3,9,8,1,-1],[1,2,10,-1],[0,8,3,1,2,10,-1],[9,2,10,0,2,9,-1],[2,8,3,2,10,8,10,9,8,-1],[3,11,2,-1],[0,11,2,8,11,0,-1],[1,9,0,2,3,11,-1],[1,11,2,1,9,11,9,8,11,-1],[3,10,1,11,10,3,-1],[0,10,1,0,8,10,8,11,10,-1],[3,9,0,3,11,9,11,10,9,-1],[9,8,10,10,8,11,-1],[4,7,8,-1],[4,3,0,7,3,4,-1],[0,1,9,8,4,7,-1],[4,1,9,4,7,1,7,3,1,-1],[1,2,10,8,4,7,-1],[3,4,7,3,0,4,1,2,10,-1],[9,2,10,9,0,2,8,4,7,-1],[2,10,9,2,9,7,7,9,4,3,2,7,-1],[8,4,7,3,11,2,-1],[11,4,7,11,2,4,2,0,4,-1],[9,0,1,8,4,7,2,3,11,-1],[4,7,11,9,4,11,9,11,2,9,2,1,-1],[3,10,1,3,11,10,7,8,4,-1],[1,11,10,1,4,11,1,0,4,7,11,4,-1],[4,7,8,9,0,11,9,11,10,11,0,3,-1],[4,7,11,4,11,9,9,11,10,-1],[9,5,4,-1],[9,5,4,0,8,3,-1],[0,5,4,1,5,0,-1],[8,5,4,8,3,5,3,1,5,-1],[1,2,10,9,5,4,-1],[3,0,8,1,2,10,4,9,5,-1],[5,2,10,5,4,2,4,0,2,-1],[2,10,5,3,2,5,3,5,4,3,4,8,-1],[9,5,4,2,3,11,-1],[0,11,2,0,8,11,4,9,5,-1],[0,5,4,0,1,5,2,3,11,-1],[2,1,5,2,5,8,2,8,11,4,8,5,-1],[10,3,11,10,1,3,9,5,4,-1],[4,9,5,0,8,1,8,10,1,8,11,10,-1],[5,4,0,5,0,11,5,11,10,11,0,3,-1],[5,4,8,5,8,10,10,8,11,-1],[9,7,8,5,7,9,-1],[9,3,0,9,5,3,5,7,3,-1],[0,7,8,0,1,7,1,5,7,-1],[1,5,3,3,5,7,-1],[9,7,8,9,5,7,10,1,2,-1],[10,1,2,9,5,0,5,3,0,5,7,3,-1],[8,0,2,8,2,5,8,5,7,10,5,2,-1],[2,10,5,2,5,3,3,5,7,-1],[7,9,5,7,8,9,3,11,2,-1],[9,5,7,9,7,2,9,2,0,2,7,11,-1],[2,3,11,0,1,8,1,7,8,1,5,7,-1],[11,2,1,11,1,7,7,1,5,-1],[9,5,8,8,5,7,10,1,3,10,3,11,-1],[5,7,0,5,0,9,7,11,0,1,0,10,11,10,0,-1],[11,10,0,11,0,3,10,5,0,8,0,7,5,7,0,-1],[11,10,5,7,11,5,-1],[10,6,5,-1],[0,8,3,5,10,6,-1],[9,0,1,5,10,6,-1],[1,8,3,1,9,8,5,10,6,-1],[1,6,5,2,6,1,-1],[1,6,5,1,2,6,3,0,8,-1],[9,6,5,9,0,6,0,2,6,-1],[5,9,8,5,8,2,5,2,6,3,2,8,-1],[2,3,11,10,6,5,-1],[11,0,8,11,2,0,10,6,5,-1],[0,1,9,2,3,11,5,10,6,-1],[5,10,6,1,9,2,9,11,2,9,8,11,-1],[3,6,5,3,11,6,1,3,5,-1],[0,8,11,0,11,6,0,6,1,5,1,6,-1],[3,11,6,0,3,6,0,6,5,0,5,9,-1],[6,5,9,6,9,11,11,9,8,-1],[5,10,6,4,7,8,-1],[4,3,0,4,7,3,6,5,10,-1],[1,9,0,5,10,6,8,4,7,-1],[10,6,5,1,9,7,1,7,3,7,9,4,-1],[6,1,2,6,5,1,4,7,8,-1],[1,2,5,5,2,6,3,0,4,3,4,7,-1],[8,4,7,9,0,5,0,6,5,0,2,6,-1],[7,3,9,7,9,4,3,2,9,5,9,6,2,6,9,-1],[3,11,2,7,8,4,10,6,5,-1],[5,10,6,4,7,2,4,2,0,2,7,11,-1],[0,1,9,4,7,8,2,3,11,5,10,6,-1],[9,2,1,9,11,2,9,4,11,7,11,4,5,10,6,-1],[8,4,7,3,11,5,3,5,1,5,11,6,-1],[5,1,11,5,11,6,1,0,11,7,11,4,0,4,11,-1],[0,5,9,0,6,5,0,3,6,11,6,3,8,4,7,-1],[6,5,9,6,9,11,4,7,9,7,11,9,-1],[10,4,9,6,4,10,-1],[4,10,6,4,9,10,0,8,3,-1],[10,0,1,10,6,0,6,4,0,-1],[8,3,1,8,1,6,8,6,4,6,1,10,-1],[1,4,9,1,2,4,2,6,4,-1],[3,0,8,1,2,9,2,4,9,2,6,4,-1],[0,2,4,4,2,6,-1],[8,3,2,8,2,4,4,2,6,-1],[10,4,9,10,6,4,11,2,3,-1],[0,8,2,2,8,11,4,9,10,4,10,6,-1],[3,11,2,0,1,6,0,6,4,6,1,10,-1],[6,4,1,6,1,10,4,8,1,2,1,11,8,11,1,-1],[9,6,4,9,3,6,9,1,3,11,6,3,-1],[8,11,1,8,1,0,11,6,1,9,1,4,6,4,1,-1],[3,11,6,3,6,0,0,6,4,-1],[6,4,8,11,6,8,-1],[7,10,6,7,8,10,8,9,10,-1],[0,7,3,0,10,7,0,9,10,6,7,10,-1],[10,6,7,1,10,7,1,7,8,1,8,0,-1],[10,6,7,10,7,1,1,7,3,-1],[1,2,6,1,6,8,1,8,9,8,6,7,-1],[2,6,9,2,9,1,6,7,9,0,9,3,7,3,9,-1],[7,8,0,7,0,6,6,0,2,-1],[7,3,2,6,7,2,-1],[2,3,11,10,6,8,10,8,9,8,6,7,-1],[2,0,7,2,7,11,0,9,7,6,7,10,9,10,7,-1],[1,8,0,1,7,8,1,10,7,6,7,10,2,3,11,-1],[11,2,1,11,1,7,10,6,1,6,7,1,-1],[8,9,6,8,6,7,9,1,6,11,6,3,1,3,6,-1],[0,9,1,11,6,7,-1],[7,8,0,7,0,6,3,11,0,11,6,0,-1],[7,11,6,-1],[7,6,11,-1],[3,0,8,11,7,6,-1],[0,1,9,11,7,6,-1],[8,1,9,8,3,1,11,7,6,-1],[10,1,2,6,11,7,-1],[1,2,10,3,0,8,6,11,7,-1],[2,9,0,2,10,9,6,11,7,-1],[6,11,7,2,10,3,10,8,3,10,9,8,-1],[7,2,3,6,2,7,-1],[7,0,8,7,6,0,6,2,0,-1],[2,7,6,2,3,7,0,1,9,-1],[1,6,2,1,8,6,1,9,8,8,7,6,-1],[10,7,6,10,1,7,1,3,7,-1],[10,7,6,1,7,10,1,8,7,1,0,8,-1],[0,3,7,0,7,10,0,10,9,6,10,7,-1],[7,6,10,7,10,8,8,10,9,-1],[6,8,4,11,8,6,-1],[3,6,11,3,0,6,0,4,6,-1],[8,6,11,8,4,6,9,0,1,-1],[9,4,6,9,6,3,9,3,1,11,3,6,-1],[6,8,4,6,11,8,2,10,1,-1],[1,2,10,3,0,11,0,6,11,0,4,6,-1],[4,11,8,4,6,11,0,2,9,2,10,9,-1],[10,9,3,10,3,2,9,4,3,11,3,6,4,6,3,-1],[8,2,3,8,4,2,4,6,2,-1],[0,4,2,4,6,2,-1],[1,9,0,2,3,4,2,4,6,4,3,8,-1],[1,9,4,1,4,2,2,4,6,-1],[8,1,3,8,6,1,8,4,6,6,10,1,-1],[10,1,0,10,0,6,6,0,4,-1],[4,6,3,4,3,8,6,10,3,0,3,9,10,9,3,-1],[10,9,4,6,10,4,-1],[4,9,5,7,6,11,-1],[0,8,3,4,9,5,11,7,6,-1],[5,0,1,5,4,0,7,6,11,-1],[11,7,6,8,3,4,3,5,4,3,1,5,-1],[9,5,4,10,1,2,7,6,11,-1],[6,11,7,1,2,10,0,8,3,4,9,5,-1],[7,6,11,5,4,10,4,2,10,4,0,2,-1],[3,4,8,3,5,4,3,2,5,10,5,2,11,7,6,-1],[7,2,3,7,6,2,5,4,9,-1],[9,5,4,0,8,6,0,6,2,6,8,7,-1],[3,6,2,3,7,6,1,5,0,5,4,0,-1],[6,2,8,6,8,7,2,1,8,4,8,5,1,5,8,-1],[9,5,4,10,1,6,1,7,6,1,3,7,-1],[1,6,10,1,7,6,1,0,7,8,7,0,9,5,4,-1],[4,0,10,4,10,5,0,3,10,6,10,7,3,7,10,-1],[7,6,10,7,10,8,5,4,10,4,8,10,-1],[6,9,5,6,11,9,11,8,9,-1],[3,6,11,0,6,3,0,5,6,0,9,5,-1],[0,11,8,0,5,11,0,1,5,5,6,11,-1],[6,11,3,6,3,5,5,3,1,-1],[1,2,10,9,5,11,9,11,8,11,5,6,-1],[0,11,3,0,6,11,0,9,6,5,6,9,1,2,10,-1],[11,8,5,11,5,6,8,0,5,10,5,2,0,2,5,-1],[6,11,3,6,3,5,2,10,3,10,5,3,-1],[5,8,9,5,2,8,5,6,2,3,8,2,-1],[9,5,6,9,6,0,0,6,2,-1],[1,5,8,1,8,0,5,6,8,3,8,2,6,2,8,-1],[1,5,6,2,1,6,-1],[1,3,6,1,6,10,3,8,6,5,6,9,8,9,6,-1],[10,1,0,10,0,6,9,5,0,5,6,0,-1],[0,3,8,5,6,10,-1],[10,5,6,-1],[11,5,10,7,5,11,-1],[11,5,10,11,7,5,8,3,0,-1],[5,11,7,5,10,11,1,9,0,-1],[10,7,5,10,11,7,9,8,1,8,3,1,-1],[11,1,2,11,7,1,7,5,1,-1],[0,8,3,1,2,7,1,7,5,7,2,11,-1],[9,7,5,9,2,7,9,0,2,2,11,7,-1],[7,5,2,7,2,11,5,9,2,3,2,8,9,8,2,-1],[2,5,10,2,3,5,3,7,5,-1],[8,2,0,8,5,2,8,7,5,10,2,5,-1],[9,0,1,2,3,5,2,5,10,5,3,7,-1],[9,8,2,9,2,1,8,7,2,10,2,5,7,5,2,-1],[1,3,5,3,7,5,-1],[0,8,7,0,7,1,1,7,5,-1],[9,0,3,9,3,5,5,3,7,-1],[9,8,7,5,9,7,-1],[5,8,4,5,10,8,10,11,8,-1],[5,0,4,5,11,0,5,10,11,11,3,0,-1],[0,1,9,8,4,10,8,10,11,10,4,5,-1],[10,11,4,10,4,5,11,3,4,9,4,1,3,1,4,-1],[2,5,1,2,8,5,2,11,8,4,5,8,-1],[0,4,11,0,11,3,4,5,11,2,11,1,5,1,11,-1],[0,2,5,0,5,9,2,11,5,4,5,8,11,8,5,-1],[9,4,5,2,11,3,-1],[2,5,10,3,5,2,3,4,5,3,8,4,-1],[5,10,2,5,2,4,4,2,0,-1],[3,10,2,3,5,10,3,8,5,4,5,8,0,1,9,-1],[5,10,2,5,2,4,1,9,2,9,4,2,-1],[8,4,5,8,5,3,3,5,1,-1],[0,4,5,1,0,5,-1],[8,4,5,8,5,3,9,0,5,0,3,5,-1],[9,4,5,-1],[4,11,7,4,9,11,9,10,11,-1],[0,8,3,4,9,7,9,11,7,9,10,11,-1],[1,10,11,1,11,4,1,4,0,7,4,11,-1],[3,1,4,3,4,8,1,10,4,7,4,11,10,11,4,-1],[4,11,7,9,11,4,9,2,11,9,1,2,-1],[9,7,4,9,11,7,9,1,11,2,11,1,0,8,3,-1],[11,7,4,11,4,2,2,4,0,-1],[11,7,4,11,4,2,8,3,4,3,2,4,-1],[2,9,10,2,7,9,2,3,7,7,4,9,-1],[9,10,7,9,7,4,10,2,7,8,7,0,2,0,7,-1],[3,7,10,3,10,2,7,4,10,1,10,0,4,0,10,-1],[1,10,2,8,7,4,-1],[4,9,1,4,1,7,7,1,3,-1],[4,9,1,4,1,7,0,8,1,8,7,1,-1],[4,0,3,7,4,3,-1],[4,8,7,-1],[9,10,8,10,11,8,-1],[3,0,9,3,9,11,11,9,10,-1],[0,1,10,0,10,8,8,10,11,-1],[3,1,10,11,3,10,-1],[1,2,11,1,11,9,9,11,8,-1],[3,0,9,3,9,11,1,2,9,2,11,9,-1],[0,2,11,8,0,11,-1],[3,2,11,-1],[2,3,8,2,8,10,10,8,9,-1],[9,10,2,0,9,2,-1],[2,3,8,2,8,10,0,1,8,1,10,8,-1],[1,10,2,-1],[1,3,8,9,1,8,-1],[0,9,1,-1],[0,3,8,-1],[-1]];
+
+function marchingCubes(data, GRID, scale, isoVal) {
+    const verts=[], normals=[];
+    function idx(ix,iy,iz){ return ix+iy*GRID+iz*GRID*GRID; }
+    function pos(i,s){ return (i/(GRID-1)-0.5)*2*s; }
+    function interp(p1,p2,v1,v2){
+        if(Math.abs(v1-v2)<1e-10) return (p1+p2)/2;
+        return p1+(isoVal-v1)*(p2-p1)/(v2-v1);
+    }
+    const edges=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    for(let ix=0;ix<GRID-1;ix++){
+    for(let iy=0;iy<GRID-1;iy++){
+    for(let iz=0;iz<GRID-1;iz++){
+        const cx=[ix,ix+1,ix+1,ix,ix,ix+1,ix+1,ix];
+        const cy=[iy,iy,iy+1,iy+1,iy,iy,iy+1,iy+1];
+        const cz=[iz,iz,iz,iz,iz+1,iz+1,iz+1,iz+1];
+        const vals=cx.map((_,i)=>data[idx(cx[i],cy[i],cz[i])]);
+        let cubeIdx=0;
+        for(let i=0;i<8;i++) if(vals[i]>=isoVal) cubeIdx|=(1<<i);
+        if(cubeIdx===0||cubeIdx===255) continue;
+        const eTable=edgeTable[cubeIdx];
+        if(eTable===0) continue;
+        const ev=[];
+        for(let e=0;e<12;e++){
+            if(eTable&(1<<e)){
+                const [a,b]=edges[e];
+                ev[e]=[
+                    interp(pos(cx[a],scale),pos(cx[b],scale),vals[a],vals[b]),
+                    interp(pos(cy[a],scale),pos(cy[b],scale),vals[a],vals[b]),
+                    interp(pos(cz[a],scale),pos(cz[b],scale),vals[a],vals[b])
+                ];
+            }
+        }
+        const tri=triTable[cubeIdx];
+        for(let t=0;t<tri.length;t+=3){
+            if(tri[t]===-1) break;
+            const v0=ev[tri[t]], v1=ev[tri[t+1]], v2=ev[tri[t+2]];
+            if(!v0||!v1||!v2) continue;
+            verts.push(...v0,...v1,...v2);
+            const ax=v1[0]-v0[0],ay=v1[1]-v0[1],az=v1[2]-v0[2];
+            const bx=v2[0]-v0[0],by=v2[1]-v0[1],bz=v2[2]-v0[2];
+            const nx=ay*bz-az*by,ny=az*bx-ax*bz,nz=ax*by-ay*bx;
+            const nl=Math.sqrt(nx*nx+ny*ny+nz*nz)||1;
+            normals.push(nx/nl,ny/nl,nz/nl,nx/nl,ny/nl,nz/nl,nx/nl,ny/nl,nz/nl);
+        }
+    }}}
+    const n=verts.length/3;
+    const faces=new Uint32Array(n); for(let i=0;i<n;i++) faces[i]=i;
+    return {verts:new Float32Array(verts), faces, normals:new Float32Array(normals)};
+}
+
+// ====================================================
+// THREE.JS
+// ====================================================
+let scene, camera, renderer, orbitalMesh, axesHelper;
+let nucleusMesh=null;
+let autoRotate=false;
+let currentColor={c1:'#6496ff', c2:'#64c8ff'};
+let currentN=1, currentL=0, currentM=0;
+let isDragging=false, prevMouse={x:0,y:0};
+let cameraTheta=0.5, cameraPhi=1.2, cameraR=6;
+
+function initThree(){
+    const canvas=document.getElementById('orbital-canvas');
+    const wrap=document.getElementById('orbital-canvas-wrap');
+    renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setClearColor(0x0a0f25,1);
+    renderer.setSize(wrap.clientWidth,wrap.clientHeight);
+
+    scene=new THREE.Scene();
+    camera=new THREE.PerspectiveCamera(45,wrap.clientWidth/wrap.clientHeight,0.01,1000);
+    updateCam();
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0x223344,0.9));
+    const d1=new THREE.DirectionalLight(0x6496ff,1.1); d1.position.set(5,8,6); scene.add(d1);
+    const d2=new THREE.DirectionalLight(0x00ff88,0.6); d2.position.set(-4,-3,-5); scene.add(d2);
+    const d3=new THREE.PointLight(0xff5500,1.5,14); d3.position.set(0,0,0); scene.add(d3);
+
+    // Grid sutil
+    const grid=new THREE.GridHelper(14,28,0x0a1520,0x070d18);
+    grid.position.y=-5; scene.add(grid);
+
+    // Núcleo fixo no centro
+    createNucleus();
+
+    // Mouse / touch
+    canvas.addEventListener('mousedown',e=>{isDragging=true;prevMouse={x:e.clientX,y:e.clientY};});
+    window.addEventListener('mousemove',e=>{
+        if(!isDragging) return;
+        cameraTheta-=(e.clientX-prevMouse.x)*0.005;
+        cameraPhi+=  (e.clientY-prevMouse.y)*0.005;
+        cameraPhi=Math.max(0.1,Math.min(Math.PI-0.1,cameraPhi));
+        prevMouse={x:e.clientX,y:e.clientY};
+        updateCam();
+    });
+    window.addEventListener('mouseup',()=>isDragging=false);
+    canvas.addEventListener('wheel',e=>{
+        cameraR+=e.deltaY*0.01;
+        cameraR=Math.max(1.5,Math.min(22,cameraR));
+        updateCam(); e.preventDefault();
+    },{passive:false});
+
+    let lTouch=null;
+    canvas.addEventListener('touchstart',e=>{lTouch={x:e.touches[0].clientX,y:e.touches[0].clientY};});
+    canvas.addEventListener('touchmove',e=>{
+        if(!lTouch) return;
+        cameraTheta-=(e.touches[0].clientX-lTouch.x)*0.005;
+        cameraPhi+=  (e.touches[0].clientY-lTouch.y)*0.005;
+        cameraPhi=Math.max(0.1,Math.min(Math.PI-0.1,cameraPhi));
+        lTouch={x:e.touches[0].clientX,y:e.touches[0].clientY};
+        updateCam(); e.preventDefault();
+    },{passive:false});
+
+    window.addEventListener('resize',()=>{
+        const w=wrap.clientWidth,h=wrap.clientHeight;
+        camera.aspect=w/h; camera.updateProjectionMatrix();
+        renderer.setSize(w,h);
+    });
+
+    triggerRender();
+    (function loop(){
+        requestAnimationFrame(loop);
+        if(autoRotate){cameraTheta+=0.004;updateCam();}
+
+        // Pulsar glow externo do núcleo
+        if(nucleusMesh && nucleusMesh.children[1]){
+            const p=0.18+0.05*Math.sin(Date.now()*0.002);
+            nucleusMesh.children[1].material.opacity=p;
+        }
+
+        renderer.render(scene,camera);
+    })();
+}
+
+function updateCam(){
+    if(!camera) return;
+    camera.position.set(
+        cameraR*Math.sin(cameraPhi)*Math.cos(cameraTheta),
+        cameraR*Math.cos(cameraPhi),
+        cameraR*Math.sin(cameraPhi)*Math.sin(cameraTheta)
+    );
+    camera.lookAt(0,0,0);
+}
+
+// ★ NÚCLEO — cópia exata de createNucleus() do PROTON.html
+function createNucleus(){
+    if(nucleusMesh){ scene.remove(nucleusMesh); }
+
+    const nucleusRadius=0.28;
+    const geo=new THREE.SphereGeometry(nucleusRadius,32,32);
+    const mat=new THREE.MeshPhongMaterial({
+        color:0xff4500, emissive:0xff4500,
+        emissiveIntensity:0.5, shininess:100
+    });
+    nucleusMesh=new THREE.Mesh(geo,mat);
+
+    // Glow principal — nucleusRadius * 1.7, opacity 0.3 (exato PROTON)
+    const glowGeo=new THREE.SphereGeometry(nucleusRadius*1.7,32,32);
+    const glowMat=new THREE.MeshBasicMaterial({
+        color:0xff4500, transparent:true, opacity:0.3, depthWrite:false
+    });
+    nucleusMesh.add(new THREE.Mesh(glowGeo,glowMat));
+
+    // Glow externo — nucleusRadius * 2.7, opacity 0.2, BackSide (exato PROTON)
+    const outerGeo=new THREE.SphereGeometry(nucleusRadius*2.7,32,32);
+    const outerMat=new THREE.MeshBasicMaterial({
+        color:0xff6600, transparent:true, opacity:0.2, side:THREE.BackSide
+    });
+    nucleusMesh.add(new THREE.Mesh(outerGeo,outerMat));
+
+    scene.add(nucleusMesh);
+}
+
+// ★ ELÉTRON — cópia exata de createElectron() do PROTON.html
+// ★ NOVA ABORDAGEM: SphereGeometry deformada pelos harmônicos esféricos reais
+// Gera a malha quadriculada (latitude/longitude) idêntica ao PROTON.html
+function buildOrbitalGeometry(n, l, m) {
+    const segments = 48; // igual PROTON desktop (64 é muito pesado com deformação)
+    const baseScale = Math.max(1.8, n * n * 0.28 + 0.9);
+
+    // Geometria base — SphereGeometry cria a malha quadriculada característica
+    const geo = new THREE.SphereGeometry(1, segments, segments);
+    const pos = geo.attributes.position.array;
+    const N = geo.attributes.position.count;
+
+    // Calcular máximo de |Y_l^m|² para normalizar
+    let maxY2 = 0;
+    for (let i = 0; i < N; i++) {
+        const x=pos[i*3], y=pos[i*3+1], z=pos[i*3+2];
+        const r=Math.sqrt(x*x+y*y+z*z);
+        if(r<1e-10) continue;
+        const theta=Math.acos(Math.max(-1,Math.min(1,z/r)));
+        const phi=Math.atan2(y,x);
+        const Y=sphericalHarmonic(l,m,theta,phi);
+        if(Y*Y>maxY2) maxY2=Y*Y;
+    }
+    if(maxY2<1e-12) maxY2=1;
+
+    // Deformar cada vértice com base em |Y_l^m(θ,φ)|²
+    for (let i = 0; i < N; i++) {
+        const x=pos[i*3], y=pos[i*3+1], z=pos[i*3+2];
+        const r=Math.sqrt(x*x+y*y+z*z);
+        if(r<1e-10) continue;
+        const theta=Math.acos(Math.max(-1,Math.min(1,z/r)));
+        const phi=Math.atan2(y,x);
+        const Y=sphericalHarmonic(l,m,theta,phi);
+        const Y2norm=Y*Y/maxY2;
+
+        // s orbital (l=0): esfera perfeita como no PROTON
+        // outros: deformados pela parte angular
+        let newR;
+        if(l===0){
+            newR = baseScale;
+        } else {
+            // Raiz quadrada suaviza os lóbulos, evitando colapso nos nódulos
+            newR = baseScale * Math.max(0.08, Math.pow(Y2norm, 0.45));
+        }
+
+        pos[i*3]   = (x/r)*newR;
+        pos[i*3+1] = (y/r)*newR;
+        pos[i*3+2] = (z/r)*newR;
+    }
+
+    geo.attributes.position.needsUpdate = true;
+    geo.computeVertexNormals();
+    return { geo, scale: baseScale };
+}
+
+let ctimer=null;
+function triggerRender(){
+    if(ctimer) clearTimeout(ctimer);
+    document.getElementById('loading').style.display='flex';
+    ctimer=setTimeout(doRender,60);
+}
+
+function doRender(){
+    if(!scene) return;
+    if(orbitalMesh){ scene.remove(orbitalMesh); if(orbitalMesh.geometry) orbitalMesh.geometry.dispose(); }
+
+    const n=currentN, l=currentL, m=currentM;
+
+    // ★ SphereGeometry deformada — malha quadriculada idêntica ao PROTON
+    const { geo, scale } = buildOrbitalGeometry(n, l, m);
+
+    // Auto-ajustar câmera ao tamanho do orbital
+    cameraR = scale * 2.8 + 1.5;
+    updateCam();
+
+    // ★ Material IDÊNTICO ao PROTON createSOrbital wireframe
+    const mat=new THREE.MeshPhongMaterial({
+        color: new THREE.Color(currentColor.c1),
+        transparent: true,
+        opacity: 0.3,
+        wireframe: true,
+        side: THREE.DoubleSide
+    });
+    orbitalMesh = new THREE.Mesh(geo, mat);
+    scene.add(orbitalMesh);
+
+    document.getElementById('loading').style.display='none';
+    updatePanel();
+}
+
+// ── UI ──
+const orbNames=['s','p','d','f','g'];
+const descs={
+    '100':'Orbital 1s: esférico perfeito. Estado fundamental do hidrogênio. Densidade máxima no núcleo, sem nódos.',
+    '200':'Orbital 2s: esférico com 1 nódulo radial. Elétrons mais afastados do que o 1s.',
+    '210':'Orbital 2p₀: dois lobos opostos ao longo do eixo z. Nódulo planar em z=0.',
+    '211':'Orbital 2p±1: toroide em torno do eixo z. Forma da função de onda real.',
+    '300':'Orbital 3s: esférico com 2 nódulos radiais concêntricos.',
+    '310':'Orbital 3p₀: lobos axiais com estrutura radial intermediária.',
+    '311':'Orbital 3p±1: toroide maior com subestrutura interna.',
+    '320':'Orbital 3d₀: dois cones opostos (formato roseta). 4 lóbulos angulares.',
+    '321':'Orbital 3d±1: quatro lóbulos com plano nodal.',
+    '322':'Orbital 3d±2: toroide compacto no plano equatorial.',
+};
+
+function onNChange(v){
+    currentN=+v;
+    document.getElementById('val-n').textContent=v;
+    document.getElementById('disp-n').textContent=v;
+    const sl=document.getElementById('sl-l');
+    sl.max=v-1; if(+sl.value>v-1) sl.value=v-1;
+    onLChange(sl.value);
+}
+
+function onLChange(v){
+    currentL=+v;
+    document.getElementById('val-l').textContent=v;
+    document.getElementById('disp-l').textContent=v;
+    const sm=document.getElementById('sl-m');
+    sm.min=-v; sm.max=+v;
+    if(+sm.value>+v) sm.value=+v;
+    if(+sm.value<-v) sm.value=-v;
+    onMChange(sm.value);
+}
+
+function onMChange(v){
+    currentM=+v;
+    document.getElementById('val-m').textContent=v;
+    document.getElementById('disp-m').textContent=v;
+    triggerRender();
+}
+
+function setColor(c1,c2){
+    currentColor={c1,c2};
+    document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));
+    event.target.classList.add('active');
+    triggerRender();
+}
+
+function toggleRotate(){
+    autoRotate=!autoRotate;
+    document.getElementById('btn-rot').classList.toggle('active',autoRotate);
+}
+
+function resetCamera(){
+    cameraTheta=0.5; cameraPhi=1.2;
+    // Reajusta raio ao orbital atual
+    const scale=Math.max(1.6, currentN*currentN*0.28+0.8);
+    cameraR=scale*2.8+1.5;
+    updateCam();
+}
+
+function toggleAxes(){
+    if(axesHelper){scene.remove(axesHelper);axesHelper=null;}
+    else{axesHelper=new THREE.AxesHelper(3);scene.add(axesHelper);}
+}
+
+function updatePanel(){
+    const n=currentN,l=currentL,m=currentM;
+    const name=n+orbNames[l]+(m!==0?` (m=${m})`:'');
+    document.getElementById('orbital-name').textContent=name;
+    document.getElementById('orbital-symbol').textContent=n+orbNames[l];
+    const subs=['s — esférico','p — lobos/toroide','d — roseta/toroide','f — complexo','g — muito complexo'];
+    document.getElementById('orbital-type').textContent='Orbital '+subs[l];
+    const energy=(-13.6/(n*n)).toFixed(3);
+    document.getElementById('ov-energy').textContent=energy;
+    document.getElementById('ov-formula').textContent=`E = −13.6 / ${n}² eV`;
+    document.getElementById('ov-r').textContent=(n*n).toFixed(1);
+    document.getElementById('ov-deg').textContent=n*n;
+    const L=Math.sqrt(l*(l+1));
+    document.getElementById('ov-L').textContent=L.toFixed(3);
+    document.getElementById('ov-Lz').textContent=m;
+    document.getElementById('info-L').textContent=L.toFixed(3);
+    document.getElementById('info-Lz').textContent=m;
+    document.getElementById('info-deg2').textContent=n*n;
+    document.getElementById('info-nr').textContent=n-l-1;
+    document.getElementById('info-na').textContent=l;
+    const key=`${n}${l}${Math.abs(m)}`;
+    document.getElementById('info-desc').textContent=descs[key]||
+        `Orbital ${name}: n=${n}, l=${l}, m=${m}. Nódulos radiais: ${n-l-1}, angulares: ${l}. Total: ${n-1}.`;
+}
+
+// Mobile hint
+if(/Mobi|Android|iPhone/i.test(navigator.userAgent)){
+    document.querySelector('.desktop-hint').style.display='none';
+    document.querySelector('.mobile-hint').style.display='inline';
+}
+
+window.addEventListener('load',()=>{ initThree(); updatePanel(); });
+</script>
+</body>
+</html>

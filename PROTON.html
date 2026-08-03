@@ -1,0 +1,4306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Orbitais e Transições — Plataforma de Recursos e Orbitais para Transições e Níveis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: radial-gradient(circle at center, #0a0f25 0%, #03050c 100%);
+            color: #f1f5f9;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #00ccff, #00ff88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 204, 255, 0.4);
+            margin-bottom: 10px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+        }
+
+        .mode-toggle {
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(0, 204, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 0 8px;
+            transition: all 0.3s ease;
+            outline: none;
+            font-size: 14px;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        @media (max-width: 768px) {
+            .mode-toggle {
+                margin: 8px 0;
+            }
+            
+            .mode-btn {
+                padding: 8px 14px;
+                margin: 3px 4px;
+                font-size: 0.75rem;
+                border-radius: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mode-btn {
+                padding: 7px 12px;
+                font-size: 0.7rem;
+                margin: 2px 3px;
+            }
+        }
+
+        .mode-btn.active {
+            background: rgba(0, 204, 255, 0.4);
+            border-color: #00ccff;
+            box-shadow: 0 0 20px rgba(0, 204, 255, 0.6);
+        }
+
+        .atom-selector {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .atom-selector h3 {
+            color: #00ccff;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .atom-selector {
+                margin: 10px 0;
+            }
+            
+            .atom-selector h3 {
+                font-size: 0.9rem;
+                margin-bottom: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .atom-selector {
+                margin: 8px 0;
+            }
+            
+            .atom-selector h3 {
+                font-size: 0.85rem;
+                margin-bottom: 6px;
+            }
+        }
+
+        .atom-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .atom-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(0, 204, 255, 0.3);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            min-width: 90px;
+            text-align: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        @media (max-width: 768px) {
+            .atom-buttons {
+                gap: 6px;
+            }
+            
+            .atom-btn {
+                min-width: 65px;
+                padding: 8px 10px;
+                font-size: 11px;
+                border-radius: 10px;
+            }
+            
+            .atom-btn .symbol {
+                font-size: 1rem !important;
+                margin-bottom: 2px !important;
+            }
+            
+            .atom-btn .name {
+                font-size: 0.6rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .atom-buttons {
+                gap: 5px;
+            }
+            
+            .atom-btn {
+                min-width: 60px;
+                padding: 6px 8px;
+                font-size: 10px;
+            }
+            
+            .atom-btn .symbol {
+                font-size: 0.95rem !important;
+            }
+            
+            .atom-btn .name {
+                font-size: 0.55rem !important;
+            }
+        }
+
+        .atom-btn.active {
+            background: rgba(0, 204, 255, 0.3);
+            border-color: #00ccff;
+            box-shadow: 0 0 20px rgba(0, 204, 255, 0.5);
+        }
+
+        .atom-btn .symbol {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .atom-btn .name {
+            display: block;
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        #canvas-container {
+            width: 700px;
+            height: 700px;
+            border: 1px solid rgba(0, 204, 255, 0.15);
+            border-radius: 24px;
+            background: rgba(10, 15, 30, 0.6);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #bohr-container {
+            width: 700px;
+            height: 700px;
+            border: 1px solid rgba(0, 204, 255, 0.15);
+            border-radius: 24px;
+            background: rgba(10, 15, 30, 0.6);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255,255,255,0.05);
+            position: relative;
+            overflow: visible;
+            display: none;
+        }
+
+        .bohr-nucleus {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: #ff4500;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px #ff4500;
+            z-index: 100;
+        }
+
+        .bohr-orbit {
+            position: absolute;
+            border: 1px dashed rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .bohr-orbit {
+                border-width: 1px;
+            }
+        }
+
+        .bohr-electron {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #00ff88;
+            border-radius: 50%;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 15px #00ff88;
+            z-index: 50;
+        }
+
+        .bohr-electron.level-1 {
+            background: #00ff88;
+            border-color: #00ff88;
+            box-shadow: 0 0 15px #00ff88;
+        }
+
+        .bohr-electron.level-2 {
+            background: #00ccff;
+            border-color: #00ccff;
+            box-shadow: 0 0 15px #00ccff;
+        }
+
+        .bohr-electron.level-3 {
+            background: #ff00ff;
+            border-color: #ff00ff;
+            box-shadow: 0 0 15px #ff00ff;
+        }
+
+        .bohr-electron.level-4 {
+            background: #ff2222;
+            border-color: #ff2222;
+            box-shadow: 0 0 15px #ff2222;
+        }
+
+        .controls {
+            background: rgba(15, 20, 35, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 24px;
+            border-radius: 24px;
+            border: 1px solid rgba(0, 204, 255, 0.15);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.05);
+            width: 100%;
+            max-width: 350px;
+            position: relative;
+            z-index: 10;
+        }
+
+        @media (max-width: 1200px) {
+            .controls {
+                max-width: 600px;
+                margin-top: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                max-width: 100%;
+                padding: 15px;
+                margin-top: 15px;
+                order: 2;
+            }
+        }
+
+        .control-group {
+            margin-bottom: 24px;
+        }
+
+        .control-group h3 {
+            color: #00ccff;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+            padding: 12px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            margin: 4px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            width: 100%;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .btn {
+                padding: 8px 12px;
+                font-size: 0.75rem;
+                margin: 3px;
+                border-radius: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .btn {
+                padding: 7px 10px;
+                font-size: 0.7rem;
+                margin: 2px;
+            }
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            color: #fff;
+        }
+
+        .btn:active {
+            transform: translateY(1px) scale(0.98);
+        }
+        
+        @media (hover: none) {
+            .btn:hover {
+                transform: none;
+                box-shadow: none;
+            }
+        }
+
+        .btn.energy {
+            background: rgba(255, 69, 0, 0.1);
+            border-color: rgba(255, 69, 0, 0.3);
+            color: #ffaa88;
+        }
+        .btn.energy:hover {
+            background: rgba(255, 69, 0, 0.2);
+            box-shadow: 0 0 20px rgba(255, 69, 0, 0.3);
+            color: #fff;
+        }
+
+        .btn.emission {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: rgba(0, 255, 136, 0.3);
+            color: #88ffcc;
+        }
+        .btn.emission:hover {
+            background: rgba(0, 255, 136, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            color: #fff;
+        }
+
+        .atom-info {
+            background: rgba(10, 15, 30, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 204, 255, 0.15);
+            padding: 20px;
+            border-radius: 16px;
+            margin: 10px 0 20px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        .atom-info:hover {
+            border-color: rgba(0, 204, 255, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 204, 255, 0.2);
+        }
+
+        .atom-info h4 {
+            color: #00ccff;
+            margin-bottom: 12px;
+            font-size: 1.15rem;
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .atom-info p {
+            margin: 6px 0;
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.85);
+        }
+
+        .orbital-legend {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 15px 0 25px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            font-family: 'Outfit', sans-serif;
+            background: rgba(15, 20, 35, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 8px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        .legend-item:hover {
+            background: rgba(30, 40, 60, 0.8);
+            border-color: rgba(0, 204, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .orbital-legend {
+                gap: 8px;
+                margin: 10px 0;
+                padding: 0 10px;
+            }
+            
+            .legend-item {
+                font-size: 0.7rem;
+                gap: 5px;
+                padding: 5px 8px;
+            }
+            
+            .legend-color {
+                width: 20px !important;
+                height: 15px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .orbital-legend {
+                gap: 5px;
+                margin: 8px 0;
+            }
+            
+            .legend-item {
+                font-size: 0.65rem;
+                padding: 4px 6px;
+            }
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid;
+        }
+
+        .legend-s { 
+            background: rgba(100, 150, 255, 0.3);
+            border-color: rgba(100, 150, 255, 0.8);
+        }
+
+        .legend-p { 
+            background: rgba(100, 255, 200, 0.3);
+            border-color: rgba(100, 255, 200, 0.8);
+        }
+
+        .legend-d { 
+            background: rgba(255, 150, 100, 0.3);
+            border-color: rgba(255, 150, 100, 0.8);
+        }
+
+        .info-text {
+            background: rgba(0, 100, 200, 0.15);
+            border-left: 4px solid #00ccff;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .info-text {
+                font-size: 0.75rem;
+                padding: 10px;
+            }
+            
+            .control-group h3 {
+                font-size: 1rem;
+            }
+            
+            .atom-info h4 {
+                font-size: 1rem;
+            }
+            
+            .atom-info p {
+                font-size: 0.85rem;
+            }
+        }
+
+        .rotation-hint {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #00ccff;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+
+        .energy-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(10, 15, 25, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 204, 255, 0.2);
+            border-radius: 16px;
+            padding: 16px 20px;
+            font-family: 'Outfit', sans-serif;
+            z-index: 1000;
+            min-width: 170px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        .energy-display:hover {
+            border-color: rgba(0, 204, 255, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 204, 255, 0.2);
+        }
+
+        .energy-display-title {
+            font-size: 0.75rem;
+            color: rgba(0, 204, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .energy-value {
+            font-size: 1.5rem;
+            color: #00ff88;
+            font-weight: 800;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+            letter-spacing: -0.5px;
+        }
+
+        .energy-unit {
+            font-size: 0.85rem;
+            color: #00ccff;
+            font-weight: 500;
+        }
+
+        .energy-level-info {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 5px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+        }
+
+        @media (max-width: 768px) {
+            .rotation-hint {
+                font-size: 0.7rem;
+                padding: 6px 10px;
+                bottom: 5px;
+            }
+
+            .energy-display {
+                top: 8px;
+                right: 8px;
+                padding: 8px 10px;
+                min-width: 110px;
+                border-width: 1px;
+            }
+
+            .energy-display-title {
+                font-size: 0.55rem;
+                margin-bottom: 3px;
+            }
+
+            .energy-value {
+                font-size: 1rem;
+                gap: 3px;
+            }
+
+            .energy-unit {
+                font-size: 0.65rem;
+            }
+
+            .energy-level-info {
+                font-size: 0.55rem;
+                margin-top: 3px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .rotation-hint {
+                font-size: 0.6rem;
+                padding: 4px 8px;
+                bottom: 3px;
+            }
+
+            .energy-display {
+                top: 5px;
+                right: 5px;
+                padding: 6px 8px;
+                min-width: 95px;
+            }
+
+            .energy-display-title {
+                font-size: 0.5rem;
+                margin-bottom: 2px;
+                letter-spacing: 0.5px;
+            }
+
+            .energy-value {
+                font-size: 0.9rem;
+            }
+
+            .energy-unit {
+                font-size: 0.6rem;
+            }
+
+            .energy-level-info {
+                font-size: 0.5rem;
+                margin-top: 2px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .rotation-hint {
+                font-size: 0.75rem;
+                padding: 6px 12px;
+            }
+            
+            .desktop-hint {
+                display: none !important;
+            }
+            
+            .mobile-hint {
+                display: inline !important;
+            }
+            
+            .atom-selector h3 {
+                font-size: 1rem;
+            }
+            
+            .mode-toggle {
+                margin: 10px 0;
+            }
+        }
+
+        .quantum-numbers {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(0, 204, 255, 0.25);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .qn-item {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.03em;
+        }
+
+        .qn-item b {
+            color: #00ccff;
+        }
+
+        body.bg-white .qn-item {
+            color: rgba(0, 0, 0, 0.75);
+        }
+
+        body.bg-white .qn-item b {
+            color: #0066aa;
+        }
+
+        body.bg-white .quantum-numbers {
+            border-top-color: rgba(0, 102, 170, 0.25);
+        }
+
+        /* SELETOR DE FUNDO */
+        .bg-btn.active-bg {
+            outline: 2px solid #00ccff;
+            outline-offset: 2px;
+        }
+
+        body.bg-white {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        body.bg-white .header h1 {
+            color: #1e3a8a;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        body.bg-white .header p {
+            color: #475569;
+        }
+
+        body.bg-white .mode-btn {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #475569;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        body.bg-white .mode-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-color: transparent;
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+        }
+
+        body.bg-white .atom-selector h3,
+        body.bg-white .control-group h3 {
+            color: #1e3a8a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 4px;
+        }
+
+        body.bg-white .atom-btn {
+            background: #ffffff;
+            border-color: #e2e8f0;
+            color: #475569;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        body.bg-white .atom-btn.active {
+            background: rgba(37, 99, 235, 0.08);
+            border-color: #2563eb;
+            color: #1e40af;
+            box-shadow: 0 0 8px rgba(37, 99, 235, 0.15);
+        }
+
+        body.bg-white .controls {
+            background: #ffffff;
+            border-color: #e2e8f0;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        body.bg-white .btn {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #334155;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        body.bg-white .btn:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            color: #0f172a;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        body.bg-white .btn.energy {
+            background: rgba(239, 68, 68, 0.05);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+        }
+        body.bg-white .btn.energy:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #b91c1c;
+        }
+
+        body.bg-white .btn.emission {
+            background: rgba(16, 185, 129, 0.05);
+            border-color: rgba(16, 185, 129, 0.2);
+            color: #059669;
+        }
+        body.bg-white .btn.emission:hover {
+            background: rgba(16, 185, 129, 0.1);
+            color: #047857;
+        }
+
+        body.bg-white .atom-info {
+            background: rgba(248, 250, 252, 0.9);
+            border-color: #e2e8f0;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        body.bg-white .atom-info h4 {
+            color: #0f172a;
+        }
+
+        body.bg-white .atom-info p {
+            color: #475569;
+        }
+
+        body.bg-white .info-text {
+            background: #f1f5f9;
+            border-left-color: #3b82f6;
+            color: #334155;
+        }
+
+        body.bg-white #canvas-container,
+        body.bg-white #bohr-container {
+            background: radial-gradient(circle, #ffffff, #f1f5f9);
+            border-color: #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        body.bg-white .legend-item {
+            background: #ffffff;
+            border-color: #e2e8f0;
+            color: #475569;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        body.bg-white .legend-item:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        body.bg-white .energy-display {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        body.bg-white .energy-display-title {
+            color: #64748b;
+        }
+
+        body.bg-white .energy-value {
+            color: #2563eb;
+        }
+
+        body.bg-white .energy-unit {
+            color: #64748b;
+        }
+
+        body.bg-white .energy-level-info {
+            color: #334155;
+        }
+
+        body.bg-white .rotation-hint {
+            color: #64748b;
+            background: rgba(255, 255, 255, 0.9);
+            border-color: #cbd5e1;
+        }
+
+        body.bg-white .bohr-orbit {
+            border-color: rgba(37, 99, 235, 0.15) !important;
+        }
+
+        * {
+            touch-action: pan-x pan-y;
+        }
+
+        /* Melhorar scroll em iOS */
+        body {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Otimização de animações */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+
+
+        @media (max-width: 1200px) {
+            #canvas-container {
+                width: 100%;
+                max-width: 600px;
+                height: 600px;
+            }
+
+            #bohr-container {
+                width: 100%;
+                max-width: 600px;
+                height: 600px;
+            }
+            
+            .controls {
+                width: 100%;
+                max-width: 600px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #canvas-container {
+                height: 75vw;
+                min-height: 280px;
+            }
+
+            #bohr-container {
+                height: 75vw;
+                min-height: 280px;
+            }
+        }
+
+        /* ====== REDESIGN: ABOVE-THE-FOLD ====== */
+        html { height: 100%; }
+
+        body {
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            flex: 1 !important;
+            overflow: hidden;
+        }
+
+        /* Header: compact horizontal bar */
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 14px;
+            padding: 7px 14px;
+            margin-bottom: 0 !important;
+            border-bottom: 1px solid rgba(0,204,255,0.25);
+            background: rgba(0,0,20,0.6);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            flex-shrink: 0;
+            text-align: left;
+        }
+
+        .header h1 {
+            font-size: 1.25rem !important;
+            margin-bottom: 0 !important;
+            white-space: nowrap;
+            letter-spacing: 1px;
+        }
+
+        /* Hide subtitle — saves vertical space */
+        .header > p { display: none !important; }
+
+        .mode-toggle { margin: 0 !important; }
+
+        .mode-btn {
+            padding: 5px 13px !important;
+            font-size: 0.75rem !important;
+            margin: 0 3px !important;
+            border-radius: 20px !important;
+        }
+
+        .orbital-legend { margin: 0 !important; gap: 6px !important; }
+
+        .legend-item {
+            padding: 3px 8px !important;
+            font-size: 0.68rem !important;
+            gap: 5px !important;
+        }
+
+        .legend-color {
+            width: 18px !important;
+            height: 11px !important;
+        }
+
+        .atom-selector { margin: 0 !important; }
+        .atom-selector h3 { display: none !important; }
+        .atom-buttons { gap: 4px !important; }
+
+        .atom-btn {
+            padding: 4px 8px !important;
+            min-width: 52px !important;
+            font-size: 10px !important;
+            border-radius: 8px !important;
+        }
+
+        .atom-btn .symbol { font-size: 0.9rem !important; margin-bottom: 1px !important; }
+        .atom-btn .name   { font-size: 0.48rem !important; }
+
+        /* Main area fills remaining viewport */
+        .main-content {
+            flex: 1 !important;
+            min-height: 0 !important;
+            overflow: hidden !important;
+            align-items: stretch !important;
+            padding: 7px !important;
+            gap: 8px !important;
+            flex-wrap: nowrap !important;
+        }
+
+        /* Canvas fills available space */
+        #canvas-container,
+        #bohr-container {
+            flex: 1 1 100% !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            height: 100% !important;
+            max-width: none !important;
+        }
+
+        /* Controls: fixed width, scrollable */
+        .controls {
+            width: 290px !important;
+            max-width: 290px !important;
+            min-width: 250px !important;
+            height: 100% !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            flex-shrink: 0 !important;
+            padding: 16px 18px !important;
+            margin-top: 0 !important;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0,204,255,0.3) transparent;
+        }
+
+        .controls::-webkit-scrollbar { width: 4px; }
+        .controls::-webkit-scrollbar-track { background: transparent; }
+        .controls::-webkit-scrollbar-thumb { background: rgba(0,204,255,0.3); border-radius: 2px; }
+
+        .control-group { margin-bottom: 16px !important; }
+        .control-group h3 { font-size: 0.95rem !important; margin-bottom: 10px !important; }
+
+        .btn {
+            padding: 9px 12px !important;
+            font-size: 0.8rem !important;
+            margin: 4px 2px !important;
+            border-radius: 14px !important;
+        }
+
+        .atom-info { padding: 12px 14px !important; margin: 8px 0 !important; }
+        .atom-info h4 { font-size: 1rem !important; margin-bottom: 6px !important; }
+        .atom-info p  { font-size: 0.85rem !important; margin: 4px 0 !important; }
+
+        .info-text {
+            padding: 10px 12px !important;
+            font-size: 0.8rem !important;
+            margin-top: 10px !important;
+            line-height: 1.4 !important;
+        }
+
+        .energy-display {
+            top: 15px !important;
+            right: 15px !important;
+            padding: 12px 16px !important;
+            min-width: 150px !important;
+        }
+
+        .energy-display-title { font-size: 0.75rem !important; margin-bottom: 5px !important; }
+        .energy-value { font-size: 1.4rem !important; }
+        .energy-unit  { font-size: 0.85rem !important; }
+        .energy-level-info { font-size: 0.75rem !important; margin-top: 5px !important; margin-bottom: 5px !important; }
+
+        .rotation-hint {
+            font-size: 0.8rem !important;
+            padding: 8px 12px !important;
+            bottom: 12px !important;
+        }
+
+        .quantum-numbers { gap: 5px !important; flex-wrap: wrap !important; }
+        .qn-item { font-size: 0.8rem !important; }
+
+        /* Mobile: restore scroll */
+        @media (max-width: 900px) {
+            html, body { height: auto !important; overflow: auto !important; }
+            .container { height: auto !important; overflow: visible !important; }
+            .main-content {
+                flex-direction: column !important;
+                flex-wrap: wrap !important;
+                overflow: visible !important;
+                min-height: 0 !important;
+            }
+            #canvas-container, #bohr-container {
+                flex: none !important;
+                width: 100% !important;
+                height: 70vw !important;
+                min-height: 300px !important;
+                max-height: 500px !important;
+            }
+            .controls {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+                overflow-y: visible !important;
+            }
+            .header {
+                padding: 6px 10px !important;
+                gap: 5px 10px !important;
+            }
+        }
+
+        /* ══════════════════════════════════════════════════
+           ESPECTRO — Espectroscópio Científico
+         ══════════════════════════════════════════════════ */
+        #spectrum-container {
+            flex: 1; min-width: 0;
+            display: flex; flex-direction: column;
+            gap: 10px; overflow-y: auto; padding: 2px 0 10px;
+        }
+
+        /* ── Toolbar do espectroscópio ── */
+        #specToolbar {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, rgba(8,15,35,0.95) 0%, rgba(4,10,25,0.98) 100%);
+            border: 1px solid rgba(0,180,255,0.25);
+            border-radius: 12px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.4);
+        }
+        body.bg-white #specToolbar {
+            background: linear-gradient(135deg, #1a2540 0%, #0f1a30 100%);
+            border-color: rgba(0,140,220,0.4);
+        }
+        .spec-toolbar-title {
+            font-family: 'Courier New', monospace; font-size: 0.78rem; font-weight: bold;
+            color: #00ccff; letter-spacing: 0.12em; text-transform: uppercase;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .spec-toolbar-title::before {
+            content: ''; width: 8px; height: 8px; border-radius: 50%;
+            background: #00ff88; box-shadow: 0 0 8px #00ff88;
+            animation: specPulse 2s ease-in-out infinite;
+        }
+        @keyframes specPulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        .spec-mode-group {
+            display: flex; gap: 8px;
+            margin-left: auto;
+        }
+        .spec-mode-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(0,204,255,0.2);
+            color: rgba(255,255,255,0.6); padding: 8px 24px;
+            font-family: 'Courier New', monospace; font-size: 0.82rem;
+            font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+            cursor: pointer; transition: all 0.3s cubic-bezier(.4,0,.2,1);
+            border-radius: 20px;
+        }
+        .spec-mode-btn:hover { 
+            background: rgba(0,204,255,0.1); 
+            color: #fff;
+            border-color: rgba(0,204,255,0.5);
+            transform: translateY(-1px);
+        }
+        .spec-mode-btn.active {
+            background: linear-gradient(135deg, #00ccff, #0088cc);
+            color: #000 !important;
+            font-weight: 900;
+            text-shadow: none !important;
+            border-color: transparent;
+            box-shadow: 0 4px 18px rgba(0,204,255,0.4);
+            transform: translateY(-2px);
+        }
+        .spec-mode-btn.active.emission { color: #000; }
+        .spec-mode-btn.active.absorption { color: #000; }
+
+        /* ── Bandas espectrais ── */
+        #specBandsContainer {
+            display: flex; flex-direction: column; gap: 2px;
+            background: #030508;
+            border: 1px solid rgba(0,180,255,0.15);
+            border-radius: 12px;
+            padding: 10px 10px;
+            box-shadow: inset 0 2px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
+        }
+        body.bg-white #specBandsContainer {
+            border-color: rgba(0,60,120,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2), inset 0 2px 20px rgba(0,0,0,0.5);
+        }
+        .serie-canvas {
+            width: 100%; height: 90px; display: block;
+            cursor: pointer; border-radius: 4px;
+        }
+
+        /* ── Painel de dados científicos ── */
+        #spectrumPanel {
+            background: linear-gradient(135deg, rgba(6,12,28,0.98) 0%, rgba(3,8,20,0.99) 100%);
+            border: 1px solid rgba(0,180,255,0.2);
+            border-radius: 12px; padding: 14px 18px;
+            display: flex; flex-wrap: wrap; gap: 0;
+            align-items: stretch; flex-shrink: 0;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 4px 16px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+        body.bg-white #spectrumPanel {
+            background: linear-gradient(135deg, #111927 0%, #0a1220 100%);
+            border-color: rgba(0,100,200,0.35);
+        }
+        .spec-panel-left {
+            display: flex; flex-direction: column; justify-content: center;
+            gap: 6px; padding-right: 18px; border-right: 1px solid rgba(0,180,255,0.12);
+            min-width: 180px;
+        }
+        .spec-panel-formula {
+            font-family: 'Courier New', monospace; font-size: 0.82rem;
+            color: rgba(100,180,255,0.5); line-height: 1.5;
+        }
+        .spec-panel-formula span { color: rgba(0,230,255,0.8); font-weight: bold; }
+        .spec-panel-hint {
+            font-family: 'Courier New', monospace; font-size: 0.7rem;
+            color: rgba(80,130,180,0.5); font-style: italic;
+        }
+        .spec-panel-right {
+            display: flex; flex-wrap: wrap; gap: 12px 24px;
+            align-items: center; padding-left: 18px; flex: 1;
+        }
+        .spec-data-item {
+            display: flex; flex-direction: column; gap: 2px;
+        }
+        .spec-data-key {
+            font-family: 'Courier New', monospace; font-size: 0.65rem;
+            color: rgba(80,140,200,0.6); letter-spacing: 0.1em; text-transform: uppercase;
+        }
+        .spec-data-val {
+            font-family: 'Courier New', monospace; font-size: 0.9rem;
+            color: #00ff88; font-weight: bold; letter-spacing: 0.04em;
+        }
+        .spec-data-val.dim { color: rgba(60,100,150,0.5); font-style: italic; }
+        .spec-data-val.highlight { color: #ffdd44; text-shadow: 0 0 12px rgba(255,220,0,0.5); }
+        #specColorSwatch {
+            width: 40px; height: 24px; border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 0 10px currentColor;
+            flex-shrink: 0; align-self: center;
+        }
+        .spec-transition-badge {
+            font-family: 'Courier New', monospace; font-size: 0.85rem;
+            padding: 4px 12px; border-radius: 6px;
+            background: rgba(0,204,255,0.08); border: 1px solid rgba(0,204,255,0.2);
+            color: #aaddff; letter-spacing: 0.05em;
+        }
+
+        body.mode-spectrum .controls,
+        body.mode-spectrum .atom-selector,
+        body.mode-spectrum .orbital-legend { display: none !important; }
+        body.mode-spectrum .main-content { gap: 0; }
+        body.mode-spectrum #spectrum-container { flex: 1; }
+
+        /* ── Cena 3D espectro ── */
+        #spec3DContainer {
+            position: relative; width: 100%; height: 240px;
+            border-radius: 12px; overflow: hidden; flex-shrink: 0;
+            border: 1px solid rgba(0,180,255,0.15);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        #spec3DCanvas { width: 100%; height: 100%; display: block; }
+        #spec3DInfo {
+            position: absolute; top: 12px; right: 14px;
+            background: rgba(2,6,18,0.92); border: 1px solid rgba(0,180,255,0.4);
+            border-radius: 10px; padding: 10px 14px; font-family: 'Courier New', monospace;
+            pointer-events: none; backdrop-filter: blur(8px); min-width: 200px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        #spec3DTitle { font-size: 0.9rem; font-weight: bold; color: #00ccff; margin-bottom: 6px; }
+        #spec3DDetails { font-size: 0.75rem; color: rgba(180,215,255,0.85); line-height: 1.9; }
+        #spec3DHint {
+            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+            font-family: 'Courier New', monospace; font-size: 0.68rem;
+            color: rgba(100,150,200,0.35); pointer-events: none; white-space: nowrap;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚛️ Simulador de Orbitais e Transições</h1>
+            <p>Plataforma de Recursos e Orbitais para Transições e Níveis</p>
+            
+            <div class="mode-toggle" style="display: none;">
+                <button class="mode-btn" data-mode="bohr" onclick="changeMode('bohr', this)">Modelo Semi-clássico</button>
+                <button class="mode-btn active" data-mode="quantum" onclick="changeMode('quantum', this)">Orbitais Quânticos 3D</button>
+                <button class="mode-btn" data-mode="spectrum" onclick="changeMode('spectrum', this)">📊 Espectro do H</button>
+            </div>
+
+            <div class="orbital-legend">
+                <div class="legend-item">
+                    <div class="legend-color legend-s"></div>
+                    <span>Orbital s (esférico)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-p"></div>
+                    <span>Orbital p (halter)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-d"></div>
+                    <span>Orbital d (trevo)</span>
+                </div>
+            </div>
+            
+            <div class="atom-selector" style="display: none;">
+                <h3>Selecione o Átomo:</h3>
+                <div class="atom-buttons">
+                    <button class="atom-btn active" onclick="changeAtom('H')" data-atom="H">
+                        <span class="symbol">H</span>
+                        <span class="name">Hidrogênio (1s¹)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div id="canvas-container">
+                <div class="energy-display">
+                    <div class="energy-display-title">⚡ Energia</div>
+                    <div class="energy-value">
+                        <span id="energyDisplayValue">-13.6</span>
+                        <span class="energy-unit">eV</span>
+                    </div>
+                    <div class="energy-level-info" id="energyLevelInfo">Nível: 1s (n=1)</div>
+                    <div class="quantum-numbers" id="quantumNumbers">
+                        <span class="qn-item"><b>n</b> = 1</span>
+                        <span class="qn-item"><b>ℓ</b> = 0</span>
+                        <span class="qn-item"><b>m<sub>ℓ</sub></b> = 0</span>
+                        <span class="qn-item"><b>m<sub>s</sub></b> = +½</span>
+                    </div>
+                </div>
+                <div class="rotation-hint">
+                    <span class="desktop-hint">🖱️ Arraste para rotacionar • Scroll para zoom</span>
+                    <span class="mobile-hint" style="display: none;">👆 Arraste para rotacionar • Pinch para zoom</span>
+                </div>
+            </div>
+
+            <div id="bohr-container">
+                <div class="energy-display">
+                    <div class="energy-display-title">⚡ Energia</div>
+                    <div class="energy-value">
+                        <span id="energyDisplayValueBohr">-13.6</span>
+                        <span class="energy-unit">eV</span>
+                    </div>
+                    <div class="energy-level-info" id="energyLevelInfoBohr">Camada K (n=1)</div>
+                    <div class="quantum-numbers" id="quantumNumbersBohr">
+                        <span class="qn-item"><b>n</b> = 1</span>
+                        <span class="qn-item"><b>ℓ</b> = 0</span>
+                        <span class="qn-item"><b>m<sub>ℓ</sub></b> = 0</span>
+                        <span class="qn-item"><b>m<sub>s</sub></b> = +½</span>
+                    </div>
+                </div>
+                <div class="bohr-nucleus"></div>
+                <div class="rotation-hint">⚛️ Modelo Semi-clássico - Órbitas Circulares</div>
+            </div>
+
+            <div id="spectrum-container" style="display:none;">
+
+                <!-- Toolbar científica -->
+                <div id="specToolbar">
+                    <div class="spec-toolbar-title">Espectroscópio &mdash; H (Z=1)</div>
+                    <div class="spec-mode-group">
+                        <button class="spec-mode-btn emission active" id="btnEmission" onclick="setSpecMode('emission')">EMISSÃO</button>
+                        <button class="spec-mode-btn absorption" id="btnAbsorption" onclick="setSpecMode('absorption')">ABSORÇÃO</button>
+                    </div>
+                    <div class="spec-mode-group" style="margin-left: 10px;">
+                        <button class="spec-mode-btn active" id="specBgBlack" onclick="setBackground('black')" style="padding: 8px 14px;">⬛ Preto</button>
+                        <button class="spec-mode-btn" id="specBgWhite" onclick="setBackground('white')" style="padding: 8px 14px;">⬜ Branco</button>
+                    </div>
+                </div>
+
+                <!-- Cena 3D Three.js -->
+                <div id="spec3DContainer">
+                    <canvas id="spec3DCanvas"></canvas>
+                    <div id="spec3DInfo" style="display:none;">
+                        <div id="spec3DTitle"></div>
+                        <div id="spec3DDetails"></div>
+                    </div>
+                    <div id="spec3DHint">DRAG TO ROTATE &nbsp;·&nbsp; CLICK SPECTRAL LINE</div>
+                </div>
+
+                <!-- 4 faixas 2D —espectroscópio real— -->
+                <div id="specBandsContainer">
+                    <canvas class="serie-canvas" id="band1" data-serie="1"></canvas>
+                    <canvas class="serie-canvas" id="band2" data-serie="2"></canvas>
+                    <canvas class="serie-canvas" id="band3" data-serie="3"></canvas>
+                    <canvas class="serie-canvas" id="band4" data-serie="4"></canvas>
+                </div>
+
+                <!-- Painel de dados científicos -->
+                <div id="spectrumPanel">
+                    <div class="spec-panel-left">
+                        <div class="spec-panel-formula">
+                            <span>ΔE</span> = 13.6 &times; (1/n₁² &minus; 1/n₂²) eV<br>
+                            <span>λ</span> = hc / ΔE &nbsp;=&nbsp; 1239.84 / ΔE &nbsp;nm
+                        </div>
+                        <div class="spec-panel-hint">↑ Clique em uma linha espectral</div>
+                    </div>
+                    <div class="spec-panel-right">
+                        <div class="spec-data-item">
+                            <div class="spec-data-key">Transição</div>
+                            <div class="spec-data-val dim" id="specTransition">—</div>
+                        </div>
+                        <div class="spec-data-item">
+                            <div class="spec-data-key">Comprimento &lambda;</div>
+                            <div class="spec-data-val dim" id="specLambda">—</div>
+                        </div>
+                        <div class="spec-data-item">
+                            <div class="spec-data-key">Energia &Delta;E</div>
+                            <div class="spec-data-val dim highlight" id="specDeltaE">—</div>
+                        </div>
+                        <div class="spec-data-item">
+                            <div class="spec-data-key">Região EM</div>
+                            <div class="spec-data-val dim" id="specRegion">—</div>
+                        </div>
+                        <div id="specColorSwatch" style="opacity:0"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <h3>📊 Informações do Átomo</h3>
+                    <div class="atom-info">
+                        <h4 id="atomName">Hidrogênio (H)</h4>
+                        <p>Prótons: <span id="protons">1</span></p>
+                        <p>Elétrons: <span id="electrons">1</span></p>
+                        <p>Config: <span id="config">1s¹</span></p>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>⚡ Controles de Visualização</h3>
+                    <button class="btn" onclick="toggleRotation()">
+                        <span id="rotationBtn">⏸️ Pausar Rotação</span>
+                    </button>
+                    <button class="btn energy" onclick="toggleElectrons()">
+                        <span id="electronBtn">👁️ Ocultar Elétrons</span>
+                    </button>
+                    <button class="btn emission" onclick="resetView()">🔄 Resetar Visão</button>
+                </div>
+
+                <div class="control-group">
+                    <h3>💫 Efeitos Quânticos</h3>
+                    <button class="btn energy" onclick="exciteElectron()">⚡ Excitar Elétron</button>
+                    <button class="btn emission" onclick="emitPhoton()">💡 Emitir Fóton</button>
+                    <button class="btn" onclick="toggleEnergyWaves()">
+                        <span id="waveBtn">🌊 Ondas: OFF</span>
+                    </button>
+                </div>
+
+                <div class="control-group" style="display: none;">
+                    <h3>🎨 Estilo de Orbital</h3>
+                    <button class="btn" onclick="changeOrbitalStyle('solid')">Sólido</button>
+                    <button class="btn" onclick="changeOrbitalStyle('wireframe')">Wireframe</button>
+                    <button class="btn" onclick="changeOrbitalStyle('transparent')">Transparente</button>
+                    <button class="btn" onclick="changeOrbitalStyle('cloud')">Nuvem</button>
+                </div>
+
+                <div class="control-group">
+                    <h3>🖼️ Fundo</h3>
+                    <button class="btn bg-btn active-bg" id="bgBlack" onclick="setBackground('black')">⬛ Preto</button>
+                    <button class="btn bg-btn" id="bgWhite" onclick="setBackground('white')">⬜ Branco</button>
+                </div>
+
+                <div class="info-text">
+                    <strong>💡 Dica:</strong> Use o mouse para rotacionar a visualização 3D. A roda do mouse controla o zoom. 
+                    <span id="quantum-info"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        // Variáveis globais Three.js
+        let scene, camera, renderer, controls;
+        let nucleus, orbitals = [], electrons = [];
+        let isRotating = true;
+        let showElectrons = true;
+        let currentMode = 'quantum';
+        let currentAtom = 'H';
+        let selectedAtom = 'H';
+        let orbitalStyle = 'solid';
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let rotation = { x: 0, y: 0 };
+        let photons = [];
+        let energyWaves = [];
+        let showEnergyWaves = false;
+        let nucleusGlow;
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        let pixelRatio = Math.min(window.devicePixelRatio, 2);
+        let hydrogenExcitedLevel = 1; // Nível de excitação do H (1, 2, 3, 4)
+        
+        function createParticleTexture() {
+            const size = 64;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            gradient.addColorStop(0.2, 'rgba(255, 255, 255, 0.7)');
+            gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const particleTexture = createParticleTexture();
+        
+        function gaussianRandom(mean = 0, stdev = 1) {
+            let u = 1 - Math.random();
+            let v = Math.random();
+            let z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            return z * stdev + mean;
+        }
+
+        function createCloud(level) {
+            const particleCount = isMobile ? 6000 : 30000;
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+            const isWhite = document.body.classList.contains('bg-white');
+            
+            // Função para gerar um deslocamento 3D aleatório dentro de uma esfera limite
+            function getRandomOffset(maxRadius) {
+                const r = maxRadius * Math.random();
+                const phi = Math.random() * Math.PI * 2;
+                const theta = Math.acos(2 * Math.random() - 1);
+                return {
+                    x: r * Math.sin(theta) * Math.cos(phi),
+                    y: r * Math.cos(theta),
+                    z: r * Math.sin(theta) * Math.sin(phi)
+                };
+            }
+
+            // Pré-calcular os deslocamentos dos picos de brilho por lóbulo, mantendo-os confinados dentro da geometria
+            const offsetsLevel2 = {
+                '1': getRandomOffset(2.4 * 0.45),
+                '-1': getRandomOffset(2.4 * 0.45)
+            };
+
+            const offsetsLevel3 = [
+                getRandomOffset(2.4 * 0.45), // angle=0, side=1
+                getRandomOffset(2.4 * 0.45), // angle=0, side=-1
+                getRandomOffset(2.4 * 0.45), // angle=pi/2, side=1
+                getRandomOffset(2.4 * 0.45)  // angle=pi/2, side=-1
+            ];
+
+            const offsetsLevel4 = [
+                getRandomOffset(3.2 * 0.45),
+                getRandomOffset(3.2 * 0.45),
+                getRandomOffset(3.2 * 0.45),
+                getRandomOffset(3.2 * 0.45)
+            ];
+
+            for (let i = 0; i < particleCount; i++) {
+                let x, y, z;
+                if (level === 1) {
+                    // Adicionado raio mínimo maior (0.8) para que os elétrons fiquem bem afastados do núcleo
+                    const r = 0.8 + -Math.log(1 - Math.random() * 0.99) * 1.8;
+                    const phi = Math.random() * Math.PI * 2;
+                    const theta = Math.acos(2 * Math.random() - 1);
+                    x = r * Math.sin(theta) * Math.cos(phi);
+                    y = r * Math.sin(theta) * Math.sin(phi);
+                    z = r * Math.cos(theta);
+                } else if (level === 2) {
+                    // 2p — dois lóbulos verticais, esferas de raio = 2.4 escaladas por (1, 1.8, 1) centradas em ±2.8 para afastar do núcleo
+                    const side = Math.random() > 0.5 ? 1 : -1;
+                    const R = 2.4;
+                    const off = offsetsLevel2[side];
+                    
+                    // Gerar ponto gaussiano centrado no offset aleatório
+                    let px = off.x + gaussianRandom(0, R * 0.35);
+                    let py = off.y + gaussianRandom(0, R * 0.35);
+                    let pz = off.z + gaussianRandom(0, R * 0.35);
+                    
+                    // Clampar o ponto para garantir confinamento esférico estrito
+                    const d = Math.sqrt(px*px + py*py + pz*pz);
+                    if (d > R) {
+                        px = (px / d) * R;
+                        py = (py / d) * R;
+                        pz = (pz / d) * R;
+                    }
+                    
+                    // Aplicar escala e translação exatas do lóbulo correspondente (aumentado para 3.4 para afastar mais do núcleo)
+                    x = px;
+                    y = py * 1.8 + side * 3.4;
+                    z = pz;
+                } else if (level === 3) {
+                    // 3p — dois halteres (eixos X e Z), lóbulos de raio = 2.4 escalados por (1.5, 1, 1) centrados em ±4.2
+                    const angleIdx = Math.random() > 0.5 ? 0 : 1;
+                    const angle = angleIdx === 0 ? 0 : Math.PI / 2;
+                    const sideIdx = Math.random() > 0.5 ? 0 : 1;
+                    const side = sideIdx === 0 ? 1 : -1;
+                    
+                    const R = 2.4;
+                    const off = offsetsLevel3[angleIdx * 2 + sideIdx];
+                    
+                    let px = off.x + gaussianRandom(0, R * 0.35);
+                    let py = off.y + gaussianRandom(0, R * 0.35);
+                    let pz = off.z + gaussianRandom(0, R * 0.35);
+                    
+                    const d = Math.sqrt(px*px + py*py + pz*pz);
+                    if (d > R) {
+                        px = (px / d) * R;
+                        py = (py / d) * R;
+                        pz = (pz / d) * R;
+                    }
+                    
+                    x = px * 1.5 + side * 4.2 * Math.cos(angle);
+                    y = py;
+                    z = pz + side * 4.2 * Math.sin(angle);
+                } else {
+                    // 3d cloverleaf — 4 lóbulos no plano XZ, de raio = 3.2 escalados por (1.5, 1, 1) rotacionados por angle, centrados em ±6.4
+                    const lobeIdx = Math.floor(Math.random() * 4);
+                    const angle = lobeIdx * (Math.PI / 2);
+                    
+                    const R = 3.2;
+                    const off = offsetsLevel4[lobeIdx];
+                    
+                    let px = off.x + gaussianRandom(0, R * 0.35);
+                    let py = off.y + gaussianRandom(0, R * 0.35);
+                    let pz = off.z + gaussianRandom(0, R * 0.35);
+                    
+                    const d = Math.sqrt(px*px + py*py + pz*pz);
+                    if (d > R) {
+                        px = (px / d) * R;
+                        py = (py / d) * R;
+                        pz = (pz / d) * R;
+                    }
+                    
+                    px *= 1.5;
+                    const rx = px * Math.cos(angle) - pz * Math.sin(angle);
+                    const rz = px * Math.sin(angle) + pz * Math.cos(angle);
+                    
+                    x = rx + 6.4 * Math.cos(angle);
+                    y = py;
+                    z = rz + 6.4 * Math.sin(angle);
+                }
+                positions[i * 3] = x;
+                positions[i * 3 + 1] = y;
+                positions[i * 3 + 2] = z;
+
+                // Calcular distância radial até o núcleo (0,0,0)
+                const dNuclear = Math.sqrt(x*x + y*y + z*z);
+
+                // Fator de decaimento físico exponencial (quanto mais longe do núcleo, menor o brilho)
+                const decayRate = level === 1 ? 2.5 : (level === 2 ? 4.2 : (level === 3 ? 5.8 : 8.5));
+                const f = Math.max(0.0, Math.exp(-dNuclear / decayRate));
+
+                // Definir cores de acordo com o nível e fundo
+                let rBase, gBase, bBase;
+                if (isWhite) {
+                    // No fundo branco, queremos eletrons pretos que desbotam para branco (1,1,1) conforme se afastam
+                    rBase = 0.0; gBase = 0.0; bBase = 0.0;
+
+                    // Interpolação linear da cor base (perto do núcleo) até branco (longe do núcleo)
+                    colors[i * 3]     = rBase * f + (1.0 - f);
+                    colors[i * 3 + 1] = gBase * f + (1.0 - f);
+                    colors[i * 3 + 2] = bBase * f + (1.0 - f);
+                } else {
+                    // No fundo escuro, cores brilhantes originais que desbotam para preto (0,0,0) e brilham branco no centro
+                    if (level === 1) { rBase = 0.39; gBase = 0.59; bBase = 1.0; }
+                    else if (level === 2) { rBase = 0.39; gBase = 0.78; bBase = 1.0; }
+                    else if (level === 3) { rBase = 0.39; gBase = 1.0; bBase = 0.78; }
+                    else { rBase = 1.0; gBase = 0.59; bBase = 0.39; }
+
+                    // Perto do núcleo (f alto), o calor faz a cor ficar "branca-quente" (glowing white core)
+                    // Conforme se afasta, desbota suavemente para preto
+                    colors[i * 3]     = rBase * f + (1.0 - rBase) * Math.pow(f, 4) * 0.85;
+                    colors[i * 3 + 1] = gBase * f + (1.0 - gBase) * Math.pow(f, 4) * 0.85;
+                    colors[i * 3 + 2] = bBase * f + (1.0 - bBase) * Math.pow(f, 4) * 0.85;
+                }
+            }
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            geometry.setAttribute('basePosition', new THREE.BufferAttribute(new Float32Array(positions), 3));
+
+            const material = new THREE.PointsMaterial({
+                size: isMobile ? 0.35 : 0.25,
+                map: particleTexture,
+                vertexColors: true,
+                transparent: true,
+                opacity: isWhite ? 0.75 : 0.5,
+                blending: isWhite ? THREE.NormalBlending : THREE.AdditiveBlending,
+                depthWrite: false
+            });
+
+            // Adicionar efeito de twinkle no shader
+            material.onBeforeCompile = function(shader) {
+                shader.uniforms.time = { value: 0 };
+                material.userData.shader = shader;
+                
+                shader.vertexShader = `varying vec3 vPos;\n` + shader.vertexShader;
+                shader.vertexShader = shader.vertexShader.replace(
+                    `#include <begin_vertex>`,
+                    `#include <begin_vertex>\nvPos = position;`
+                );
+
+                shader.fragmentShader = `uniform float time;\nvarying vec3 vPos;\n` + shader.fragmentShader;
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    `#include <color_fragment>`,
+                    `#include <color_fragment>\n` +
+                    `float phase = sin(vPos.x * 20.0) + cos(vPos.y * 30.0) + sin(vPos.z * 40.0);\n` +
+                    `float twinkle = (sin(time * 15.0 + phase * 10.0) + 1.0) * 0.5;\n` + 
+                    `diffuseColor.a *= (0.1 + 0.9 * twinkle);`
+                );
+            };
+
+            const cloud = new THREE.Points(geometry, material);
+            scene.add(cloud);
+            orbitals.push(cloud);
+        }
+
+        // Números quânticos do H por nível de excitação
+        // Estado fundamental: 1s → n=1, ℓ=0, mℓ=0, ms=+½
+        // n=2: exibimos 2p (ℓ=1, mℓ=0) como mais representativo
+        // n=3: 3p (ℓ=1, mℓ=0)
+        // n=4: 3d (ℓ=2, mℓ=0) — já que o simulador chama de "3d"
+        const hydrogenQN = [
+            { n: 1, l: 0, ml:  0, ms: '+½', orbital: '1s' },
+            { n: 2, l: 1, ml:  0, ms: '+½', orbital: '2p' },
+            { n: 3, l: 1, ml:  0, ms: '+½', orbital: '3p' },
+            { n: 3, l: 2, ml:  0, ms: '+½', orbital: '3d' }
+        ];
+
+        function updateQuantumNumbers(level) {
+            const qn = hydrogenQN[level - 1];
+            if (!qn) return;
+            const html =
+                `<span class="qn-item"><b>n</b> = ${qn.n}</span>` +
+                `<span class="qn-item"><b>ℓ</b> = ${qn.l}</span>` +
+                `<span class="qn-item"><b>m<sub>ℓ</sub></b> = ${qn.ml}</span>` +
+                `<span class="qn-item"><b>m<sub>s</sub></b> = ${qn.ms}</span>`;
+            const q1 = document.getElementById('quantumNumbers');
+            const q2 = document.getElementById('quantumNumbersBohr');
+            if (q1) q1.innerHTML = html;
+            if (q2) q2.innerHTML = html;
+        }
+
+        // Energias dos níveis (em eV) — valores de ionização aproximados
+        const energyLevels = {
+            '1s': -13.6,
+            '2s': -3.4,
+            '2p': -3.4,
+            '3s': -1.51,
+            '3p': -1.51,
+            '3d': -1.51,
+            'K': -13.6,   // n=1
+            'L': -3.4,    // n=2
+            'M': -1.51,   // n=3
+            'N': -0.85    // n=4
+        };
+
+        // Expor funções globalmente ANTES de qualquer outra coisa
+        window.changeAtom = function(atomSymbol) {
+            currentAtom = atomSymbol;
+            selectedAtom = atomSymbol;
+            
+            // Reset nível de excitação do Hidrogênio
+            if (atomSymbol === 'H') {
+                hydrogenExcitedLevel = 1;
+                updateQuantumNumbers(1);
+            }
+            
+            // Atualizar botões
+            document.querySelectorAll('.atom-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-atom') === atomSymbol) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            if (currentMode === 'bohr') {
+                createBohrAtom(atomSymbol);
+            } else if (scene) {
+                createAtom(atomSymbol);
+            }
+        };
+
+        // ============================================
+        // MODELO SEMI-CLÁSSICO 2D
+        // ============================================
+        let bohrElectrons = [];
+        let bohrAnimationId = null;
+
+        function createBohrAtom(atomSymbol) {
+            const container = document.getElementById('bohr-container');
+            const atom = atomicData[atomSymbol];
+            if (!atom) return;
+
+            // Limpar elétrons anteriores
+            bohrElectrons.forEach(el => {
+                if (el.element && el.element.parentNode) {
+                    el.element.parentNode.removeChild(el.element);
+                }
+            });
+            bohrElectrons = [];
+
+            // Limpar órbitas anteriores
+            const oldOrbits = container.querySelectorAll('.bohr-orbit');
+            oldOrbits.forEach(orbit => orbit.remove());
+
+            // Obter dimensões reais do container
+            const rect = container.getBoundingClientRect();
+            const containerWidth = container.clientWidth || rect.width || 700;
+            const containerHeight = container.clientHeight || rect.height || 700;
+            
+            const baseSize = Math.min(containerWidth, containerHeight);
+            const scale = baseSize / 700;
+            
+            // Raios ajustados para ficar menor no centro da tela, combinando com a escala do 3D
+            const bohrRadiusUnit = baseSize * 0.015; 
+            const bohrOrbitDefs = [
+                { n: 1, radius: bohrRadiusUnit * 2.5, shell: 'K', level: 1 },
+                { n: 2, radius: bohrRadiusUnit * 6,   shell: 'L', level: 2 },
+                { n: 3, radius: bohrRadiusUnit * 10,  shell: 'M', level: 3 },
+                { n: 4, radius: bohrRadiusUnit * 15,  shell: 'N', level: 4 }
+            ];
+
+            // Para H, mostrar apenas as 4 órbitas do Modelo Semi-clássico (n=1..4)
+            // Para outros átomos, comportamento padrão
+            const centerX = containerWidth / 2;
+            const centerY = containerHeight / 2;
+
+            if (atomSymbol === 'H') {
+                // Desenhar as 4 órbitas possíveis
+                bohrOrbitDefs.forEach((orb, idx) => {
+                    const orbitEl = document.createElement('div');
+                    orbitEl.className = 'bohr-orbit';
+                    orbitEl.style.width = (orb.radius * 2) + 'px';
+                    orbitEl.style.height = (orb.radius * 2) + 'px';
+                    // Órbita atual fica mais visível
+                    orbitEl.style.opacity = orb.n === hydrogenExcitedLevel ? '0.85' : '0.25';
+                    orbitEl.style.borderStyle = orb.n === hydrogenExcitedLevel ? 'solid' : 'dashed';
+                    orbitEl.style.borderColor = orb.n === hydrogenExcitedLevel
+                        ? bohrLevelColor(orb.n) : 'rgba(255,255,255,0.3)';
+                    container.appendChild(orbitEl);
+                });
+
+                // Colocar elétron na órbita do nível atual
+                const activeOrb = bohrOrbitDefs[hydrogenExcitedLevel - 1];
+                const electronSize = Math.max(8, Math.min(14, 14 * scale));
+                const electron = document.createElement('div');
+                electron.className = 'bohr-electron level-' + hydrogenExcitedLevel;
+                electron.style.width = electronSize + 'px';
+                electron.style.height = electronSize + 'px';
+                electron.style.boxShadow = `0 0 18px ${bohrLevelColor(hydrogenExcitedLevel)}`;
+                electron.style.background = bohrLevelColor(hydrogenExcitedLevel);
+                electron.style.borderColor = bohrLevelColor(hydrogenExcitedLevel);
+                container.appendChild(electron);
+
+                const angle = Math.random() * Math.PI * 2;
+                bohrElectrons.push({
+                    element: electron,
+                    radius: activeOrb.radius,
+                    angle: angle,
+                    speed: (isMobile ? 0.018 : 0.025) - hydrogenExcitedLevel * 0.003,
+                    centerX, centerY,
+                    level: hydrogenExcitedLevel,
+                    size: electronSize / 2
+                });
+
+                // Atualizar display de energia no Modelo Semi-clássico
+                const energies = [-13.6, -3.4, -1.51, -0.85];
+                const shells = ['K (n=1)', 'L (n=2)', 'M (n=3)', 'N (n=4)'];
+                const displayValue = document.getElementById('energyDisplayValueBohr');
+                const levelInfo = document.getElementById('energyLevelInfoBohr');
+                if (displayValue) displayValue.textContent = energies[hydrogenExcitedLevel - 1].toFixed(2);
+                if (levelInfo) levelInfo.textContent = 'Camada ' + shells[hydrogenExcitedLevel - 1];
+
+            } else {
+                // Comportamento genérico para outros átomos (não usado agora, mas mantido)
+                bohrOrbitDefs.slice(0, 2).forEach((orb, idx) => {
+                    const orbitEl = document.createElement('div');
+                    orbitEl.className = 'bohr-orbit';
+                    orbitEl.style.width = (orb.radius * 2) + 'px';
+                    orbitEl.style.height = (orb.radius * 2) + 'px';
+                    orbitEl.style.opacity = '0.4';
+                    container.appendChild(orbitEl);
+                });
+
+                for (let i = 0; i < Math.min(atom.electrons, 2); i++) {
+                    const orb = bohrOrbitDefs[i];
+                    const electronSize = Math.max(8, Math.min(12, 12 * scale));
+                    const electron = document.createElement('div');
+                    electron.className = 'bohr-electron level-1';
+                    electron.style.width = electronSize + 'px';
+                    electron.style.height = electronSize + 'px';
+                    container.appendChild(electron);
+                    const angle = (i * Math.PI) + Math.random() * 0.3;
+                    bohrElectrons.push({
+                        element: electron,
+                        radius: orb.radius,
+                        angle, speed: 0.02,
+                        centerX, centerY,
+                        level: 1, size: electronSize / 2
+                    });
+                }
+            }
+
+            // Iniciar animação
+            if (bohrAnimationId) cancelAnimationFrame(bohrAnimationId);
+            animateBohr();
+
+            updateAtomInfo(atom);
+        }
+
+        // Cor por nível do Modelo Semi-clássico
+        function bohrLevelColor(n) {
+            const colors = ['#00ff88', '#00ccff', '#ff00ff', '#ff2222'];
+            return colors[(n - 1) % colors.length];
+        }
+
+        function updateBohrDistribution(totalElectrons) {
+            const quantumInfo = document.getElementById('quantum-info');
+            if (quantumInfo && currentMode === 'bohr') {
+                let desc = '<br><strong>🔵 Modelo Semi-clássico com Princípio de Pauli:</strong><br>';
+                desc += '<span style="font-size: 0.85rem;">Cada órbita contém apenas 1 elétron, respeitando a exclusão de estados quânticos idênticos.</span><br>';
+                desc += '<span style="font-size: 0.85rem;">';
+                
+                // Descrever distribuição
+                if (totalElectrons <= 2) {
+                    desc += `Camada K: ${totalElectrons} elétron${totalElectrons > 1 ? 's' : ''} (orbital 1s)`;
+                } else if (totalElectrons <= 8) {
+                    desc += `Camada K: 2 elétrons (1s²) • Camada L: ${totalElectrons - 2} elétrons (2s, 2p)`;
+                } else {
+                    desc += `Camadas K, L ocupadas • Total: ${totalElectrons} elétrons`;
+                }
+                
+                desc += '</span>';
+                quantumInfo.innerHTML = desc;
+            }
+        }
+
+        function distributeElectrons(total) {
+            // Esta função não é mais usada no novo sistema
+            // Mantida para compatibilidade
+            const distribution = [0, 0, 0, 0];
+            
+            for (let i = 0; i < Math.min(total, 4); i++) {
+                distribution[i] = 1;
+            }
+            
+            let remaining = total - 4;
+            let level = 0;
+            while (remaining > 0) {
+                distribution[level]++;
+                remaining--;
+                level = (level + 1) % 4;
+            }
+            
+            return distribution;
+        }
+
+        function animateBohr() {
+            bohrElectrons.forEach(e => {
+                e.angle += e.speed;
+                const x = e.centerX + e.radius * Math.cos(e.angle);
+                const y = e.centerY + e.radius * Math.sin(e.angle);
+                const halfSize = e.size || 6;
+                e.element.style.left = (x - halfSize) + 'px';
+                e.element.style.top = (y - halfSize) + 'px';
+            });
+
+            bohrAnimationId = requestAnimationFrame(animateBohr);
+        }
+
+        // Adicionar listener para redimensionamento do Modelo Semi-clássico e Espectro
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            // Limpar timeout anterior
+            if (resizeTimeout) {
+                clearTimeout(resizeTimeout);
+            }
+            
+            // Aguardar 300ms após o último resize para recriar
+            resizeTimeout = setTimeout(function() {
+                if (currentMode === 'bohr' && (selectedAtom || currentAtom)) {
+                    const atomToUse = selectedAtom || currentAtom;
+                    createBohrAtom(atomToUse);
+                }
+                if (currentMode === 'spectrum') {
+                    drawSpectrum();
+                }
+            }, 300);
+        });
+
+        window.changeMode = function(mode, targetBtn) {
+            currentMode = mode;
+            
+            // Parar a simulação do espectro 3D se estiver mudando de aba
+            if (mode !== 'spectrum') {
+                stopSpec3D();
+            }
+            
+            // Atualizar botões
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // Suporte a chamada via onclick="changeMode('x')" e via código
+            const activeBtn = targetBtn || document.querySelector(`.mode-btn[data-mode="${mode}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+            
+            const canvas3D = document.getElementById('canvas-container');
+            const bohrContainer = document.getElementById('bohr-container');
+            const specContainer = document.getElementById('spectrum-container');
+            const legend = document.querySelector('.orbital-legend');
+            
+            // Controlar classe do body para o layout do espectro
+            document.body.classList.toggle('mode-spectrum', mode === 'spectrum');
+            
+            if (mode === 'bohr') {
+                // Mostrar Modelo Semi-clássico, esconder 3D e Espectro
+                canvas3D.style.display = 'none';
+                bohrContainer.style.display = 'block';
+                specContainer.style.display = 'none';
+                if (legend) legend.style.display = 'none';
+                createBohrAtom(currentAtom);
+            } else if (mode === 'quantum') {
+                // Mostrar 3D, esconder Modelo Semi-clássico e Espectro
+                canvas3D.style.display = 'block';
+                bohrContainer.style.display = 'none';
+                specContainer.style.display = 'none';
+                if (legend) legend.style.display = 'flex';
+                if (scene) {
+                    createAtom(currentAtom);
+                }
+            } else if (mode === 'spectrum') {
+                // Mostrar Espectro, esconder 3D e Modelo Semi-clássico
+                canvas3D.style.display = 'none';
+                bohrContainer.style.display = 'none';
+                specContainer.style.display = 'flex';
+
+                // Inicializar 3D primeiro
+                if (!spec3DRenderer) {
+                    initSpec3D();
+                } else {
+                    buildSpec3DScene();
+                    if (!spec3DAnimId) animateSpec3D();
+                }
+
+                // Desenhar bandas no próximo frame (após layout ser calculado)
+                requestAnimationFrame(() => {
+                    drawAllBands();
+                    bindAllBandEvents();
+                });
+            }
+        };
+
+        window.setBackground = function(bg) {
+            const isWhite = bg === 'white';
+            document.body.classList.toggle('bg-white', isWhite);
+
+            // Atualizar renderer 3D
+            if (renderer) {
+                renderer.setClearColor(isWhite ? 0xf0f4f8 : 0x0a0a1a, 1);
+            }
+
+            // Atualizar fog da cena
+            if (scene) {
+                scene.fog = new THREE.Fog(isWhite ? 0xf0f4f8 : 0x0a0a1a, 10, 50);
+            }
+
+            // Atualizar renderer 3D do espectro
+            if (spec3DRenderer) {
+                const bgCol = isWhite ? 0xf0f4f8 : 0x05060f;
+                spec3DRenderer.setClearColor(bgCol, 1);
+                if (spec3DScene) {
+                    spec3DScene.background = new THREE.Color(bgCol);
+                    spec3DScene.fog = new THREE.Fog(bgCol, 18, 40);
+                }
+            }
+
+            // Atualizar botões ativos
+            const bgBlack = document.getElementById('bgBlack');
+            const bgWhite = document.getElementById('bgWhite');
+            if (bgBlack) bgBlack.classList.toggle('active-bg', !isWhite);
+            if (bgWhite) bgWhite.classList.toggle('active-bg', isWhite);
+
+            const specBgBlack = document.getElementById('specBgBlack');
+            const specBgWhite = document.getElementById('specBgWhite');
+            if (specBgBlack) specBgBlack.classList.toggle('active', !isWhite);
+            if (specBgWhite) specBgWhite.classList.toggle('active', isWhite);
+
+            // Recriar átomo ou redesenhar espectro para aplicar novas cores
+            if (currentMode === 'quantum') {
+                createAtom(currentAtom);
+            } else if (currentMode === 'spectrum') {
+                setTimeout(drawSpectrum, 30);
+            }
+        };
+
+        window.toggleRotation = function() {
+            isRotating = !isRotating;
+            const btn = document.getElementById('rotationBtn');
+            btn.textContent = isRotating ? '⏸️ Pausar Rotação' : '▶️ Iniciar Rotação';
+        };
+
+        window.toggleElectrons = function() {
+            showElectrons = !showElectrons;
+            const btn = document.getElementById('electronBtn');
+            btn.textContent = showElectrons ? '👁️ Ocultar Elétrons' : '👁️ Mostrar Elétrons';
+            
+            if (showElectrons) {
+                createAtom(currentAtom);
+            } else {
+                electrons.forEach(electron => {
+                    electron.geometry.dispose();
+                    electron.material.dispose();
+                    scene.remove(electron);
+                });
+                electrons = [];
+            }
+        };
+
+        window.resetView = function() {
+            rotation = { x: 0, y: 0 };
+            camera.position.set(0, 5, 15);
+            camera.lookAt(0, 0, 0);
+        };
+
+        window.changeOrbitalStyle = function(style) {
+            orbitalStyle = style;
+            if (currentMode === 'quantum') {
+                createAtom(currentAtom);
+            }
+        };
+
+        window.exciteElectron = function() {
+            if (currentAtom !== 'H') return;
+
+            // Subir um nível (cicla de 1→2→3→4→1)
+            hydrogenExcitedLevel++;
+            if (hydrogenExcitedLevel > 4) hydrogenExcitedLevel = 1;
+
+            const energies    = [-13.6, -3.4, -1.51, -0.85];
+            const levelLabels = ['1s (n=1)', '2p (n=2)', '3p (n=3)', '3d (n=3)'];
+            const shells      = ['K (n=1)', 'L (n=2)', 'M (n=3)', 'N (n=4)'];
+
+            if (currentMode === 'quantum') {
+                // No modo nuvem, não temos o array 'electrons' preenchido, mas podemos excitar o átomo
+                if (orbitalStyle !== 'cloud' && electrons.length === 0) return;
+                
+                clearAtom();
+                createNucleus();
+                createHydrogenWaveFunction(hydrogenExcitedLevel);
+                createEnergyWave();
+
+                const displayValue = document.getElementById('energyDisplayValue');
+                const levelInfo    = document.getElementById('energyLevelInfo');
+                if (displayValue) { displayValue.textContent = energies[hydrogenExcitedLevel - 1].toFixed(2); displayValue.style.color = '#ff2222'; }
+                if (levelInfo)    { levelInfo.textContent = 'Nível: ' + levelLabels[hydrogenExcitedLevel - 1]; levelInfo.style.color = '#ff2222'; }
+                updateQuantumNumbers(hydrogenExcitedLevel);
+                setTimeout(function() {
+                    if (displayValue) displayValue.style.color = '#00ff88';
+                    if (levelInfo)    levelInfo.style.color = 'rgba(255,255,255,0.7)';
+                }, 1200);
+
+            } else if (currentMode === 'bohr') {
+                // Flash amarelo no elétron antes de reconstruir
+                bohrElectrons.forEach(e => {
+                    e.element.style.background = '#ff2222';
+                    e.element.style.boxShadow  = '0 0 20px #ff2222';
+                    e.element.style.borderColor = '#ff2222';
+                });
+                setTimeout(function() {
+                    createBohrAtom(currentAtom);
+                    updateQuantumNumbers(hydrogenExcitedLevel);
+                    // Piscar display
+                    const displayValue = document.getElementById('energyDisplayValueBohr');
+                    const levelInfo    = document.getElementById('energyLevelInfoBohr');
+                    if (displayValue) { displayValue.textContent = energies[hydrogenExcitedLevel - 1].toFixed(2); displayValue.style.color = '#ff2222'; }
+                    if (levelInfo)    { levelInfo.textContent = 'Nível: ' + levelLabels[hydrogenExcitedLevel - 1]; levelInfo.style.color = '#ff2222'; }
+                    setTimeout(function() {
+                        if (displayValue) displayValue.style.color = '#00ff88';
+                        if (levelInfo)    levelInfo.style.color = 'rgba(255,255,255,0.7)';
+                    }, 800);
+                }, 180);
+            }
+        };
+
+        window.emitPhoton = function() {
+            if (currentAtom !== 'H' || hydrogenExcitedLevel <= 1) return;
+
+            const targetLevel = Math.ceil(Math.random() * (hydrogenExcitedLevel - 1));
+            const energies    = [-13.6, -3.4, -1.51, -0.85];
+            const levelLabels = ['1s (n=1)', '2p (n=2)', '3p (n=3)', '3d (n=3)'];
+
+            if (currentMode === 'quantum') {
+                // Capturar posição do elétron antes de limpar — mesmo se estiver invisível
+                let emitPos = new THREE.Vector3(2, 0, 0);
+                if (electrons.length > 0) {
+                    emitPos = electrons[0].position.clone();
+                    // Se o elétron estiver na origem (nunca moveu), usar posição no raio do orbital
+                    if (emitPos.length() < 0.5) {
+                        emitPos.set(hydrogenExcitedLevel * 2, 0, 0);
+                    }
+                }
+
+                createPhoton(emitPos);
+
+                hydrogenExcitedLevel = targetLevel;
+                clearAtom();
+                createNucleus();
+                createHydrogenWaveFunction(hydrogenExcitedLevel);
+
+                const displayValue = document.getElementById('energyDisplayValue');
+                const levelInfo    = document.getElementById('energyLevelInfo');
+                if (displayValue) { displayValue.textContent = energies[hydrogenExcitedLevel - 1].toFixed(2); displayValue.style.color = '#00ccff'; }
+                if (levelInfo)    { levelInfo.textContent = 'Nível: ' + levelLabels[hydrogenExcitedLevel - 1]; levelInfo.style.color = '#00ccff'; }
+                updateQuantumNumbers(hydrogenExcitedLevel);
+                setTimeout(function() {
+                    if (displayValue) displayValue.style.color = '#00ff88';
+                    if (levelInfo)    levelInfo.style.color = 'rgba(255,255,255,0.7)';
+                    updateAtomInfo(atomicData['H']);
+                }, 1000);
+
+            } else if (currentMode === 'bohr') {
+                // Flash ciano + emitir fóton DOM imediatamente
+                createBohrPhoton();
+                bohrElectrons.forEach(e => {
+                    e.element.style.background  = '#00ccff';
+                    e.element.style.boxShadow   = '0 0 22px #00ccff';
+                    e.element.style.borderColor = '#00ccff';
+                });
+
+                setTimeout(function() {
+                    hydrogenExcitedLevel = targetLevel;
+                    createBohrAtom(currentAtom);
+                    updateQuantumNumbers(hydrogenExcitedLevel);
+                    const displayValue = document.getElementById('energyDisplayValueBohr');
+                    const levelInfo    = document.getElementById('energyLevelInfoBohr');
+                    if (displayValue) { displayValue.textContent = energies[hydrogenExcitedLevel - 1].toFixed(2); displayValue.style.color = '#00ccff'; }
+                    if (levelInfo)    { levelInfo.textContent = 'Nível: ' + levelLabels[hydrogenExcitedLevel - 1]; levelInfo.style.color = '#00ccff'; }
+                    setTimeout(function() {
+                        if (displayValue) displayValue.style.color = '#00ff88';
+                        if (levelInfo)    levelInfo.style.color = 'rgba(255,255,255,0.7)';
+                    }, 800);
+                }, 250);
+            }
+        };
+
+        // ══════════════════════════════════════════════
+        // ESPECTRO — 4 séries simultâneas
+        // ══════════════════════════════════════════════
+        const hc_eVnm = 1239.84;
+        const serieColors = { 1:'#aa55ff', 2:'#00cc66', 3:'#ff7722', 4:'#ffaa00' };
+        const serieNames  = { 1:'Lyman', 2:'Balmer', 3:'Paschen', 4:'Brackett' };
+        const serieRegion = { 1:'UV extremo', 2:'Visível / UV', 3:'IV próximo', 4:'IV médio' };
+        let specMode = 'emission';
+        let hoveredInfo = null; // {n1, n2}
+
+        function hydrogenWavelength(n1, n2) {
+            if (n2 <= n1) return null;
+            const dE = 13.6 * (1/(n1*n1) - 1/(n2*n2));
+            return hc_eVnm / dE;
+        }
+
+        function wavelengthToColor(nm) {
+            let r, g, b;
+            if      (nm < 380)  { r=0.5; g=0;   b=0.5; }
+            else if (nm < 440)  { r=(440-nm)/60; g=0; b=1; }
+            else if (nm < 490)  { r=0; g=(nm-440)/50; b=1; }
+            else if (nm < 510)  { r=0; g=1; b=(510-nm)/20; }
+            else if (nm < 580)  { r=(nm-510)/70; g=1; b=0; }
+            else if (nm < 645)  { r=1; g=(645-nm)/65; b=0; }
+            else if (nm < 750)  { r=1; g=0; b=0; }
+            else                { r=0.5; g=0; b=0; }
+            let a = 1;
+            if (nm < 420) a = 0.3 + 0.7*(nm-380)/40;
+            else if (nm > 700) a = 0.3 + 0.7*(750-nm)/50;
+            return { r:Math.round(r*255), g:Math.round(g*255), b:Math.round(b*255), a };
+        }
+
+        function regionForNm(nm) {
+            if (nm < 200)  return 'UV extremo';
+            if (nm < 380)  return 'Ultravioleta (UV)';
+            if (nm < 750)  return 'Visível';
+            if (nm < 1400) return 'Infravermelho próximo';
+            return 'Infravermelho';
+        }
+
+        window.setSpecMode = function(mode) {
+            specMode = mode;
+            const btnE = document.getElementById('btnEmission');
+            const btnA = document.getElementById('btnAbsorption');
+            if (btnE) { btnE.classList.toggle('active', mode === 'emission'); }
+            if (btnA) { btnA.classList.toggle('active', mode === 'absorption'); }
+            drawAllBands();
+            if (spec3DRenderer) { spec3DLineTimer = 0; buildSpec3DScene(); }
+        };
+
+        // ══════════════════════════════════════════════
+        // CENA 3D DO ESPECTRO
+        // ══════════════════════════════════════════════
+        let spec3DScene, spec3DCamera, spec3DRenderer, spec3DAnimId;
+        let spec3DDragging = false, spec3DLastX = 0, spec3DLastY = 0;
+        let spec3DRotY = -0.3, spec3DRotX = 0.18;
+        let spec3DSpectralLines = [];
+        let spec3DPhotons = [];
+        let spec3D_screenLines = [];
+        let spec3D_tubeLight = null;
+        let spec3DLineTimer = 0;
+        let spec3DLineProgress = 0;
+
+        function bindSpec3DEvents() {
+            const canvas = document.getElementById('spec3DCanvas');
+            const cont   = document.getElementById('spec3DContainer');
+            if (!canvas || canvas._evBound) return;
+            canvas._evBound = true;
+
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            canvas.addEventListener('mousedown', e => {
+                spec3DDragging = false;
+                spec3DLastX = e.clientX;
+                spec3DLastY = e.clientY;
+            });
+
+            canvas.addEventListener('mousemove', e => {
+                if (e.buttons !== 1) return;
+                spec3DDragging = true;
+                spec3DRotY += (e.clientX - spec3DLastX) * 0.008;
+                spec3DRotX += (e.clientY - spec3DLastY) * 0.006;
+                spec3DRotX = Math.max(-0.5, Math.min(0.5, spec3DRotX));
+                spec3DLastX = e.clientX;
+                spec3DLastY = e.clientY;
+            });
+
+            canvas.addEventListener('click', e => {
+                if (spec3DDragging) { spec3DDragging = false; return; }
+                const rect = canvas.getBoundingClientRect();
+                mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+                mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+                raycaster.setFromCamera(mouse, spec3DCamera);
+                const hits = raycaster.intersectObjects(spec3DSpectralLines);
+                if (!hits.length) return;
+
+                const data = hits[0].object.userData;
+                const nm   = data.nm;
+                const dE   = hc_eVnm / nm;
+                const n1 = 2, n2 = data.n2;
+
+                // Painel flutuante
+                const info    = document.getElementById('spec3DInfo');
+                const title   = document.getElementById('spec3DTitle');
+                const details = document.getElementById('spec3DDetails');
+                if (info && title && details) {
+                    info.style.display = 'block';
+                    const c = wavelengthToColor(nm);
+                    title.textContent  = `${data.name} — ${Math.round(nm*10)} Å`;
+                    title.style.color  = `rgb(${c.r},${c.g},${c.b})`;
+                    details.innerHTML  =
+                        `Transição: n${n2} → n${n1}<br>` +
+                        `ΔE = ${dE.toFixed(3)} eV<br>` +
+                        `λ = ${Math.round(nm)} nm<br>` +
+                        `n = ${n2},  ℓ = 1,  mₗ = 0<br>` +
+                        `Série de Balmer`;
+                }
+
+                // Painel inferior
+                updateSpecInfo(n1, n2, nm);
+
+                // Destacar linha clicada
+                spec3DSpectralLines.forEach(l => l.scale.set(1, 1, 1));
+                hits[0].object.scale.set(1, 2.5, 1);
+            });
+
+            // Touch
+            canvas.addEventListener('touchstart', e => {
+                spec3DLastX = e.touches[0].clientX;
+                spec3DLastY = e.touches[0].clientY;
+            }, { passive: true });
+
+            canvas.addEventListener('touchmove', e => {
+                spec3DRotY += (e.touches[0].clientX - spec3DLastX) * 0.008;
+                spec3DRotX += (e.touches[0].clientY - spec3DLastY) * 0.006;
+                spec3DRotX  = Math.max(-0.5, Math.min(0.5, spec3DRotX));
+                spec3DLastX = e.touches[0].clientX;
+                spec3DLastY = e.touches[0].clientY;
+            }, { passive: true });
+
+            // Resize
+            window.addEventListener('resize', () => {
+                if (!spec3DRenderer || !cont) return;
+                const W = cont.clientWidth, H = cont.clientHeight;
+                spec3DCamera.aspect = W / H;
+                spec3DCamera.updateProjectionMatrix();
+                spec3DRenderer.setSize(W, H);
+            });
+        }
+
+        function stopSpec3D() {
+            if (spec3DAnimId) cancelAnimationFrame(spec3DAnimId);
+            spec3DAnimId = null;
+        }
+
+        // Linhas Balmer visíveis (as mais educativas)
+        const balmerVisible = [
+            { n2:3, nm:656.3, name:'Hα', greek:'α' },
+            { n2:4, nm:486.1, name:'Hβ', greek:'β' },
+            { n2:5, nm:434.0, name:'Hγ', greek:'γ' },
+            { n2:6, nm:410.2, name:'Hδ', greek:'δ' },
+        ];
+
+        function nmToThreeColor(nm) {
+            const c = wavelengthToColor(nm);
+            return new THREE.Color(c.r/255, c.g/255, c.b/255);
+        }
+
+        function initSpec3D() {
+            const canvas = document.getElementById('spec3DCanvas');
+            const cont   = document.getElementById('spec3DContainer');
+            if (!canvas || !cont) return;
+            const W = cont.clientWidth  || 800;
+            const H = cont.clientHeight || 340;
+
+            spec3DScene    = new THREE.Scene();
+            spec3DScene.background = new THREE.Color(0x05060f);
+            spec3DScene.fog        = new THREE.Fog(0x05060f, 18, 40);
+
+            spec3DCamera   = new THREE.PerspectiveCamera(42, W/H, 0.1, 100);
+            spec3DCamera.position.set(0, 4, 10);
+            spec3DCamera.lookAt(1, 0, 0);
+
+            spec3DRenderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+            spec3DRenderer.setSize(W, H);
+            spec3DRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            buildSpec3DScene();
+            bindSpec3DEvents();
+            animateSpec3D();
+        }
+
+        function buildSpec3DScene() {
+            while (spec3DScene.children.length) spec3DScene.remove(spec3DScene.children[0]);
+            spec3DSpectralLines = [];
+            spec3DPhotons = [];
+            spec3DLineProgress = 0;
+            spec3DLineTimer    = 0;
+
+            // Luzes
+            spec3DScene.add(new THREE.AmbientLight(0x1a2a44, 1.0));
+            const d1 = new THREE.DirectionalLight(0xffffff, 0.5);
+            d1.position.set(4, 8, 4); spec3DScene.add(d1);
+
+            // Mesa
+            const tabMat = new THREE.MeshPhongMaterial({ color: 0x090d18, shininess: 15 });
+            const tab = new THREE.Mesh(new THREE.BoxGeometry(22, 0.12, 6), tabMat);
+            tab.position.set(0, -1.55, 0); spec3DScene.add(tab);
+
+            // ── Tubo de descarga ──
+            const tubeMat  = new THREE.MeshPhongMaterial({ color: 0x7799cc, transparent: true, opacity: 0.22, side: THREE.DoubleSide });
+            const tubeGlow = new THREE.MeshBasicMaterial({ color: specMode === 'emission' ? 0xff55bb : 0x4488ff, transparent: true, opacity: 0.55, side: THREE.DoubleSide });
+            const tubeGeo  = new THREE.CylinderGeometry(0.14, 0.14, 3.8, 16, 1, true);
+            const tg = new THREE.Mesh(tubeGeo, tubeMat);
+            const gi = new THREE.Mesh(tubeGeo, tubeGlow);
+            [tg, gi].forEach(m => { m.rotation.z = Math.PI/2; m.position.set(-7.5, 0.1, 0); spec3DScene.add(m); });
+            // Eletrodos
+            const eMat = new THREE.MeshPhongMaterial({ color: 0x445566 });
+            [-2, 2].forEach(x => {
+                const e = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.32, 8), eMat);
+                e.rotation.z = Math.PI/2; e.position.set(-7.5+x, 0.1, 0); spec3DScene.add(e);
+            });
+            // Suportes
+            [-0.55, 0.55].forEach(z => {
+                const s = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 1.7, 8), eMat);
+                s.position.set(-7.5, -0.75, z); spec3DScene.add(s);
+            });
+            const tubeLight = new THREE.PointLight(0xff55bb, 1.4, 6);
+            tubeLight.position.set(-7.5, 0.1, 0); spec3DScene.add(tubeLight);
+            spec3D_tubeLight = tubeLight;
+
+            // ── Fenda ──
+            const slitMat = new THREE.MeshPhongMaterial({ color: 0x1a2233 });
+            const slitF = new THREE.Mesh(new THREE.BoxGeometry(0.25, 2.4, 1.0), slitMat);
+            slitF.position.set(-4.5, 0.1, 0); spec3DScene.add(slitF);
+            // Abertura
+            const slitO = new THREE.Mesh(new THREE.BoxGeometry(0.28, 1.4, 0.06),
+                new THREE.MeshBasicMaterial({ color: 0x000000 }));
+            slitO.position.set(-4.5, 0.1, 0); spec3DScene.add(slitO);
+
+            // ── Feixe único (antes do prisma) ──
+            const beamColor0 = specMode === 'absorption' ? 0xffffff : 0xff99cc;
+            const beamMat = new THREE.MeshBasicMaterial({ color: beamColor0, transparent: true, opacity: 0.30 });
+            const beamSingle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 3.4, 6), beamMat);
+            beamSingle.rotation.z = Math.PI/2;
+            beamSingle.position.set(-2.8, 0.1, 0);
+            spec3DScene.add(beamSingle);
+
+            // ── Prisma ──
+            const pts = [
+                new THREE.Vector2(0, 0), new THREE.Vector2(1.5, 0), new THREE.Vector2(0.75, 1.3)
+            ];
+            const prismShape = new THREE.Shape(pts);
+            const prismGeo = new THREE.ExtrudeGeometry(prismShape, { depth: 0.9, bevelEnabled: false });
+            prismGeo.center();
+            const prismMat = new THREE.MeshPhongMaterial({
+                color: 0xaad4ff, transparent: true, opacity: 0.38,
+                shininess: 140, specular: 0xffffff, side: THREE.DoubleSide
+            });
+            const prism = new THREE.Mesh(prismGeo, prismMat);
+            prism.position.set(-0.5, 0.1, 0);
+            prism.rotation.y = 0.25;
+            spec3DScene.add(prism);
+            const prismEdge = new THREE.LineSegments(
+                new THREE.EdgesGeometry(prismGeo),
+                new THREE.LineBasicMaterial({ color: 0xbbddff, transparent: true, opacity: 0.7 })
+            );
+            prismEdge.position.copy(prism.position);
+            prismEdge.rotation.copy(prism.rotation);
+            spec3DScene.add(prismEdge);
+
+            // ── Tela VERTICAL (à direita, de frente para câmera) ──
+            const screenW = 4.5, screenH = 1.2;
+
+            // Criar textura da tela baseada no modo
+            const texCanvas = document.createElement('canvas');
+            texCanvas.width = 512; texCanvas.height = 128;
+            const texCtx = texCanvas.getContext('2d');
+
+            if (specMode === 'absorption') {
+                // Fundo branco puro
+                texCtx.fillStyle = '#ffffff';
+                texCtx.fillRect(0, 0, 512, 128);
+
+                // Linhas pretas largas e bem visíveis
+                balmerVisible.forEach((line, idx) => {
+                    const xPx = 60 + (idx / (balmerVisible.length - 1)) * 392;
+                    texCtx.fillStyle = '#000000';
+                    texCtx.fillRect(xPx - 8, 0, 16, 128);
+                });
+            } else {
+                // Fundo escuro para emissão
+                texCtx.fillStyle = '#080b18';
+                texCtx.fillRect(0, 0, 512, 128);
+            }
+
+            const screenTex = new THREE.CanvasTexture(texCanvas);
+            const screenMat = new THREE.MeshBasicMaterial({
+                map: screenTex, side: THREE.DoubleSide
+            });
+            const screenGeo = new THREE.PlaneGeometry(screenH, screenW);
+            const screen    = new THREE.Mesh(screenGeo, screenMat);
+            screen.rotation.y = -Math.PI / 2;
+            screen.position.set(6.8, 0.5, 0);
+            spec3DScene.add(screen);
+
+            // Moldura
+            const frameMat2 = new THREE.MeshPhongMaterial({ color: 0x1a2a3a });
+            [
+                [0.08, screenW + 0.12, 0.08,  6.8, 0.5 + screenW/2, 0],
+                [0.08, screenW + 0.12, 0.08,  6.8, 0.5 - screenW/2, 0],
+                [0.08, 0.08, screenH + 0.12,  6.8, 0.5,  screenH/2],
+                [0.08, 0.08, screenH + 0.12,  6.8, 0.5, -screenH/2],
+            ].forEach(([gx, gy, gz, px, py, pz]) => {
+                const f = new THREE.Mesh(new THREE.BoxGeometry(gx, gy, gz), frameMat2);
+                f.position.set(px, py, pz);
+                spec3DScene.add(f);
+            });
+
+            // ── Linhas espectrais na tela vertical (listras verticais, separadas por Z) ──
+            spec3D_screenLines = [];
+            const lineData = balmerVisible;
+            const spreadZ = specMode === 'absorption' ? screenW * 0.72 : 3.6;
+            lineData.forEach((line, idx) => {
+                const col  = nmToThreeColor(line.nm);
+                // Espalhar ao longo de Z (eixo de dispersão do prisma)
+                const zPos = -spreadZ/2 + (idx / (lineData.length - 1)) * spreadZ;
+
+                // Listra na tela (emissão: colorida; absorção: escura com borda)
+                const lineMat = new THREE.MeshBasicMaterial({
+                    color: specMode === 'absorption' ? 0x000000 : col,
+                    transparent: true,
+                    opacity: specMode === 'absorption' ? 0 : 1  // invisible in absorption — texture handles it
+                });
+                const lineGeo = new THREE.BoxGeometry(0.04, screenW * 0.90, specMode === 'absorption' ? 0.14 : 0.07);
+                const lineMesh = new THREE.Mesh(lineGeo, lineMat);
+                lineMesh.rotation.y = -Math.PI / 2;
+                lineMesh.position.set(6.82, 0.5, zPos);
+                lineMesh.scale.set(1, 0, 1); // cresce em Y
+                lineMesh.userData = { spectralLine: true, ...line, n1: 2, idx };
+                spec3DScene.add(lineMesh);
+                spec3DSpectralLines.push(lineMesh);
+                spec3D_screenLines.push({ mesh: lineMesh, zPos, col });
+
+                // Halo glow (emissão)
+                if (specMode === 'emission') {
+                    const hMat  = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0 });
+                    const hMesh = new THREE.Mesh(new THREE.BoxGeometry(0.04, screenW*0.90, 0.28), hMat);
+                    hMesh.rotation.y = -Math.PI / 2;
+                    hMesh.position.set(6.82, 0.5, zPos);
+                    hMesh.scale.set(1, 0, 1);
+                    spec3DScene.add(hMesh);
+                    spec3D_screenLines[idx].halo = hMesh;
+
+                    const pt = new THREE.PointLight(col, 0, 3);
+                    pt.position.set(6.5, 0.5, zPos);
+                    spec3DScene.add(pt);
+                    spec3D_screenLines[idx].light = pt;
+                }
+
+                // Feixe contínuo (absorção: branco; emissão: colorido)
+                const beamColor = specMode === 'absorption' ? 0xffffff : col;
+                const bLen = 6.82 - (-0.5);
+                const bGeo = new THREE.CylinderGeometry(0.015, 0.015, bLen, 5);
+                const bMat2 = new THREE.MeshBasicMaterial({
+                    color: beamColor,
+                    transparent: true, opacity: 0
+                });
+                const bMesh = new THREE.Mesh(bGeo, bMat2);
+                // Inclinação: segue de (-0.5, 0.1, 0) até (6.82, 0.5, zPos)
+                const dx = 6.82 - (-0.5), dz = zPos;
+                const angleZ = Math.atan2(dz, dx);  // rotação em torno de Y
+                bMesh.rotation.z = Math.PI / 2;
+                bMesh.rotation.y = -angleZ;
+                bMesh.position.set((-0.5 + 6.82) / 2, 0.2, zPos / 2);
+                spec3DScene.add(bMesh);
+                spec3D_screenLines[idx].beam = bMesh;
+
+                // Label sprite acima de cada listra
+                const lc = document.createElement('canvas');
+                lc.width = 140; lc.height = 52;
+                const lx = lc.getContext('2d');
+                lx.fillStyle = `rgb(${Math.round(col.r*255)},${Math.round(col.g*255)},${Math.round(col.b*255)})`;
+                lx.font = 'bold 22px monospace'; lx.textAlign = 'center';
+                lx.fillText(line.name, 70, 24);
+                lx.font = '15px monospace';
+                lx.fillText(Math.round(line.nm * 10) + ' Å', 70, 44);
+                const tex = new THREE.CanvasTexture(lc);
+                const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0 }));
+                spr.position.set(6.82, 0.5 + screenW/2 + 0.4, zPos);
+                spr.scale.set(1.2, 0.44, 1);
+                spec3DScene.add(spr);
+                spec3D_screenLines[idx].label = spr;
+            });
+
+            // Diagrama de níveis movido para HUD 2D (canvas sobreposto)
+            drawLevelHUD();
+        }
+
+        // ── Diagrama de níveis como HUD 2D no canto ──
+        function drawLevelHUD() {
+            let hud = document.getElementById('spec3DHUD');
+            if (!hud) {
+                hud = document.createElement('canvas');
+                hud.id = 'spec3DHUD';
+                hud.style.cssText = 'position:absolute;top:10px;left:10px;pointer-events:none;border-radius:8px;';
+                document.getElementById('spec3DContainer').appendChild(hud);
+            }
+            const W = 160, H = 220;
+            hud.width = W; hud.height = H;
+            hud.style.width  = W + 'px';
+            hud.style.height = H + 'px';
+
+            const ctx = hud.getContext('2d');
+            ctx.clearRect(0, 0, W, H);
+
+            // Fundo semi-transparente
+            ctx.fillStyle = 'rgba(4,8,20,0.78)';
+            ctx.beginPath();
+            ctx.roundRect(0, 0, W, H, 8);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(0,180,255,0.25)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Título
+            ctx.fillStyle = '#6688aa';
+            ctx.font = '9px monospace';
+            ctx.fillText('Diagrama de Níveis', 10, 14);
+
+            // Níveis n=1..5
+            const padL = 38, padT = 26, padB = 18;
+            const plotH = H - padT - padB;
+            function lY(n) { return padT + plotH * (1 - (1 - 1/n)); }
+            // escala: n=1 em baixo, n=∞ em cima
+            function eY(n) { return padT + plotH * (1 - (1 - 1/n) / (1 - 1/6)); }
+
+            [5,4,3,2,1].forEach(n => {
+                const y = eY(n);
+                const isBase = n === 2;
+                ctx.strokeStyle = isBase ? '#00ccff' : n===1 ? '#00ff88' : '#334466';
+                ctx.lineWidth = isBase ? 1.5 : 0.8;
+                ctx.beginPath();
+                ctx.moveTo(padL, y);
+                ctx.lineTo(W - 10, y);
+                ctx.stroke();
+                ctx.fillStyle = isBase ? '#00ccff' : '#4a6a88';
+                ctx.font = (isBase ? 'bold ' : '') + '9px monospace';
+                ctx.textAlign = 'right';
+                ctx.fillText('n='+n, padL - 4, y + 3);
+                if (isBase || n === 1) {
+                    const E = -13.6/(n*n);
+                    ctx.fillStyle = 'rgba(100,140,180,0.6)';
+                    ctx.font = '7px monospace';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(E.toFixed(1)+'eV', W - 38, y - 2);
+                }
+            });
+
+            // Setas Balmer (n2→2)
+            balmerVisible.forEach((line, idx) => {
+                const c = wavelengthToColor(line.nm);
+                const x = padL + 12 + idx * 22;
+                const yTop = eY(Math.min(line.n2, 5));
+                const yBot = eY(2);
+
+                // Linha da seta
+                ctx.strokeStyle = `rgb(${c.r},${c.g},${c.b})`;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(x, yTop + 1);
+                ctx.lineTo(x, yBot - 5);
+                ctx.stroke();
+
+                // Ponta
+                ctx.fillStyle = `rgb(${c.r},${c.g},${c.b})`;
+                ctx.beginPath();
+                ctx.moveTo(x - 4, yBot - 5);
+                ctx.lineTo(x, yBot);
+                ctx.lineTo(x + 4, yBot - 5);
+                ctx.closePath();
+                ctx.fill();
+
+                // Label
+                ctx.font = '7px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('H'+line.greek, x, yTop - 2);
+            });
+        }
+
+        function spawnSpec3DPhoton() {
+            if (!spec3DScene || specMode !== 'emission') return;
+            const col = nmToThreeColor(balmerVisible[Math.floor(Math.random()*4)].nm);
+            const geo = new THREE.SphereGeometry(0.055, 5, 5);
+            const mat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.9 });
+            const m   = new THREE.Mesh(geo, mat);
+            m.position.set(-6.5, 0.1 + (Math.random()-0.5)*0.2, 0);
+            m.userData.vel  = new THREE.Vector3(0.055 + Math.random()*0.02, (Math.random()-0.5)*0.005, 0);
+            m.userData.life = 100;
+            spec3DScene.add(m);
+            spec3DPhotons.push(m);
+        }
+
+        function animateSpec3D() {
+            spec3DAnimId = requestAnimationFrame(animateSpec3D);
+            if (!spec3DRenderer || !spec3DScene) return;
+
+            // Rotação drag
+            spec3DScene.rotation.y = spec3DRotY;
+            spec3DScene.rotation.x = spec3DRotX;
+
+            // Pulsação do tubo
+            if (spec3D_tubeLight) {
+                spec3D_tubeLight.intensity = 1.2 + Math.sin(Date.now()*0.006)*0.4;
+            }
+
+            // Animação das linhas espectrais surgindo TODAS SIMULTANEAMENTE
+            spec3DLineTimer++;
+            if (spec3D_screenLines) {
+                const progress = Math.min(1, spec3DLineTimer / 40);
+                spec3D_screenLines.forEach((sl) => {
+                    // Listra cresce em Y (vertical na tela)
+                    sl.mesh.scale.set(1, progress, 1);
+                    if (sl.beam) sl.beam.material.opacity = progress * (specMode === 'absorption' ? 0.10 : 0.28);
+                    if (sl.halo) { sl.halo.scale.set(1, progress, 1); sl.halo.material.opacity = progress * 0.28; }
+                    if (sl.light) sl.light.intensity = progress * 0.65;
+                    if (sl.label) sl.label.material.opacity = progress * 0.9;
+                });
+            }
+
+            // Fótons
+            if (specMode === 'emission' && Math.random() < 0.06) spawnSpec3DPhoton();
+            for (let i = spec3DPhotons.length-1; i >= 0; i--) {
+                const p = spec3DPhotons[i];
+                p.position.add(p.userData.vel);
+                p.userData.life--;
+                p.material.opacity = p.userData.life / 100;
+                if (p.userData.life <= 0 || p.position.x > 5.5) {
+                    spec3DScene.remove(p); spec3DPhotons.splice(i,1);
+                }
+            }
+
+            spec3DRenderer.render(spec3DScene, spec3DCamera);
+        }
+
+
+        // ── Desenhar as 4 faixas ──
+        function drawAllBands() {
+            [1, 2, 3, 4].forEach(n1 => drawBand(n1));
+        }
+
+        function drawBand(n1) {
+            const canvas = document.getElementById('band' + n1);
+            if (!canvas) return;
+            const W = canvas.parentElement ? (canvas.parentElement.clientWidth || 900) : 900;
+            const H = 90;
+            canvas.width  = W;
+            canvas.height = H;
+            const ctx = canvas.getContext('2d');
+
+            // Série config
+            const col = serieColors[n1];
+            const serieName = serieNames[n1];
+
+            // Linhas da série
+            const lines = [];
+            for (let n2 = n1+1; n2 <= n1+8; n2++) {
+                const nm = hydrogenWavelength(n1, n2);
+                if (!nm) continue;
+                const rel = 1 / Math.pow(n2 - n1, 0.75);
+                const greek = ['α','β','γ','δ','ε','ζ','η','θ'][n2-n1-1] || ('n'+n2);
+                lines.push({ n2, nm, rel, greek });
+            }
+
+            // Escala λ
+            const nmVals = lines.map(l => l.nm);
+            const nmMin0 = Math.min(...nmVals), nmMax0 = Math.max(...nmVals);
+            const span = Math.max(300, (nmMax0 - nmMin0) * 1.5);
+            const mid  = (nmMin0 + nmMax0) / 2;
+            const nmA  = mid - span/2, nmB = mid + span/2;
+
+            // Layout — compacto para caber todas as 4 séries na janela
+            const padL = 66, padR = 12, padT = 22, padB = 16;
+            const plotW = W - padL - padR;
+            const bandH = H - padT - padB;
+            const toX   = nm => padL + (nm - nmA) / (nmB - nmA) * plotW;
+
+            // Fundo sempre escuro (espectroscópio real)
+            ctx.fillStyle = '#020409';
+            ctx.fillRect(0, 0, W, H);
+
+            if (specMode === 'absorption') {
+                const grad = ctx.createLinearGradient(padL, 0, padL + plotW, 0);
+                for (let i = 0; i <= 200; i++) {
+                    const nm = nmA + (nmB - nmA) * i / 200;
+                    if (nm >= 380 && nm < 750) {
+                        const c = wavelengthToColor(nm);
+                        grad.addColorStop(i/200, `rgba(${c.r},${c.g},${c.b},${Math.min(1, c.a * 1.2)})`);
+                    } else if (nm < 380) {
+                        grad.addColorStop(i/200, `rgba(60,0,80,0.7)`);
+                    } else {
+                        grad.addColorStop(i/200, `rgba(60,0,0,0.5)`);
+                    }
+                }
+                ctx.fillStyle = grad;
+                ctx.fillRect(padL, padT, plotW, bandH);
+                // Vinheta
+                const vigL = ctx.createLinearGradient(padL, 0, padL+30, 0);
+                vigL.addColorStop(0, 'rgba(2,4,9,0.8)'); vigL.addColorStop(1, 'rgba(2,4,9,0)');
+                ctx.fillStyle = vigL; ctx.fillRect(padL, padT, 30, bandH);
+                const vigR = ctx.createLinearGradient(padL+plotW-30, 0, padL+plotW, 0);
+                vigR.addColorStop(0, 'rgba(2,4,9,0)'); vigR.addColorStop(1, 'rgba(2,4,9,0.8)');
+                ctx.fillStyle = vigR; ctx.fillRect(padL+plotW-30, padT, 30, bandH);
+            } else {
+                ctx.fillStyle = '#010208';
+                ctx.fillRect(padL, padT, plotW, bandH);
+            }
+
+            // Borda da janela do espectro
+            ctx.strokeStyle = 'rgba(0,150,255,0.1)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(padL+0.5, padT+0.5, plotW-1, bandH-1);
+
+            // Linhas espectrais
+            canvas._lines = [];
+            lines.forEach(line => {
+                const x = toX(line.nm);
+                if (x < padL-10 || x > padL+plotW+10) return;
+                const isHov = hoveredInfo && hoveredInfo.n1===n1 && hoveredInfo.n2===line.n2;
+
+                if (specMode === 'emission') {
+                    const isVis = line.nm >= 380 && line.nm < 750;
+                    let r, g, b;
+                    if (isVis) {
+                        const c = wavelengthToColor(line.nm); r=c.r; g=c.g; b=c.b;
+                    } else {
+                        const hex = col.replace('#','');
+                        r=parseInt(hex.slice(0,2),16); g=parseInt(hex.slice(2,4),16); b=parseInt(hex.slice(4,6),16);
+                    }
+                    const inten = isHov ? 1.0 : 0.4 + line.rel*0.6;
+                    const gR    = isHov ? 20 : 10 * line.rel;
+                    // Halo
+                    const gg = ctx.createLinearGradient(x-gR*2,0,x+gR*2,0);
+                    gg.addColorStop(0,   `rgba(${r},${g},${b},0)`);
+                    gg.addColorStop(0.5, `rgba(${r},${g},${b},${0.20*inten})`);
+                    gg.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+                    ctx.fillStyle=gg; ctx.fillRect(x-gR*2, padT, gR*4, bandH);
+                    // Núcleo
+                    const lw = isHov ? 3 : 1.0 + line.rel*1.6;
+                    const lg = ctx.createLinearGradient(x-lw,0,x+lw,0);
+                    lg.addColorStop(0,   `rgba(${r},${g},${b},0)`);
+                    lg.addColorStop(0.3, `rgba(${r},${g},${b},${0.7*inten})`);
+                    lg.addColorStop(0.5, `rgba(255,255,255,${0.95*inten})`);
+                    lg.addColorStop(0.7, `rgba(${r},${g},${b},${0.7*inten})`);
+                    lg.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+                    ctx.fillStyle=lg; ctx.fillRect(x-lw, padT+1, lw*2, bandH-2);
+                } else {
+                    const lw = isHov ? 3.5 : 1.5 + line.rel*2;
+                    ctx.fillStyle='rgba(0,0,0,0.92)';
+                    ctx.fillRect(x-lw/2, padT, lw, bandH);
+                    if (isHov) {
+                        ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+                        ctx.strokeRect(x-lw/2-2, padT, lw+4, bandH); ctx.setLineDash([]);
+                    }
+                }
+
+                // Labels
+                if ((line.n2-n1 <= 4) || isHov) {
+                    const isVis = specMode==='emission' && line.nm>=380 && line.nm<750;
+                    const c = isVis ? wavelengthToColor(line.nm) : null;
+                    ctx.fillStyle = isHov ? 'rgba(255,255,255,0.95)'
+                        : (c ? `rgba(${c.r},${c.g},${c.b},0.75)` : 'rgba(140,170,220,0.5)');
+                    ctx.font = `${isHov?'bold ':''} ${isHov?9:7}px 'Courier New',monospace`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText('H'+line.greek, x, padT-9);
+                    ctx.fillStyle = 'rgba(100,140,200,0.4)';
+                    ctx.font = `6px 'Courier New',monospace`;
+                    ctx.fillText(Math.round(line.nm)+'nm', x, padT-1);
+                }
+                canvas._lines.push({n1, n2:line.n2, nm:line.nm, rel:line.rel, greek:line.greek, x});
+            });
+
+            // Eixo X
+            const botY = padT + bandH;
+            ctx.strokeStyle='rgba(0,100,200,0.2)'; ctx.lineWidth=0.8;
+            ctx.beginPath(); ctx.moveTo(padL,botY); ctx.lineTo(padL+plotW,botY); ctx.stroke();
+            const nmRange = nmB-nmA;
+            const step = nmRange<200?10:nmRange<600?50:nmRange<1500?100:500;
+            for (let nm=Math.ceil(nmA/step)*step; nm<=nmB; nm+=step) {
+                const x=toX(nm);
+                if (x<padL||x>padL+plotW) continue;
+                ctx.strokeStyle='rgba(60,120,200,0.3)'; ctx.lineWidth=0.8;
+                ctx.beginPath(); ctx.moveTo(x,botY); ctx.lineTo(x,botY+3); ctx.stroke();
+                ctx.fillStyle='rgba(70,130,210,0.55)';
+                ctx.font=`6px 'Courier New',monospace`; ctx.textAlign='center';
+                ctx.fillText(Math.round(nm), x, botY+10);
+            }
+
+            // Label série
+            ctx.fillStyle = col;
+            ctx.font = `bold 9px 'Courier New',monospace`;
+            ctx.textAlign='right';
+            ctx.fillText(serieName, padL-4, padT+bandH/2-3);
+            ctx.fillStyle='rgba(80,120,180,0.5)';
+            ctx.font=`6px 'Courier New',monospace`;
+            ctx.fillText('n₁='+n1, padL-4, padT+bandH/2+6);
+        }
+
+        // ── Determinador de Região EM ──
+        function regionForNm(nm) {
+            if (nm < 380) return 'Ultravioleta';
+            if (nm > 750) return 'Infravermelho';
+            return 'Visível';
+        }
+
+        // ── Info ao clicar ──
+        function updateSpecInfo(n1, n2, nm) {
+            const hc_eVnm = 1239.84193; // Constante hc em eV·nm
+            const dE = hc_eVnm / nm;
+            const col = serieColors[n1];
+
+            // Remove 'dim' ao exibir dados
+            const setVal = (id, text) => {
+                const el = document.getElementById(id);
+                if (el) { el.textContent = text; el.classList.remove('dim'); }
+            };
+
+            setVal('specTransition', `n${n2} → n${n1}  (${serieNames[n1]})`);
+            setVal('specDeltaE',     dE.toFixed(4) + ' eV');
+            setVal('specLambda',     Math.round(nm) + ' nm  (' + Math.round(nm*10) + ' Å)');
+            setVal('specRegion',     regionForNm(nm));
+
+            const sw = document.getElementById('specColorSwatch');
+            if (sw) {
+                sw.style.opacity = '1';
+                if (nm >= 380 && nm < 750) {
+                    const c = wavelengthToColor(nm);
+                    sw.style.background = `rgb(${c.r},${c.g},${c.b})`;
+                    sw.style.boxShadow  = `0 0 12px rgb(${c.r},${c.g},${c.b})`;
+                } else {
+                    sw.style.background = col;
+                    sw.style.boxShadow  = `0 0 10px ${col}`;
+                }
+            }
+        }
+
+        // ── Bind eventos em todos os canvases ──
+        function bindAllBandEvents() {
+            [1,2,3,4].forEach(n1 => {
+                const canvas = document.getElementById('band'+n1);
+                if (!canvas || canvas._evBound) return;
+                canvas._evBound = true;
+
+                canvas.addEventListener('mousemove', function(e) {
+                    const rect = canvas.getBoundingClientRect();
+                    const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+                    const hits = canvas._lines || [];
+                    let best = null, bestD = 999;
+                    hits.forEach(h => { const d = Math.abs(h.x - mx); if (d < bestD) { bestD = d; best = h; } });
+                    const newHov = (best && bestD < 26) ? {n1: best.n1, n2: best.n2} : null;
+                    const changed = JSON.stringify(newHov) !== JSON.stringify(hoveredInfo);
+                    if (changed) {
+                        hoveredInfo = newHov;
+                        canvas.style.cursor = newHov ? 'pointer' : 'default';
+                        drawBand(n1);
+                        if (newHov) updateSpecInfo(newHov.n1, newHov.n2, best.nm);
+                    }
+                });
+
+                canvas.addEventListener('mouseleave', function() {
+                    if (hoveredInfo && hoveredInfo.n1 === n1) {
+                        hoveredInfo = null;
+                        drawBand(n1);
+                    }
+                });
+
+                canvas.addEventListener('click', function(e) {
+                    const rect = canvas.getBoundingClientRect();
+                    const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+                    const hits = canvas._lines || [];
+                    let best = null, bestD = 999;
+                    hits.forEach(h => { const d = Math.abs(h.x - mx); if (d < bestD) { bestD = d; best = h; } });
+                    if (best && bestD < 26) updateSpecInfo(best.n1, best.n2, best.nm);
+                });
+            });
+        }
+
+        function drawSpectrum()   { drawAllBands(); bindAllBandEvents(); }
+        function redrawSpectrum() { drawSpectrum(); }
+
+        window.toggleEnergyWaves = function() {
+            showEnergyWaves = !showEnergyWaves;
+            const btn = document.getElementById('waveBtn');
+            if (btn) {
+                btn.textContent = showEnergyWaves ? '🌊 Ondas: ON' : '🌊 Ondas: OFF';
+            }
+            
+            if (!showEnergyWaves) {
+                energyWaves.forEach(wave => {
+                    wave.geometry.dispose();
+                    wave.material.dispose();
+                    scene.remove(wave);
+                });
+                energyWaves = [];
+            }
+        };
+
+        // Dados dos átomos
+        const atomicData = {
+            H: { name: 'Hidrogênio', protons: 1, electrons: 1, config: '1s¹', 
+                 orbitals: [{type: 's', n: 1, count: 1}] }
+        };
+
+        // Inicialização
+        function init() {
+            const container = document.getElementById('canvas-container');
+            
+            // Obter dimensões reais do container
+            const rect = container.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+
+            // Cena
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0a0a1a, 10, 50);
+
+            // Câmera com aspect ratio correto
+            camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+            camera.position.set(0, 5, 15);
+            camera.lookAt(0, 0, 0);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: !isMobile, alpha: true, powerPreference: "high-performance" });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(pixelRatio);
+            renderer.setClearColor(0x0a0a1a, 1);
+            
+            // Posicionar canvas corretamente
+            renderer.domElement.style.position = 'absolute';
+            renderer.domElement.style.top = '0';
+            renderer.domElement.style.left = '0';
+            container.appendChild(renderer.domElement);
+
+            // Luzes (otimizadas para mobile)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const pointLight1 = new THREE.PointLight(0x00ccff, isMobile ? 0.7 : 1, 100);
+            pointLight1.position.set(10, 10, 10);
+            scene.add(pointLight1);
+
+            if (!isMobile) {
+                const pointLight2 = new THREE.PointLight(0xff00ff, 0.5, 100);
+                pointLight2.position.set(-10, -10, 10);
+                scene.add(pointLight2);
+            }
+
+            // Controles de mouse
+            setupMouseControls(container);
+
+            // Criar átomo inicial
+            createAtom(currentAtom);
+
+            // Animação
+            animate();
+
+            // Responsividade
+            window.addEventListener('resize', onWindowResize);
+            
+            // Forçar ajuste inicial
+            setTimeout(() => onWindowResize(), 100);
+        }
+
+        function setupMouseControls(container) {
+            // Controles de Mouse
+            container.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            container.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const deltaX = e.clientX - previousMousePosition.x;
+                    const deltaY = e.clientY - previousMousePosition.y;
+                    
+                    rotation.y += deltaX * 0.005;
+                    rotation.x += deltaY * 0.005;
+                    
+                    previousMousePosition = { x: e.clientX, y: e.clientY };
+                }
+            });
+
+            container.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            container.addEventListener('mouseleave', () => {
+                isDragging = false;
+            });
+
+            container.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                camera.position.z += e.deltaY * 0.01;
+                camera.position.z = Math.max(8, Math.min(30, camera.position.z));
+            });
+
+            // Controles Touch para dispositivos móveis
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchStartDistance = 0;
+
+            container.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                
+                if (e.touches.length === 1) {
+                    // Um dedo - rotação
+                    isDragging = true;
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                } else if (e.touches.length === 2) {
+                    // Dois dedos - zoom (pinch)
+                    isDragging = false;
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    touchStartDistance = Math.sqrt(dx * dx + dy * dy);
+                }
+            }, { passive: false });
+
+            container.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                
+                if (e.touches.length === 1 && isDragging) {
+                    // Rotação com um dedo
+                    const deltaX = e.touches[0].clientX - touchStartX;
+                    const deltaY = e.touches[0].clientY - touchStartY;
+                    
+                    rotation.y += deltaX * 0.01;
+                    rotation.x += deltaY * 0.01;
+                    
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                } else if (e.touches.length === 2) {
+                    // Zoom com pinch (dois dedos)
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    const delta = distance - touchStartDistance;
+                    camera.position.z -= delta * 0.05;
+                    camera.position.z = Math.max(8, Math.min(30, camera.position.z));
+                    
+                    touchStartDistance = distance;
+                }
+            }, { passive: false });
+
+            container.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                isDragging = false;
+                touchStartDistance = 0;
+            }, { passive: false });
+
+            container.addEventListener('touchcancel', (e) => {
+                isDragging = false;
+                touchStartDistance = 0;
+            });
+        }
+
+        function createNucleus() {
+            const atom = atomicData[currentAtom];
+            // Raio do núcleo cresce levemente com o número de prótons (r ∝ Z^(1/3))
+            const baseRadius = 0.28;
+            const nucleusRadius = atom ? baseRadius * Math.pow(atom.protons, 1/3) : baseRadius;
+            const geometry = new THREE.SphereGeometry(nucleusRadius, 32, 32);
+            const isWhite = document.body.classList.contains('bg-white');
+            const material = new THREE.MeshPhongMaterial({
+                color: isWhite ? 0xcc3300 : 0xff4500,
+                emissive: isWhite ? 0x992200 : 0xff4500,
+                emissiveIntensity: isWhite ? 0.3 : 0.5,
+                shininess: 100
+            });
+            nucleus = new THREE.Mesh(geometry, material);
+            scene.add(nucleus);
+        }
+
+        function createPhoton(startPosition) {
+            if (!scene) return;
+            if (isMobile && photons.length > 6) return;
+            if (!isMobile && photons.length > 10) return;
+
+            const count = isMobile ? 3 : 5;
+            for (let p = 0; p < count; p++) {
+                const segments = isMobile ? 12 : 16;
+                const geometry = new THREE.SphereGeometry(0.28, segments, segments);
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0xff2222,
+                    transparent: false,
+                    depthWrite: true
+                });
+                const photon = new THREE.Mesh(geometry, material);
+                photon.position.copy(startPosition);
+
+                const spread = (2 * Math.PI / count) * p + Math.random() * 0.3;
+                const direction = new THREE.Vector3(
+                    Math.cos(spread) * (0.8 + Math.random() * 0.2),
+                    (Math.random() - 0.5) * 0.8,
+                    Math.sin(spread) * (0.8 + Math.random() * 0.2)
+                ).normalize();
+
+                photon.userData = {
+                    direction,
+                    speed: 0.25,
+                    life: isMobile ? 80 : 120,
+                    maxLife: isMobile ? 80 : 120
+                };
+
+                // Glow generoso
+                const glowGeo = new THREE.SphereGeometry(0.55, segments, segments);
+                const glowMat = new THREE.MeshBasicMaterial({
+                    color: 0xff6600,
+                    transparent: true,
+                    opacity: 0.7,
+                    depthWrite: false
+                });
+                photon.add(new THREE.Mesh(glowGeo, glowMat));
+
+                scene.add(photon);
+                photons.push(photon);
+            }
+        }
+
+        // Emissão de fóton no Modelo Semi-clássico (DOM animado)
+        function createBohrPhoton() {
+            const container = document.getElementById('bohr-container');
+            if (!container) return;
+            const rect = container.getBoundingClientRect();
+            const cx = rect.width / 2;
+            const cy = rect.height / 2;
+
+            // Pegar posição atual do elétron se existir
+            let startX = cx, startY = cy;
+            if (bohrElectrons.length > 0) {
+                const e = bohrElectrons[0];
+                startX = e.centerX + e.radius * Math.cos(e.angle);
+                startY = e.centerY + e.radius * Math.sin(e.angle);
+            }
+
+            const count = isMobile ? 3 : 5;
+            for (let i = 0; i < count; i++) {
+                const dot = document.createElement('div');
+                dot.style.cssText = `
+                    position: absolute;
+                    width: 10px; height: 10px;
+                    background: #ff2222;
+                    border-radius: 50%;
+                    box-shadow: 0 0 14px 4px #ff6600;
+                    pointer-events: none;
+                    z-index: 200;
+                    left: ${startX - 5}px;
+                    top:  ${startY - 5}px;
+                    transition: none;
+                `;
+                container.appendChild(dot);
+
+                const angle = (2 * Math.PI / count) * i + Math.random() * 0.4;
+                const dist  = 80 + Math.random() * 60;
+                const tx = Math.cos(angle) * dist;
+                const ty = Math.sin(angle) * dist;
+
+                // Animar com requestAnimationFrame
+                const startTime = performance.now();
+                const duration  = 600 + Math.random() * 200;
+
+                function animateDot(now) {
+                    const t = Math.min((now - startTime) / duration, 1);
+                    const ease = 1 - Math.pow(1 - t, 2);
+                    dot.style.left    = (startX - 5 + tx * ease) + 'px';
+                    dot.style.top     = (startY - 5 + ty * ease) + 'px';
+                    dot.style.opacity = (1 - t).toFixed(2);
+                    if (t < 1) requestAnimationFrame(animateDot);
+                    else dot.remove();
+                }
+                requestAnimationFrame(animateDot);
+            }
+        }
+
+        function createEnergyWave() {
+            if (!showEnergyWaves || !scene || !nucleus) return;
+            
+            // Limitar ondas em mobile
+            if (isMobile && energyWaves.length > 2) return;
+            if (!isMobile && energyWaves.length > 5) return;
+            
+            const segments = isMobile ? 24 : 32;
+            const geometry = new THREE.SphereGeometry(0.5, segments, segments);
+            const material = new THREE.MeshBasicMaterial({
+                color: 0x00ffff,
+                transparent: true,
+                opacity: 0.35,
+                side: THREE.FrontSide,
+                depthWrite: false
+            });
+            const wave = new THREE.Mesh(geometry, material);
+            
+            wave.position.copy(nucleus.position);
+            wave.userData = {
+                scale: 0.5,
+                maxScale: isMobile ? 6 : 8,
+                speed: isMobile ? 0.12 : 0.08
+            };
+            
+            scene.add(wave);
+            energyWaves.push(wave);
+        }
+
+        function createSOrbital(n, count) {
+            const radius = n * 2;
+            const segments = isMobile ? 32 : 64;
+            const isWhite = document.body.classList.contains('bg-white');
+            
+            // Para Hidrogênio, criar visualização baseada no nível de excitação
+            if (currentAtom === 'H' && currentMode === 'quantum') {
+                createHydrogenWaveFunction(hydrogenExcitedLevel);
+                return;
+            }
+
+            if (orbitalStyle === 'cloud') {
+                const particleCount = isMobile ? 2000 : 5000;
+                const positions = new Float32Array(particleCount * 3);
+                for (let i = 0; i < particleCount; i++) {
+                    const r = Math.abs(gaussianRandom(0, radius * 0.8));
+                    const phi = Math.random() * Math.PI * 2;
+                    const theta = Math.acos(2 * Math.random() - 1);
+                    positions[i * 3] = r * Math.sin(theta) * Math.cos(phi);
+                    positions[i * 3 + 1] = r * Math.sin(theta) * Math.sin(phi);
+                    positions[i * 3 + 2] = r * Math.cos(theta);
+                }
+                const geometry = new THREE.BufferGeometry();
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                const material = new THREE.PointsMaterial({
+                    size: isMobile ? 0.08 : 0.06, color: isWhite ? 0x111111 : 0x6496ff,
+                    transparent: true, opacity: isWhite ? 0.7 : 0.5, 
+                    blending: isWhite ? THREE.NormalBlending : THREE.AdditiveBlending, 
+                    depthWrite: false
+                });
+
+                material.onBeforeCompile = function(shader) {
+                    shader.uniforms.time = { value: 0 };
+                    material.userData.shader = shader;
+                    shader.vertexShader = `varying vec3 vPos;\n` + shader.vertexShader;
+                    shader.vertexShader = shader.vertexShader.replace(`#include <begin_vertex>`, `#include <begin_vertex>\nvPos = position;`);
+                    shader.fragmentShader = `uniform float time;\nvarying vec3 vPos;\n` + shader.fragmentShader;
+                    shader.fragmentShader = shader.fragmentShader.replace(
+                        `#include <color_fragment>`,
+                        `#include <color_fragment>\n` +
+                        `float phase = sin(vPos.x * 20.0) + cos(vPos.y * 30.0) + sin(vPos.z * 40.0);\n` +
+                        `float twinkle = (sin(time * 15.0 + phase * 10.0) + 1.0) * 0.5;\n` + 
+                        `diffuseColor.a *= (0.1 + 0.9 * twinkle);`
+                    );
+                };
+                const cloud = new THREE.Points(geometry, material);
+                scene.add(cloud);
+                orbitals.push(cloud);
+            } else {
+                const geometry = new THREE.SphereGeometry(radius, segments, segments);
+                const material = new THREE.MeshPhongMaterial({
+                    color: isWhite ? 0x2244aa : 0x6496ff,
+                    transparent: true,
+                    opacity: orbitalStyle === 'transparent' ? 0.15 : 0.3,
+                    wireframe: orbitalStyle === 'wireframe',
+                    side: THREE.DoubleSide
+                });
+                const orbital = new THREE.Mesh(geometry, material);
+                scene.add(orbital);
+                orbitals.push(orbital);
+            }
+
+            // Criar elétrons
+            if (showElectrons && orbitalStyle !== 'cloud') {
+                for (let i = 0; i < count; i++) {
+                    createElectron(radius, i, count);
+                }
+            }
+        }
+
+        function createHydrogenWaveFunction(level) {
+            const segments = isMobile ? 24 : 32;
+            
+            if (orbitalStyle === 'cloud') {
+                createCloud(level);
+                return;
+            }
+
+            if (level === 1) {
+                const isWhite = document.body.classList.contains('bg-white');
+                // 1s — esférico, raio = 2
+                const geometry = new THREE.SphereGeometry(2, segments, segments);
+                const material = new THREE.MeshPhongMaterial({
+                    color: isWhite ? 0x2244aa : 0x6496ff, transparent: true, 
+                    opacity: orbitalStyle === 'transparent' ? 0.15 : 0.3,
+                    wireframe: orbitalStyle === 'wireframe', side: THREE.DoubleSide
+                });
+                const orbital = new THREE.Mesh(geometry, material);
+                scene.add(orbital);
+                orbitals.push(orbital);
+                if (showElectrons) createElectron(2, 0, 1);
+            } 
+            else if (level === 2) {
+                // 2p — halter vertical, lóbulo width=2.4, height centrado em ±2.4
+                createPShapedOrbital(4, 0x64c8ff);
+                if (showElectrons) createElectronInLobe('py', 2.4, 2.4);
+            }
+            else if (level === 3) {
+                // 3p — dois halteres em X e Z, lóbulos centrados em ±4.2 nos eixos x e z
+                createDoublePOrbital(6, 0x64ffc8);
+                if (showElectrons) {
+                    createElectronInLobe('px', 4.2, 1.8);
+                    createElectronInLobe('pz', 4.2, 1.8);
+                }
+            }
+            else if (level === 4) {
+                // 3d cloverleaf — lóbulos no plano XZ, centrados em ±6.4 em x e z
+                createCloverleafOrbital(8, 0xff9664);
+                if (showElectrons) {
+                    createElectronInLobe('px', 6.4, 3.2);
+                    createElectronInLobe('pz', 6.4, 3.2);
+                }
+            }
+        }
+
+        // Cria elétron confinado dentro de um lóbulo específico
+        // axis: 'px'|'py'|'pz' — eixo principal do lóbulo
+        // lobeDist: distância do centro ao centro do lóbulo
+        // lobeRadius: raio do lóbulo (confinamento)
+        function createElectronInLobe(axis, lobeDist, lobeRadius) {
+            const geometry = new THREE.SphereGeometry(0.15, 16, 16);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 0.5,
+                transparent: true, opacity: 1
+            });
+            const electron = new THREE.Mesh(geometry, material);
+
+            // Escolher um dos dois lóbulos (+ ou -)
+            const side = Math.random() > 0.5 ? 1 : -1;
+            // Posição inicial: centro do lóbulo + pequeno deslocamento aleatório
+            const offset = () => (Math.random() - 0.5) * lobeRadius * 0.8;
+
+            if (axis === 'px') {
+                electron.position.set(side * lobeDist + offset(), offset() * 0.5, offset() * 0.5);
+            } else if (axis === 'py') {
+                electron.position.set(offset() * 0.5, side * lobeDist + offset(), offset() * 0.5);
+            } else { // pz
+                electron.position.set(offset() * 0.5, offset() * 0.5, side * lobeDist + offset());
+            }
+
+            electron.userData = {
+                type: 'lobe',
+                axis,
+                lobeDist,
+                lobeRadius,
+                side,
+                angle: Math.random() * Math.PI * 2,
+                speed: 0.018 + Math.random() * 0.008,
+                visible: true,
+                visibilityTimer: Math.random() * 100,
+                visibilityDuration: 40 + Math.random() * 40,
+                invisibilityDuration: 10 + Math.random() * 20
+            };
+
+            scene.add(electron);
+            electrons.push(electron);
+        }
+
+        function createPShapedOrbital(radius, color) {
+            const group = new THREE.Group();
+            const lobeHeight = radius * 1.2;
+            const lobeWidth = radius * 0.6;
+            
+            // Lóbulo superior
+            const topGeometry = new THREE.SphereGeometry(lobeWidth, 24, 24);
+            topGeometry.scale(1, 1.8, 1);
+            const material = new THREE.MeshPhongMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0.35,
+                wireframe: orbitalStyle === 'wireframe',
+                side: THREE.DoubleSide
+            });
+            const topLobe = new THREE.Mesh(topGeometry, material);
+            topLobe.position.y = lobeHeight * 0.5;
+            group.add(topLobe);
+            
+            // Lóbulo inferior
+            const bottomLobe = new THREE.Mesh(topGeometry, material.clone());
+            bottomLobe.position.y = -lobeHeight * 0.5;
+            group.add(bottomLobe);
+            
+            scene.add(group);
+            orbitals.push(group);
+        }
+
+        function createDoublePOrbital(radius, color) {
+            const group = new THREE.Group();
+            
+            // Criar dois conjuntos de lóbulos em ângulo
+            for (let angle of [0, Math.PI / 2]) {
+                const subGroup = new THREE.Group();
+                const lobeSize = radius * 0.8;
+                
+                for (let side of [-1, 1]) {
+                    const geometry = new THREE.SphereGeometry(lobeSize * 0.5, 20, 20);
+                    geometry.scale(1.5, 1, 1);
+                    
+                    const material = new THREE.MeshPhongMaterial({
+                        color: color,
+                        transparent: true,
+                        opacity: 0.3,
+                        wireframe: orbitalStyle === 'wireframe',
+                        side: THREE.DoubleSide
+                    });
+                    
+                    const lobe = new THREE.Mesh(geometry, material);
+                    lobe.position.x = side * radius * 0.7 * Math.cos(angle);
+                    lobe.position.z = side * radius * 0.7 * Math.sin(angle);
+                    subGroup.add(lobe);
+                }
+                
+                group.add(subGroup);
+            }
+            
+            scene.add(group);
+            orbitals.push(group);
+        }
+
+        function createCloverleafOrbital(radius, color) {
+            const group = new THREE.Group();
+            const angles = [0, Math.PI / 2, Math.PI, 3 * Math.PI / 2];
+            const lobeDistance = radius * 0.8;
+            const lobeSize = radius * 0.4;
+            
+            // Criar 4 lóbulos em formato de trevo
+            angles.forEach(angle => {
+                const geometry = new THREE.SphereGeometry(lobeSize, 20, 20);
+                geometry.scale(1.5, 1, 1);
+                
+                const material = new THREE.MeshPhongMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: 0.35,
+                    wireframe: orbitalStyle === 'wireframe',
+                    side: THREE.DoubleSide
+                });
+                
+                const lobe = new THREE.Mesh(geometry, material);
+                lobe.position.x = lobeDistance * Math.cos(angle);
+                lobe.position.z = lobeDistance * Math.sin(angle);
+                lobe.rotation.y = angle;
+                
+                group.add(lobe);
+            });
+            
+            scene.add(group);
+            orbitals.push(group);
+        }
+
+        function createPOrbital(n, count) {
+            const scale = n * 1.5;
+            const segments = isMobile ? 24 : 32;
+            
+            // Criar 3 orientações (px, py, pz)
+            const orientations = [
+                { axis: 'x', color: 0x64ffc8, rotation: [0, 0, Math.PI / 2] },
+                { axis: 'y', color: 0x64c8ff, rotation: [0, 0, 0] },
+                { axis: 'z', color: 0xc864ff, rotation: [Math.PI / 2, 0, 0] }
+            ];
+
+            orientations.forEach((orient, idx) => {
+                if (orbitalStyle === 'cloud') {
+                    const particleCount = isMobile ? 1000 : 2500;
+                    const positions = new Float32Array(particleCount * 3);
+                    const rScale = scale * 1.2;
+                    for (let i = 0; i < particleCount; i++) {
+                        const r = Math.abs(gaussianRandom(rScale, rScale * 0.4));
+                        const phi = Math.random() * Math.PI * 2;
+                        const cosTheta = (Math.random() * 2 - 1);
+                        const theta = Math.acos(Math.pow(cosTheta, 3));
+                        
+                        let px = r * Math.sin(theta) * Math.cos(phi);
+                        let py = r * Math.cos(theta);
+                        let pz = r * Math.sin(theta) * Math.sin(phi);
+
+                        // Rotacionar manualmente para o eixo correto
+                        if (orient.axis === 'x') {
+                            let temp = px; px = py; py = temp;
+                        } else if (orient.axis === 'z') {
+                            let temp = pz; pz = py; py = temp;
+                        }
+
+                        positions[i * 3] = px;
+                        positions[i * 3 + 1] = py;
+                        positions[i * 3 + 2] = pz;
+                    }
+                    const geometry = new THREE.BufferGeometry();
+                    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                    const material = new THREE.PointsMaterial({
+                        size: isMobile ? 0.08 : 0.06, color: orient.color,
+                        transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false
+                    });
+
+                    material.onBeforeCompile = function(shader) {
+                        shader.uniforms.time = { value: 0 };
+                        material.userData.shader = shader;
+                        shader.vertexShader = `varying vec3 vPos;\n` + shader.vertexShader;
+                        shader.vertexShader = shader.vertexShader.replace(`#include <begin_vertex>`, `#include <begin_vertex>\nvPos = position;`);
+                        shader.fragmentShader = `uniform float time;\nvarying vec3 vPos;\n` + shader.fragmentShader;
+                        shader.fragmentShader = shader.fragmentShader.replace(
+                            `#include <color_fragment>`,
+                            `#include <color_fragment>\n` +
+                            `float phase = sin(vPos.x * 20.0) + cos(vPos.y * 30.0) + sin(vPos.z * 40.0);\n` +
+                            `float twinkle = (sin(time * 15.0 + phase * 10.0) + 1.0) * 0.5;\n` + 
+                            `diffuseColor.a *= (0.1 + 0.9 * twinkle);`
+                        );
+                    };
+                    const cloud = new THREE.Points(geometry, material);
+                    scene.add(cloud);
+                    orbitals.push(cloud);
+                } else {
+                    // Criar forma de halter
+                    const group = new THREE.Group();
+                    
+                    // Dois lóbulos
+                    for (let side of [-1, 1]) {
+                        const lobeGeometry = new THREE.SphereGeometry(scale * 0.8, segments, segments);
+                        lobeGeometry.scale(1, 1.5, 1);
+                        
+                        const material = new THREE.MeshPhongMaterial({
+                            color: orient.color,
+                            transparent: true,
+                            opacity: orbitalStyle === 'transparent' ? 0.2 : 0.35,
+                            wireframe: orbitalStyle === 'wireframe',
+                            side: THREE.DoubleSide
+                        });
+                        
+                        const lobe = new THREE.Mesh(lobeGeometry, material);
+                        lobe.position.y = side * scale * 1.2;
+                        group.add(lobe);
+                    }
+                    
+                    group.rotation.set(...orient.rotation);
+                    scene.add(group);
+                    orbitals.push(group);
+                }
+            });
+
+            // Elétrons distribuídos nos orbitais p
+            if (showElectrons && orbitalStyle !== 'cloud') {
+                const radius = scale * 1.8;
+                for (let i = 0; i < count; i++) {
+                    const orientIdx = i % 3;
+                    createElectronP(radius, orientIdx);
+                }
+            }
+        }
+
+        function createElectron(radius, index, total) {
+            const geometry = new THREE.SphereGeometry(0.15, 16, 16);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0x00ff88,
+                emissive: 0x00ff88,
+                emissiveIntensity: 0.5,
+                transparent: true,
+                opacity: 1
+            });
+            const electron = new THREE.Mesh(geometry, material);
+            
+            // Posição inicial aleatória na superfície da esfera
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            
+            electron.position.x = radius * Math.sin(phi) * Math.cos(theta);
+            electron.position.y = radius * Math.sin(phi) * Math.sin(theta);
+            electron.position.z = radius * Math.cos(phi);
+            
+            electron.userData = { 
+                radius, 
+                theta, 
+                phi, 
+                speed: 0.01 + Math.random() * 0.01,
+                visible: true,
+                visibilityTimer: Math.random() * 100,
+                visibilityDuration: 40 + Math.random() * 40,
+                invisibilityDuration: 10 + Math.random() * 20
+            };
+            
+            scene.add(electron);
+            electrons.push(electron);
+        }
+
+        function createElectronP(radius, orientation) {
+            const geometry = new THREE.SphereGeometry(0.15, 16, 16);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0x00ff88,
+                emissive: 0x00ff88,
+                emissiveIntensity: 0.5,
+                transparent: true,
+                opacity: 1
+            });
+            const electron = new THREE.Mesh(geometry, material);
+            
+            // Posicionar em órbitas tipo halter
+            const angle = Math.random() * Math.PI * 2;
+            const side = Math.random() > 0.5 ? 1 : -1;
+            
+            if (orientation === 0) { // px
+                electron.position.x = side * radius * 0.7;
+                electron.position.y = Math.cos(angle) * radius * 0.25;
+                electron.position.z = Math.sin(angle) * radius * 0.25;
+            } else if (orientation === 1) { // py
+                electron.position.y = side * radius * 0.7;
+                electron.position.x = Math.cos(angle) * radius * 0.25;
+                electron.position.z = Math.sin(angle) * radius * 0.25;
+            } else { // pz
+                electron.position.z = side * radius * 0.7;
+                electron.position.x = Math.cos(angle) * radius * 0.25;
+                electron.position.y = Math.sin(angle) * radius * 0.25;
+            }
+            
+            electron.userData = { 
+                orientation, 
+                angle, 
+                radius, 
+                speed: 0.02,
+                visible: true,
+                visibilityTimer: Math.random() * 100,
+                visibilityDuration: 40 + Math.random() * 40,
+                invisibilityDuration: 10 + Math.random() * 20
+            };
+            
+            scene.add(electron);
+            electrons.push(electron);
+        }
+
+        function disposeObject(obj) {
+            if (!obj) return;
+            if (obj.children && obj.children.length > 0) {
+                // Clone array because children may be modified during iteration
+                [...obj.children].forEach(child => disposeObject(child));
+            }
+            if (obj.geometry) obj.geometry.dispose();
+            if (obj.material) {
+                if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+                else obj.material.dispose();
+            }
+        }
+
+        function clearAtom() {
+            // Remover orbitais (incluindo Groups com filhos)
+            orbitals.forEach(orbital => {
+                disposeObject(orbital);
+                scene.remove(orbital);
+            });
+            orbitals = [];
+
+            // Remover elétrons
+            electrons.forEach(electron => {
+                disposeObject(electron);
+                scene.remove(electron);
+            });
+            electrons = [];
+
+            // Remover núcleo
+            if (nucleus) {
+                disposeObject(nucleus);
+                scene.remove(nucleus);
+                nucleus = null;
+            }
+
+            // Remover fótons
+            photons.forEach(photon => {
+                disposeObject(photon);
+                scene.remove(photon);
+            });
+            photons = [];
+
+            // Remover ondas de energia
+            energyWaves.forEach(wave => {
+                disposeObject(wave);
+                scene.remove(wave);
+            });
+            energyWaves = [];
+        }
+
+        function createAtom(atomSymbol) {
+            clearAtom();
+            
+            const atom = atomicData[atomSymbol];
+            if (!atom) return;
+
+            // Criar núcleo
+            createNucleus();
+
+            // Criar orbitais
+            atom.orbitals.forEach(orb => {
+                if (orb.type === 's') {
+                    createSOrbital(orb.n, orb.count);
+                } else if (orb.type === 'p') {
+                    createPOrbital(orb.n, orb.count);
+                }
+            });
+
+            // Atualizar UI
+            updateAtomInfo(atom);
+        }
+
+        function updateAtomInfo(atom) {
+            document.getElementById('atomName').textContent = atom.name + ' (' + currentAtom + ')';
+            document.getElementById('protons').textContent = atom.protons;
+            document.getElementById('electrons').textContent = atom.electrons;
+            document.getElementById('config').textContent = atom.config;
+            
+            // Atualizar display de energia
+            updateEnergyDisplay(atom);
+            
+            // Atualizar dica quântica
+            const quantumInfo = document.getElementById('quantum-info');
+            if (quantumInfo) {
+                if (currentMode === 'quantum') {
+                    quantumInfo.innerHTML = '<br><strong>⚛️ Efeito Quântico Ativo:</strong> Os elétrons desaparecem e reaparecem em posições diferentes, simulando o comportamento probabilístico da mecânica quântica (tunelamento quântico e dualidade onda-partícula).';
+                } else {
+                    quantumInfo.innerHTML = '';
+                }
+            }
+        }
+
+        function updateEnergyDisplay(atom) {
+            // Energias do último orbital ocupado (valência)
+            const shellEnergies = {
+                H:  { key: '1s', shell: 'K', n: 1, energy: -13.6 }
+            };
+            const info = shellEnergies[currentAtom] || { key: '1s', shell: 'K', n: 1, energy: -13.6 };
+
+            if (currentMode === 'quantum') {
+                const displayValue = document.getElementById('energyDisplayValue');
+                const levelInfo = document.getElementById('energyLevelInfo');
+                
+                if (displayValue) displayValue.textContent = info.energy.toFixed(1);
+                if (levelInfo) levelInfo.textContent = `Nível: ${info.key} (n=${info.n})`;
+            } else if (currentMode === 'bohr') {
+                const displayValue = document.getElementById('energyDisplayValueBohr');
+                const levelInfo = document.getElementById('energyLevelInfoBohr');
+                
+                if (displayValue) displayValue.textContent = info.energy.toFixed(1);
+                if (levelInfo) levelInfo.textContent = `Camada ${info.shell} (n=${info.n})`;
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Rotação automática
+            if (isRotating && !isDragging) {
+                rotation.y += 0.003;
+            }
+
+            // Aplicar rotação
+            scene.rotation.x = rotation.x;
+            scene.rotation.y = rotation.y;
+
+            // Atualizar tempo nos shaders da nuvem para efeito de piscar (twinkle)
+            orbitals.forEach(orb => {
+                if (orb.isPoints && orb.material && orb.material.userData && orb.material.userData.shader) {
+                    orb.material.userData.shader.uniforms.time.value = performance.now() * 0.001;
+                }
+            });
+
+            // Animar elétrons
+            electrons.forEach(electron => {
+                const data = electron.userData;
+                
+                // Efeito de tunelamento quântico para TODOS os átomos no modo quântico
+                if (currentMode === 'quantum') {
+                    data.visibilityTimer++;
+                    
+                    if (data.visible) {
+                        // Elétron visível
+                        if (data.visibilityTimer >= data.visibilityDuration) {
+                            // Começar a desaparecer
+                            data.visible = false;
+                            data.visibilityTimer = 0;
+                            
+                            // Efeito de fade out
+                            let fadeSteps = 0;
+                            const fadeInterval = setInterval(() => {
+                                fadeSteps++;
+                                electron.material.opacity = 1 - (fadeSteps / 10);
+                                if (fadeSteps >= 10) {
+                                    clearInterval(fadeInterval);
+                                    electron.material.opacity = 0;
+                                    electron.visible = false;
+                                }
+                            }, 20);
+                        }
+                    } else {
+                        // Elétron invisível
+                        if (data.visibilityTimer >= data.invisibilityDuration) {
+                            // Começar a aparecer
+                            data.visible = true;
+                            data.visibilityTimer = 0;
+                            data.visibilityDuration = 40 + Math.random() * 40;
+                            data.invisibilityDuration = 10 + Math.random() * 20;
+                            
+                            // Reposicionar em local aleatório (tunelamento)
+                            if (data.theta !== undefined) {
+                                // Orbital s
+                                data.theta = Math.random() * Math.PI * 2;
+                                data.phi = Math.acos(2 * Math.random() - 1);
+                            } else if (data.type === 'lobe') {
+                                // Orbital lobe — pode tunelar para o outro lóbulo
+                                data.side = Math.random() > 0.5 ? 1 : -1;
+                                data.angle = Math.random() * Math.PI * 2;
+                            } else if (data.orientation !== undefined) {
+                                // Orbital p legado
+                                data.angle = Math.random() * Math.PI * 2;
+                            }
+                            
+                            electron.visible = true;
+                            
+                            // Efeito de fade in
+                            let fadeSteps = 0;
+                            const fadeInterval = setInterval(() => {
+                                fadeSteps++;
+                                electron.material.opacity = fadeSteps / 10;
+                                if (fadeSteps >= 10) {
+                                    clearInterval(fadeInterval);
+                                    electron.material.opacity = 1;
+                                }
+                            }, 20);
+                        }
+                    }
+                }
+                
+                // Movimento contínuo (mesmo quando invisível, para manter a física)
+                if (data.theta !== undefined) {
+                    // Orbital s — movimento na superfície esférica (levemente para dentro)
+                    data.theta += data.speed;
+                    data.phi += data.speed * 0.5;
+                    const r = data.radius * 0.9; 
+                    electron.position.x = r * Math.sin(data.phi) * Math.cos(data.theta);
+                    electron.position.y = r * Math.sin(data.phi) * Math.sin(data.theta);
+                    electron.position.z = r * Math.cos(data.phi);
+                } else if (data.type === 'lobe') {
+                    // Orbital lobe (p ou d) — movimento volumétrico dentro do lóbulo
+                    data.angle += data.speed;
+                    const r = data.lobeRadius * 0.45;
+                    const c1 = Math.cos(data.angle) * r;
+                    const s1 = Math.sin(data.angle) * r;
+                    const c2 = Math.cos(data.angle * 1.3) * r * 0.5;
+                    
+                    if (data.axis === 'px') {
+                        electron.position.set(data.side * data.lobeDist + c1 * 0.7, s1, c2);
+                    } else if (data.axis === 'py') {
+                        electron.position.set(c1, data.side * data.lobeDist + s1 * 0.7, c2);
+                    } else { // pz
+                        electron.position.set(c1, c2, data.side * data.lobeDist + s1 * 0.7);
+                    }
+                } else if (data.orientation !== undefined) {
+                    // Orbital p legado — centralizado
+                    data.angle += data.speed;
+                    const side = Math.sin(data.angle * 2) > 0 ? 1 : -1;
+                    const r = data.radius;
+                    if (data.orientation === 0) {
+                        electron.position.x = side * r * 0.7;
+                        electron.position.y = Math.cos(data.angle) * r * 0.25;
+                        electron.position.z = Math.sin(data.angle) * r * 0.25;
+                    } else if (data.orientation === 1) {
+                        electron.position.y = side * r * 0.7;
+                        electron.position.x = Math.cos(data.angle) * r * 0.25;
+                        electron.position.z = Math.sin(data.angle) * r * 0.25;
+                    } else {
+                        electron.position.z = side * r * 0.7;
+                        electron.position.x = Math.cos(data.angle) * r * 0.25;
+                        electron.position.y = Math.sin(data.angle) * r * 0.25;
+                    }
+                }
+            });
+
+            // Mantém núcleo estático (sem pulsar escala)
+            if (nucleus) {
+                const time = Date.now() * 0.002;
+                
+                // Apenas oscila levemente a opacidade do brilho sem alterar escala física
+                if (nucleusGlow) {
+                    nucleusGlow.material.opacity = 0.1 + Math.sin(time * 2) * 0.1;
+                }
+                
+                // Emissão periódica de energia (menos frequente em mobile)
+                if (showEnergyWaves && Math.random() < (isMobile ? 0.005 : 0.01)) {
+                    createEnergyWave();
+                }
+            }
+
+            // Animar fótons
+            for (let i = photons.length - 1; i >= 0; i--) {
+                const photon = photons[i];
+                const data = photon.userData;
+                
+                photon.position.add(data.direction.clone().multiplyScalar(data.speed));
+                data.life--;
+                
+                // Fade out via escala + opacidade do glow
+                const ratio = data.life / data.maxLife;
+                photon.scale.setScalar(0.5 + ratio * 0.5);
+                if (photon.children[0]) {
+                    photon.children[0].material.opacity = ratio * 0.7;
+                }
+                
+                // Remover quando expirar
+                if (data.life <= 0) {
+                    disposeObject(photon);
+                    scene.remove(photon);
+                    photons.splice(i, 1);
+                }
+            }
+
+            // Animar ondas de energia
+            for (let i = energyWaves.length - 1; i >= 0; i--) {
+                const wave = energyWaves[i];
+                const data = wave.userData;
+                
+                data.scale += data.speed;
+                wave.scale.set(data.scale, data.scale, data.scale);
+                
+                // Fade out
+                wave.material.opacity = 0.6 * (1 - data.scale / data.maxScale);
+                
+                // Remover quando atingir tamanho máximo
+                if (data.scale >= data.maxScale) {
+                    wave.geometry.dispose();
+                    wave.material.dispose();
+                    scene.remove(wave);
+                    energyWaves.splice(i, 1);
+                }
+            }
+
+            // Animar nuvem eletrônica (pulsar e formigamento com ondas harmônicas)
+            if (orbitalStyle === 'cloud') {
+                const time = Date.now() * 0.0015;
+                const isWhite = document.body.classList.contains('bg-white');
+                orbitals.forEach(orb => {
+                    const points = (orb instanceof THREE.Points) ? [orb] : (orb instanceof THREE.Group ? orb.children.filter(c => c instanceof THREE.Points) : []);
+                    
+                    points.forEach(p => {
+                        // Pulsação suave de opacidade e tamanho (tamanho maior para partículas soft)
+                        p.material.opacity = isWhite ? 0.75 + Math.sin(time) * 0.1 : 0.45 + Math.sin(time) * 0.15;
+                        p.material.size = (isMobile ? 0.35 : 0.25) * (1 + Math.sin(time * 1.2) * 0.12);
+                        
+                        // Efeito de Formigamento (Jitter) e Ondulação Harmônica (Quantum Wave)
+                        const attr = p.geometry.attributes.position;
+                        const baseAttr = p.geometry.attributes.basePosition;
+                        if (attr && baseAttr) {
+                            const arr = attr.array;
+                            const baseArr = baseAttr.array;
+                            // Otimização: processar saltando pontos em mobile
+                            const step = isMobile ? 12 : 6;
+                            for (let i = 0; i < arr.length; i += step) {
+                                const x = baseArr[i];
+                                const y = baseArr[i+1];
+                                const z = baseArr[i+2];
+                                
+                                // Distância radial até o núcleo (0, 0, 0)
+                                const d = Math.sqrt(x*x + y*y + z*z);
+                                
+                                // Ondulação Harmônica Radial Quântica (propagando do centro)
+                                const waveSpeed = time * 3.5;
+                                const wave = Math.sin(waveSpeed - d * 0.8) * 0.08;
+                                
+                                // Jitter aleatório convencional
+                                const jitter = (Math.random() - 0.5) * 0.06;
+                                
+                                // Direção radial unitária
+                                const nx = x / (d + 0.0001);
+                                const ny = y / (d + 0.0001);
+                                const nz = z / (d + 0.0001);
+                                
+                                // Aplicar propagação da onda radial + tremor
+                                arr[i] = x + nx * wave + jitter;
+                                arr[i+1] = y + ny * wave + jitter;
+                                arr[i+2] = z + nz * wave + jitter;
+                            }
+                            attr.needsUpdate = true;
+                        }
+                    });
+                });
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            if (!container || !renderer || !camera) return;
+            
+            const rect = container.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            
+            if (width === 0 || height === 0) return; // Evitar divisão por zero
+            
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(pixelRatio);
+            
+            // Reposicionar canvas
+            if (renderer.domElement) {
+                renderer.domElement.style.position = 'absolute';
+                renderer.domElement.style.top = '0';
+                renderer.domElement.style.left = '0';
+            }
+        }
+
+        function handleStartupParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            if (mode === 'spectrum') {
+                const btn = document.querySelector('.mode-btn[data-mode="spectrum"]');
+                if(btn) changeMode('spectrum', btn);
+            } else if (mode === 'bohr') {
+                const btn = document.querySelector('.mode-btn[data-mode="bohr"]');
+                if(btn) changeMode('bohr', btn);
+            } else if (mode === 'quantum') {
+                const btn = document.querySelector('.mode-btn[data-mode="quantum"]');
+                if(btn) changeMode('quantum', btn);
+                const view = urlParams.get('view');
+                if (view) {
+                    setTimeout(() => {
+                        if (typeof changeOrbitalStyle === 'function') changeOrbitalStyle(view);
+                    }, 100);
+                }
+            }
+        }
+
+        // Inicializar quando o DOM estiver pronto
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                init();
+                handleStartupParams();
+            });
+        } else {
+            init();
+            handleStartupParams();
+        }
+    </script>
+            

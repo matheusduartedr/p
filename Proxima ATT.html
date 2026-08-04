@@ -662,7 +662,8 @@ input[type=range]::-webkit-slider-thumb {
             <button class="btn" id="btn-rot" onclick="toggleRotate()">⟳ Rotação automática</button>
             <button class="btn" onclick="resetCamera()">⌖ Resetar câmera</button>
             <button class="btn" onclick="toggleAxes()">⊕ Eixos XYZ</button>
-            <button class="btn" onclick="triggerRender()">↺ Recalcular</button>
+            <button class="btn" onclick="triggerRender()">↻ Recalcular</button>
+            <button class="btn" id="btn-viewmode" onclick="toggleViewMode()">☁️ Nuvem de pontos</button>
         </div>
 
         <!-- Nódulos -->
@@ -847,6 +848,7 @@ let nucleusMesh=null;
 let autoRotate=false;
 let currentColor={c1:'#6496ff', c2:'#64c8ff'};
 let currentN=1, currentL=0, currentM=0;
+let viewMode='wireframe'; // 'wireframe' | 'cloud'
 let isDragging=false, prevMouse={x:0,y:0};
 let cameraTheta=0.5, cameraPhi=1.2, cameraR=6;
 
@@ -913,13 +915,6 @@ function initThree(){
     (function loop(){
         requestAnimationFrame(loop);
         if(autoRotate){cameraTheta+=0.004;updateCam();}
-
-        // Pulsar glow externo do núcleo
-        if(nucleusMesh && nucleusMesh.children[1]){
-            const p=0.18+0.05*Math.sin(Date.now()*0.002);
-            nucleusMesh.children[1].material.opacity=p;
-        }
-
         renderer.render(scene,camera);
     })();
 }
@@ -934,7 +929,7 @@ function updateCam(){
     camera.lookAt(0,0,0);
 }
 
-// ★ NÚCLEO — cópia exata de createNucleus() do PROTON.html
+// ★ NÚcleo — esfera laranja simples, igual aos outros modos
 function createNucleus(){
     if(nucleusMesh){ scene.remove(nucleusMesh); }
 
@@ -945,21 +940,6 @@ function createNucleus(){
         emissiveIntensity:0.5, shininess:100
     });
     nucleusMesh=new THREE.Mesh(geo,mat);
-
-    // Glow principal — nucleusRadius * 1.7, opacity 0.3 (exato PROTON)
-    const glowGeo=new THREE.SphereGeometry(nucleusRadius*1.7,32,32);
-    const glowMat=new THREE.MeshBasicMaterial({
-        color:0xff4500, transparent:true, opacity:0.3, depthWrite:false
-    });
-    nucleusMesh.add(new THREE.Mesh(glowGeo,glowMat));
-
-    // Glow externo — nucleusRadius * 2.7, opacity 0.2, BackSide (exato PROTON)
-    const outerGeo=new THREE.SphereGeometry(nucleusRadius*2.7,32,32);
-    const outerMat=new THREE.MeshBasicMaterial({
-        color:0xff6600, transparent:true, opacity:0.2, side:THREE.BackSide
-    });
-    nucleusMesh.add(new THREE.Mesh(outerGeo,outerMat));
-
     scene.add(nucleusMesh);
 }
 
@@ -1025,30 +1005,110 @@ function triggerRender(){
     ctimer=setTimeout(doRender,60);
 }
 
+function toggleViewMode(){
+    viewMode = viewMode === 'wireframe' ? 'cloud' : 'wireframe';
+    const btn = document.getElementById('btn-viewmode');
+    if(btn){
+        btn.textContent = viewMode === 'cloud' ? '🔧 Wireframe' : '☁️ Nuvem de pontos';
+        btn.style.background = viewMode === 'cloud' ? 'rgba(0,204,255,0.35)' : '';
+        btn.style.borderColor = viewMode === 'cloud' ? '#00ccff' : '';
+        btn.style.boxShadow = viewMode === 'cloud' ? '0 0 18px rgba(0,204,255,0.55)' : '';
+    }
+    triggerRender();
+}
+
+function buildCloudPoints(n, l, m, scale){
+    // Rejection sampling usando |psi|^2 — exatamente igual ao modo nuvem do PROTON
+    const N_POINTS = 18000;
+    const box = scale * 2.2;
+    const positions = new Float32Array(N_POINTS * 3);
+    const colors    = new Float32Array(N_POINTS * 3);
+
+    // Calcular psi2 max para normalizar rejection
+    let psiMax = 0;
+    for(let k=0; k<800; k++){
+        const tx = (Math.random()-0.5)*box*2;
+        const ty = (Math.random()-0.5)*box*2;
+        const tz = (Math.random()-0.5)*box*2;
+        const v = psi2(n, l, m, tx, ty, tz);
+        if(v > psiMax) psiMax = v;
+    }
+    if(psiMax < 1e-30) psiMax = 1e-30;
+
+    let accepted = 0;
+    let tries = 0;
+    const maxTries = N_POINTS * 80;
+    while(accepted < N_POINTS && tries < maxTries){
+        tries++;
+        const x = (Math.random()-0.5)*box*2;
+        const y = (Math.random()-0.5)*box*2;
+        const z = (Math.random()-0.5)*box*2;
+        const prob = psi2(n, l, m, x, y, z) / psiMax;
+        if(Math.random() > prob) continue;
+
+        positions[accepted*3]   = x;
+        positions[accepted*3+1] = y;
+        positions[accepted*3+2] = z;
+
+        // Cor baseada na distância ao núcleo (decay quente no centro)
+        const d = Math.sqrt(x*x + y*y + z*z);
+        const decayR = Math.max(1, scale * 0.6);
+        const f = Math.exp(-d / decayR);
+
+        // Gradiente: branco-quente no centro -> azul-ciano na borda
+        const c = new THREE.Color(currentColor.c1);
+        colors[accepted*3]   = c.r * f + (1-f) * c.r * 0.3;
+        colors[accepted*3+1] = c.g * f + (1-f) * c.g * 0.3;
+        colors[accepted*3+2] = c.b * f + (1-f) * c.b * 0.3;
+
+        accepted++;
+    }
+
+    const usedPositions = positions.slice(0, accepted*3);
+    const usedColors    = colors.slice(0, accepted*3);
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position',     new THREE.BufferAttribute(usedPositions, 3));
+    geo.setAttribute('color',        new THREE.BufferAttribute(usedColors,    3));
+    geo.setAttribute('basePosition', new THREE.BufferAttribute(new Float32Array(usedPositions), 3));
+    return geo;
+}
+
 function doRender(){
     if(!scene) return;
-    if(orbitalMesh){ scene.remove(orbitalMesh); if(orbitalMesh.geometry) orbitalMesh.geometry.dispose(); }
+    if(orbitalMesh){ scene.remove(orbitalMesh); if(orbitalMesh.geometry) orbitalMesh.geometry.dispose(); if(orbitalMesh.material) orbitalMesh.material.dispose(); }
 
     const n=currentN, l=currentL, m=currentM;
+    const scale = Math.max(1.8, n*n*0.28+0.9);
 
-    // ★ SphereGeometry deformada — malha quadriculada idêntica ao PROTON
-    const { geo, scale } = buildOrbitalGeometry(n, l, m);
-
-    // Auto-ajustar câmera ao tamanho do orbital
     cameraR = scale * 2.8 + 1.5;
     updateCam();
 
-    // ★ Material IDÊNTICO ao PROTON createSOrbital wireframe
-    const mat=new THREE.MeshPhongMaterial({
-        color: new THREE.Color(currentColor.c1),
-        transparent: true,
-        opacity: 0.3,
-        wireframe: true,
-        side: THREE.DoubleSide
-    });
-    orbitalMesh = new THREE.Mesh(geo, mat);
-    scene.add(orbitalMesh);
+    if(viewMode === 'cloud'){
+        const geo = buildCloudPoints(n, l, m, scale);
+        const mat = new THREE.PointsMaterial({
+            size: 0.12,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.75,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+        orbitalMesh = new THREE.Points(geo, mat);
+    } else {
+        // Wireframe deformado original
+        const { geo } = buildOrbitalGeometry(n, l, m);
+        const mat = new THREE.MeshPhongMaterial({
+            color: new THREE.Color(currentColor.c1),
+            transparent: true,
+            opacity: 0.3,
+            wireframe: true,
+            side: THREE.DoubleSide
+        });
+        orbitalMesh = new THREE.Mesh(geo, mat);
+    }
 
+    scene.add(orbitalMesh);
     document.getElementById('loading').style.display='none';
     updatePanel();
 }

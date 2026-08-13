@@ -1,1312 +1,1708 @@
+4
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QUANTUM HUB — Plataforma de Física e Química Quântica</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#0a0a1a;color:#fff;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
-:root{--cyan:#00ccff;--green:#00ff88;--red:#ff4500;--bg:#0a0a1a;--card:rgba(255,255,255,0.08);--border:rgba(0,204,255,0.3);}
-/* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(10,10,26,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:60px;}
-.nav-logo{font-size:1.4rem;font-weight:700;color:var(--cyan);text-shadow:0 0 20px rgba(0,204,255,0.5);letter-spacing:2px;cursor:pointer;}
-.nav-links{display:flex;gap:4px;}
-.nav-btn{background:none;border:1px solid transparent;color:rgba(255,255,255,0.7);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:0.85rem;transition:all 0.3s;white-space:nowrap;}
-.nav-btn:hover,.nav-btn.active{color:#fff;border-color:var(--border);background:rgba(0,204,255,0.1);box-shadow:0 0 12px rgba(0,204,255,0.2);}
-@media(max-width:600px){.nav-btn{padding:6px 10px;font-size:0.75rem;}.nav-logo{font-size:1.1rem;}}
-/* SECTIONS */
-.section{display:none;min-height:100vh;padding:80px 20px 40px;}
-.section.active{display:block;}
-.container{max-width:1200px;margin:0 auto;}
-/* HOME */
-#home{position:relative;overflow:hidden;}
-#particles-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
-.home-content{position:relative;z-index:1;text-align:center;padding-top:80px;}
-.home-title{font-size:clamp(2.5rem,8vw,5rem);font-weight:900;background:linear-gradient(135deg,#00ccff,#00ff88,#ff4500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;letter-spacing:-1px;}
-.home-sub{font-size:clamp(0.9rem,2vw,1.2rem);color:rgba(255,255,255,0.6);max-width:600px;margin:0 auto 50px;line-height:1.7;}
-.modules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:20px;}
-.module-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:30px;cursor:pointer;transition:all 0.4s;text-align:left;position:relative;overflow:hidden;}
-.module-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--green));transform:scaleX(0);transition:transform 0.4s;transform-origin:left;}
-.module-card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(0,204,255,0.15);border-color:rgba(0,204,255,0.6);}
-.module-card:hover::before{transform:scaleX(1);}
-.card-icon{font-size:2.5rem;margin-bottom:12px;display:block;}
-.card-title{font-size:1.2rem;font-weight:700;color:var(--cyan);margin-bottom:8px;}
-.card-desc{font-size:0.88rem;color:rgba(255,255,255,0.6);line-height:1.6;}
-.card-tag{display:inline-block;background:rgba(0,204,255,0.15);border:1px solid var(--border);color:var(--cyan);font-size:0.7rem;padding:3px 10px;border-radius:20px;margin-top:12px;}
-/* SECTION HEADERS */
-.sec-header{text-align:center;margin-bottom:40px;padding-top:20px;}
-.sec-title{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;color:var(--cyan);text-shadow:0 0 30px rgba(0,204,255,0.4);margin-bottom:10px;}
-.sec-sub{color:rgba(255,255,255,0.5);font-size:0.95rem;}
-/* PERIODIC TABLE */
-.pt-controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:24px;}
-.pt-btn{background:rgba(255,255,255,0.08);border:1px solid var(--border);color:#fff;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:0.8rem;transition:all 0.3s;}
-.pt-btn:hover,.pt-btn.active{background:rgba(0,204,255,0.2);border-color:var(--cyan);box-shadow:0 0 12px rgba(0,204,255,0.3);}
-.pt-grid{display:grid;grid-template-columns:repeat(18,1fr);gap:3px;overflow-x:auto;min-width:900px;}
-.pt-wrapper{overflow-x:auto;padding-bottom:10px;}
-.el-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:4px 2px;cursor:pointer;text-align:center;transition:all 0.2s;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.el-btn:hover{transform:scale(1.15);z-index:10;position:relative;box-shadow:0 0 20px rgba(0,204,255,0.5);}
-.el-btn.active-el{border-color:var(--cyan);box-shadow:0 0 16px rgba(0,204,255,0.6);}
-.el-num{font-size:0.5rem;color:rgba(255,255,255,0.5);line-height:1;}
-.el-sym{font-size:0.95rem;font-weight:700;color:#fff;line-height:1.1;}
-.el-name{font-size:0.42rem;color:rgba(255,255,255,0.6);line-height:1;}
-.el-metal-a{background:rgba(255,107,107,0.25);border-color:rgba(255,107,107,0.4);}
-.el-metal-t{background:rgba(255,180,80,0.2);border-color:rgba(255,180,80,0.4);}
-.el-metal-b{background:rgba(255,220,100,0.15);border-color:rgba(255,220,100,0.3);}
-.el-nomet{background:rgba(100,255,200,0.15);border-color:rgba(100,255,200,0.3);}
-.el-nob{background:rgba(150,100,255,0.2);border-color:rgba(150,100,255,0.4);}
-.el-hal{background:rgba(80,200,255,0.15);border-color:rgba(80,200,255,0.3);}
-.el-lan{background:rgba(255,150,220,0.2);border-color:rgba(255,150,220,0.3);}
-.el-act{background:rgba(200,150,255,0.2);border-color:rgba(200,150,255,0.3);}
-.el-met{background:rgba(200,200,200,0.1);border-color:rgba(200,200,200,0.3);}
-.el-hidden{visibility:hidden;}
-/* DETAIL PANEL */
-.el-detail{background:rgba(0,30,60,0.9);border:1px solid var(--border);border-radius:16px;padding:24px;margin-top:20px;display:none;backdrop-filter:blur(8px);}
-.el-detail.show{display:block;animation:fadeIn 0.3s ease;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.el-detail-header{display:flex;align-items:center;gap:20px;margin-bottom:16px;}
-.el-big-sym{font-size:3rem;font-weight:900;color:var(--cyan);text-shadow:0 0 20px rgba(0,204,255,0.5);}
-.el-detail-info h3{font-size:1.4rem;color:#fff;}
-.el-detail-info p{color:rgba(255,255,255,0.6);font-size:0.9rem;}
-.el-props{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px;}
-.el-prop{background:rgba(0,204,255,0.08);border:1px solid rgba(0,204,255,0.2);border-radius:10px;padding:10px 14px;}
-.el-prop-label{font-size:0.7rem;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
-.el-prop-val{font-size:1rem;font-weight:600;color:#fff;}
-/* LEGEND */
-.pt-legend{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:20px;}
-.leg{display:flex;align-items:center;gap:6px;font-size:0.75rem;color:rgba(255,255,255,0.7);}
-.leg-dot{width:12px;height:12px;border-radius:3px;}
 
-/* ══════════════════════════════════════════════════
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QUANTUM HUB — Plataforma de Física e Química Quântica</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: #0a0a1a;
+      color: #fff;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    :root {
+      --cyan: #00ccff;
+      --green: #00ff88;
+      --red: #ff4500;
+      --bg: #0a0a1a;
+      --card: rgba(255, 255, 255, 0.08);
+      --border: rgba(0, 204, 255, 0.3);
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+      background: rgba(10, 10, 26, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: clamp(6px, 1.5vw, 12px) clamp(10px, 3vw, 24px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 60px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .nav-logo {
+      font-size: clamp(1rem, 3.5vw, 1.4rem);
+      font-weight: 700;
+      color: var(--cyan);
+      text-shadow: 0 0 20px rgba(0, 204, 255, 0.5);
+      letter-spacing: 1px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: clamp(4px, 1vw, 8px);
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid transparent;
+      color: rgba(255, 255, 255, 0.7);
+      padding: clamp(6px, 1.5vw, 8px) clamp(10px, 2vw, 16px);
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: clamp(0.72rem, 1.8vw, 0.85rem);
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover,
+    .nav-btn.active {
+      color: #fff;
+      border-color: var(--border);
+      background: rgba(0, 204, 255, 0.1);
+      box-shadow: 0 0 12px rgba(0, 204, 255, 0.2);
+    }
+
+    /* SECTIONS */
+    .section {
+      display: none;
+      min-height: 100vh;
+      padding: clamp(75px, 10vh, 90px) clamp(10px, 3vw, 20px) clamp(20px, 4vh, 40px);
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* HOME */
+    #home {
+      position: relative;
+      overflow: hidden;
+    }
+
+    #particles-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .home-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding-top: clamp(40px, 8vh, 80px);
+    }
+
+    .home-title {
+      font-size: clamp(2rem, 7vw, 5rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #00ccff, #00ff88, #ff4500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+    }
+
+    .home-sub {
+      font-size: clamp(0.85rem, 2vw, 1.2rem);
+      color: rgba(255, 255, 255, 0.6);
+      max-width: 600px;
+      margin: 0 auto clamp(30px, 5vh, 50px);
+      line-height: 1.7;
+    }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(clamp(240px, 100%, 300px), 1fr));
+      gap: clamp(12px, 3vw, 20px);
+      margin-top: 20px;
+    }
+
+    .module-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: clamp(20px, 4vw, 30px);
+      cursor: pointer;
+      transition: all 0.4s;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .module-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+      transform: scaleX(0);
+      transition: transform 0.4s;
+      transform-origin: left;
+    }
+
+    .module-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0, 204, 255, 0.15);
+      border-color: rgba(0, 204, 255, 0.6);
+    }
+
+    .module-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card-icon {
+      font-size: clamp(2rem, 5vw, 2.5rem);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .card-title {
+      font-size: clamp(1.05rem, 2.5vw, 1.2rem);
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 8px;
+    }
+
+    .card-desc {
+      font-size: clamp(0.8rem, 1.8vw, 0.88rem);
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.6;
+    }
+
+    .card-tag {
+      display: inline-block;
+      background: rgba(0, 204, 255, 0.15);
+      border: 1px solid var(--border);
+      color: var(--cyan);
+      font-size: 0.7rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-top: 12px;
+    }
+
+    /* SECTION HEADERS */
+    .sec-header {
+      text-align: center;
+      margin-bottom: clamp(24px, 4vh, 40px);
+      padding-top: 10px;
+    }
+
+    .sec-title {
+      font-size: clamp(1.5rem, 4vw, 2.8rem);
+      font-weight: 800;
+      color: var(--cyan);
+      text-shadow: 0 0 30px rgba(0, 204, 255, 0.4);
+      margin-bottom: 8px;
+    }
+
+    .sec-sub {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: clamp(0.82rem, 1.8vw, 0.95rem);
+    }
+
+    /* ══════════════════════════════════════════════════
    SIMULADOR — Abas de Modo de Visualização
  ══════════════════════════════════════════════════ */
-.sim-launch-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 36px;
-}
+    .sim-launch-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(20px, 4vh, 36px);
+      width: 100%;
+    }
 
-.sim-btn-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
+    .sim-btn-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+    }
 
-#btn-abrir-sim {
-  background: linear-gradient(135deg, rgba(0,204,255,0.25), rgba(0,120,200,0.2));
-  border: 2px solid var(--cyan);
-  color: #fff;
-  padding: 16px 40px;
-  border-radius: 30px;
-  font-size: 1.05rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.35s cubic-bezier(.4,0,.2,1);
-  letter-spacing: 0.04em;
-  box-shadow: 0 0 24px rgba(0,204,255,0.2);
-  position: relative;
-  overflow: hidden;
-}
-#btn-abrir-sim::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -60%;
-  width: 40%;
-  height: 200%;
-  background: rgba(255,255,255,0.08);
-  transform: skewX(-20deg);
-  transition: left 0.5s ease;
-}
-#btn-abrir-sim:hover::before { left: 130%; }
-#btn-abrir-sim:hover {
-  background: linear-gradient(135deg, rgba(0,204,255,0.45), rgba(0,180,255,0.35));
-  box-shadow: 0 0 40px rgba(0,204,255,0.45), 0 8px 32px rgba(0,0,0,0.3);
-  transform: translateY(-3px) scale(1.03);
-}
-#btn-abrir-sim:active { transform: translateY(0) scale(0.99); }
+    #btn-abrir-sim {
+      background: linear-gradient(135deg, rgba(0, 204, 255, 0.25), rgba(0, 120, 200, 0.2));
+      border: 2px solid var(--cyan);
+      color: #fff;
+      padding: clamp(12px, 2.5vw, 16px) clamp(24px, 6vw, 40px);
+      border-radius: 30px;
+      font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.35s cubic-bezier(.4, 0, .2, 1);
+      letter-spacing: 0.04em;
+      box-shadow: 0 0 24px rgba(0, 204, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+      max-width: 100%;
+    }
 
-.sim-hint-text {
-  font-size: 0.8rem;
-  color: rgba(0,204,255,0.5);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  animation: hintPulse 2.5s ease-in-out infinite;
-}
-@keyframes hintPulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+    #btn-abrir-sim::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 40%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.08);
+      transform: skewX(-20deg);
+      transition: left 0.5s ease;
+    }
 
-/* Tabs container */
-.sim-tabs-section {
-  width: 100%;
-  max-width: 780px;
-  opacity: 0;
-  transform: translateY(30px);
-  pointer-events: none;
-  transition: opacity 0.5s cubic-bezier(.4,0,.2,1), transform 0.5s cubic-bezier(.4,0,.2,1);
-}
-.sim-tabs-section.visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: all;
-}
+    #btn-abrir-sim:hover::before {
+      left: 130%;
+    }
 
-.sim-tabs-label {
-  text-align: center;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(0,204,255,0.55);
-  margin-bottom: 18px;
-}
+    #btn-abrir-sim:hover {
+      background: linear-gradient(135deg, rgba(0, 204, 255, 0.45), rgba(0, 180, 255, 0.35));
+      box-shadow: 0 0 40px rgba(0, 204, 255, 0.45), 0 8px 32px rgba(0, 0, 0, 0.3);
+      transform: translateY(-3px) scale(1.03);
+    }
 
-.sim-tabs-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-}
-@media(max-width:600px){
-  .sim-tabs-grid { grid-template-columns: repeat(2, 1fr); }
-}
+    #btn-abrir-sim:active {
+      transform: translateY(0) scale(0.99);
+    }
 
-.sim-tab-card {
-  background: rgba(255,255,255,0.04);
-  border: 1.5px solid rgba(0,204,255,0.18);
-  border-radius: 18px;
-  padding: 22px 14px 18px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(.4,0,.2,1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(8px);
-}
-.sim-tab-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 17px;
-  background: linear-gradient(135deg, rgba(0,204,255,0.08), transparent);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.sim-tab-card:hover::after { opacity: 1; }
-.sim-tab-card:hover {
-  border-color: rgba(0,204,255,0.5);
-  transform: translateY(-5px);
-  box-shadow: 0 12px 36px rgba(0,204,255,0.18);
-}
-.sim-tab-card.selected {
-  border-color: var(--cyan);
-  background: rgba(0,204,255,0.12);
-  box-shadow: 0 0 30px rgba(0,204,255,0.3), inset 0 1px 0 rgba(0,204,255,0.2);
-  transform: translateY(-5px);
-}
-.sim-tab-card.selected::after { opacity: 1; }
+    .sim-hint-text {
+      font-size: 0.8rem;
+      color: rgba(0, 204, 255, 0.5);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      animation: hintPulse 2.5s ease-in-out infinite;
+    }
 
-.sim-tab-icon {
-  font-size: 2.2rem;
-  line-height: 1;
-  filter: drop-shadow(0 0 8px rgba(0,204,255,0.4));
-  transition: transform 0.3s;
-}
-.sim-tab-card:hover .sim-tab-icon,
-.sim-tab-card.selected .sim-tab-icon {
-  transform: scale(1.15) rotate(-5deg);
-}
+    @keyframes hintPulse {
 
-.sim-tab-name {
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.04em;
-}
-.sim-tab-desc {
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.45);
-  text-align: center;
-  line-height: 1.5;
-}
+      0%,
+      100% {
+        opacity: 0.5
+      }
 
-.sim-tab-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--cyan);
-  box-shadow: 0 0 8px var(--cyan);
-  opacity: 0;
-  transform: scale(0);
-  transition: all 0.3s;
-}
-.sim-tab-card.selected .sim-tab-badge {
-  opacity: 1;
-  transform: scale(1);
-}
+      50% {
+        opacity: 1
+      }
+    }
 
-/* Open CTA */
-.sim-open-cta {
-  margin-top: 22px;
-  display: flex;
-  justify-content: center;
-  opacity: 0;
-  transform: translateY(12px);
-  pointer-events: none;
-  transition: all 0.4s cubic-bezier(.4,0,.2,1) 0.15s;
-}
-.sim-open-cta.visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: all;
-}
+    /* Tabs container */
+    .sim-tabs-section {
+      width: 100%;
+      max-width: 780px;
+      opacity: 0;
+      transform: translateY(30px);
+      pointer-events: none;
+      transition: opacity 0.5s cubic-bezier(.4, 0, .2, 1), transform 0.5s cubic-bezier(.4, 0, .2, 1);
+    }
 
-#btn-launch-mode {
-  background: linear-gradient(135deg, #00ccff, #0088cc);
-  border: none;
-  color: #000;
-  font-weight: 800;
-  font-size: 0.95rem;
-  padding: 14px 38px;
-  border-radius: 28px;
-  cursor: pointer;
-  letter-spacing: 0.06em;
-  transition: all 0.3s cubic-bezier(.4,0,.2,1);
-  box-shadow: 0 6px 24px rgba(0,204,255,0.35);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-#btn-launch-mode:hover {
-  background: linear-gradient(135deg, #33ddff, #00aaee);
-  box-shadow: 0 10px 40px rgba(0,204,255,0.55);
-  transform: translateY(-3px) scale(1.04);
-}
-#btn-launch-mode:active { transform: scale(0.98); }
+    .sim-tabs-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
 
-.sim-selected-label {
-  font-size: 0.75rem;
-  color: rgba(0,204,255,0.6);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-top: 8px;
-  text-align: center;
-}
+    .sim-tabs-label {
+      text-align: center;
+      font-size: clamp(0.68rem, 1.8vw, 0.72rem);
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(0, 204, 255, 0.55);
+      margin-bottom: 18px;
+    }
 
-/* ══════════════════════════════════════════════════
-   ESPECTRO — Espectroscópio Científico (Importado de Atualização.html)
+    .sim-tabs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(clamp(130px, 30%, 200px), 1fr));
+      gap: clamp(8px, 2vw, 14px);
+      width: 100%;
+    }
+
+    .sim-tab-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1.5px solid rgba(0, 204, 255, 0.18);
+      border-radius: 18px;
+      padding: clamp(14px, 2.5vw, 22px) clamp(8px, 2vw, 14px);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(.4, 0, .2, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(6px, 1.5vw, 10px);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      min-width: 0;
+    }
+
+    .sim-tab-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 17px;
+      background: linear-gradient(135deg, rgba(0, 204, 255, 0.08), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .sim-tab-card:hover::after {
+      opacity: 1;
+    }
+
+    .sim-tab-card:hover {
+      border-color: rgba(0, 204, 255, 0.5);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 36px rgba(0, 204, 255, 0.18);
+    }
+
+    .sim-tab-card.selected {
+      border-color: var(--cyan);
+      background: rgba(0, 204, 255, 0.12);
+      box-shadow: 0 0 30px rgba(0, 204, 255, 0.3), inset 0 1px 0 rgba(0, 204, 255, 0.2);
+      transform: translateY(-5px);
+    }
+
+    .sim-tab-card.selected::after {
+      opacity: 1;
+    }
+
+    .sim-tab-icon {
+      font-size: clamp(1.8rem, 4vw, 2.2rem);
+      line-height: 1;
+      filter: drop-shadow(0 0 8px rgba(0, 204, 255, 0.4));
+      transition: transform 0.3s;
+    }
+
+    .sim-tab-card:hover .sim-tab-icon,
+    .sim-tab-card.selected .sim-tab-icon {
+      transform: scale(1.15) rotate(-5deg);
+    }
+
+    .sim-tab-name {
+      font-size: clamp(0.82rem, 2vw, 0.92rem);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.04em;
+      text-align: center;
+    }
+
+    .sim-tab-desc {
+      font-size: clamp(0.65rem, 1.5vw, 0.7rem);
+      color: rgba(255, 255, 255, 0.45);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .sim-tab-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+      opacity: 0;
+      transform: scale(0);
+      transition: all 0.3s;
+    }
+
+    .sim-tab-card.selected .sim-tab-badge {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Open CTA */
+    .sim-open-cta {
+      margin-top: 22px;
+      display: flex;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(.4, 0, .2, 1) 0.15s;
+      width: 100%;
+    }
+
+    .sim-open-cta.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    #btn-launch-mode {
+      background: linear-gradient(135deg, #00ccff, #0088cc);
+      border: none;
+      color: #000;
+      font-weight: 800;
+      font-size: clamp(0.82rem, 2vw, 0.95rem);
+      padding: clamp(10px, 2.5vw, 14px) clamp(20px, 5vw, 38px);
+      border-radius: 28px;
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      transition: all 0.3s cubic-bezier(.4, 0, .2, 1);
+      box-shadow: 0 6px 24px rgba(0, 204, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      max-width: 100%;
+    }
+
+    #btn-launch-mode:hover {
+      background: linear-gradient(135deg, #33ddff, #00aaee);
+      box-shadow: 0 10px 40px rgba(0, 204, 255, 0.55);
+      transform: translateY(-3px) scale(1.04);
+    }
+
+    #btn-launch-mode:active {
+      transform: scale(0.98);
+    }
+
+    .sim-selected-label {
+      font-size: clamp(0.68rem, 1.6vw, 0.75rem);
+      color: rgba(0, 204, 255, 0.6);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    /* ══════════════════════════════════════════════════
+   ESPECTRO — Espectroscópio Científico
  ══════════════════════════════════════════════════ */
-#spectrum-container {
-    flex: 1; min-width: 0;
-    display: flex; flex-direction: column;
-    gap: 10px; overflow-y: auto; padding: 2px 0 10px;
-}
+    #spectrum-container {
+      flex: 1;
+      min-width: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      padding: 2px 0 10px;
+    }
 
-/* ── Toolbar do espectroscópio ── */
-#specToolbar {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
-    padding: 10px 16px;
-    background: linear-gradient(135deg, rgba(8,15,35,0.95) 0%, rgba(4,10,25,0.98) 100%);
-    border: 1px solid rgba(0,180,255,0.25);
-    border-radius: 12px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.4);
-    margin-bottom: 5px;
-}
-body.bg-white #specToolbar {
-    background: linear-gradient(135deg, #1a2540 0%, #0f1a30 100%);
-    border-color: rgba(0,140,220,0.4);
-}
-.spec-toolbar-title {
-    font-family: 'Courier New', monospace; font-size: 0.78rem; font-weight: bold;
-    color: #00ccff; letter-spacing: 0.12em; text-transform: uppercase;
-    display: flex; align-items: center; gap: 8px;
-}
-.spec-toolbar-title::before {
-    content: ''; width: 8px; height: 8px; border-radius: 50%;
-    background: #00ff88; box-shadow: 0 0 8px #00ff88;
-    animation: specPulse 2s ease-in-out infinite;
-}
-@keyframes specPulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-.spec-mode-group {
-    display: flex; gap: 8px;
-    margin-left: auto;
-}
-.spec-mode-btn {
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(0,204,255,0.2);
-    color: rgba(255,255,255,0.6); padding: 8px 24px;
-    font-family: 'Courier New', monospace; font-size: 0.82rem;
-    font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
-    cursor: pointer; transition: all 0.3s cubic-bezier(.4,0,.2,1);
-    border-radius: 20px;
-}
-.spec-mode-btn:hover { 
-    background: rgba(0,204,255,0.1); 
-    color: #fff;
-    border-color: rgba(0,204,255,0.5);
-    transform: translateY(-1px);
-}
-.spec-mode-btn.active {
-    background: linear-gradient(135deg, #00ccff, #0088cc);
-    color: #000 !important;
-    font-weight: 900;
-    text-shadow: none !important;
-    border-color: transparent;
-    box-shadow: 0 4px 18px rgba(0,204,255,0.4);
-    transform: translateY(-2px);
-}
-.spec-mode-btn.active.emission { color: #000; }
-.spec-mode-btn.active.absorption { color: #000; }
+    /* ── Toolbar do espectroscópio ── */
+    #specToolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 12px;
+      padding: clamp(8px, 2vw, 12px) clamp(10px, 2.5vw, 16px);
+      background: linear-gradient(135deg, rgba(8, 15, 35, 0.95) 0%, rgba(4, 10, 25, 0.98) 100%);
+      border: 1px solid rgba(0, 180, 255, 0.25);
+      border-radius: 12px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 20px rgba(0, 0, 0, 0.4);
+      margin-bottom: 5px;
+    }
 
-/* ── Bandas espectrais ── */
-#specBandsContainer {
-    display: flex; flex-direction: column; gap: 3px;
-    background: #030508;
-    border: 1px solid rgba(0,180,255,0.15);
-    border-radius: 12px;
-    padding: 10px 10px;
-    box-shadow: inset 0 2px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
-    margin-bottom: 10px;
-}
-body.bg-white #specBandsContainer {
-    border-color: rgba(0,60,120,0.3);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2), inset 0 2px 20px rgba(0,0,0,0.5);
-}
-.serie-canvas {
-    width: 100%; height: 90px; display: block;
-    cursor: pointer; border-radius: 4px;
-}
+    body.bg-white #specToolbar {
+      background: linear-gradient(135deg, #1a2540 0%, #0f1a30 100%);
+      border-color: rgba(0, 140, 220, 0.4);
+    }
 
-/* ── Painel de dados científicos ── */
-#spectrumPanel {
-    background: linear-gradient(135deg, rgba(6,12,28,0.98) 0%, rgba(3,8,20,0.99) 100%);
-    border: 1px solid rgba(0,180,255,0.2);
-    border-radius: 12px; padding: 14px 18px;
-    display: flex; flex-wrap: wrap; gap: 0;
-    align-items: stretch; flex-shrink: 0;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 4px 16px rgba(0,0,0,0.4);
-    overflow: hidden;
-}
-body.bg-white #spectrumPanel {
-    background: linear-gradient(135deg, #111927 0%, #0a1220 100%);
-    border-color: rgba(0,100,200,0.35);
-}
-.spec-panel-left {
-    display: flex; flex-direction: column; justify-content: center;
-    gap: 6px; padding-right: 18px; border-right: 1px solid rgba(0,180,255,0.12);
-    min-width: 180px;
-}
-.spec-panel-formula {
-    font-family: 'Courier New', monospace; font-size: 0.82rem;
-    color: rgba(100,180,255,0.5); line-height: 1.5;
-}
-.spec-panel-formula span { color: rgba(0,230,255,0.8); font-weight: bold; }
-.spec-panel-hint {
-    font-family: 'Courier New', monospace; font-size: 0.7rem;
-    color: rgba(80,130,180,0.5); font-style: italic;
-}
-.spec-panel-right {
-    display: flex; flex-wrap: wrap; gap: 12px 24px;
-    align-items: center; padding-left: 18px; flex: 1;
-}
-.spec-data-item {
-    display: flex; flex-direction: column; gap: 2px;
-}
-.spec-data-key {
-    font-family: 'Courier New', monospace; font-size: 0.65rem;
-    color: rgba(80,140,200,0.6); letter-spacing: 0.1em; text-transform: uppercase;
-}
-.spec-data-val {
-    font-family: 'Courier New', monospace; font-size: 0.9rem;
-    color: #00ff88; font-weight: bold; letter-spacing: 0.04em;
-}
-.spec-data-val.dim { color: rgba(60,100,150,0.5); font-style: italic; }
-.spec-data-val.highlight { color: #ffdd44; text-shadow: 0 0 12px rgba(255,220,0,0.5); }
-#specColorSwatch {
-    width: 40px; height: 24px; border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.12);
-    box-shadow: 0 0 10px currentColor;
-    flex-shrink: 0; align-self: center;
-}
-.spec-transition-badge {
-    font-family: 'Courier New', monospace; font-size: 0.85rem;
-    padding: 4px 12px; border-radius: 6px;
-    background: rgba(0,204,255,0.08); border: 1px solid rgba(0,204,255,0.2);
-    color: #aaddff; letter-spacing: 0.05em;
-}
+    .spec-toolbar-title {
+      font-family: 'Courier New', monospace;
+      font-size: clamp(0.7rem, 1.8vw, 0.78rem);
+      font-weight: bold;
+      color: #00ccff;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-/* ── Cena 3D espectro ── */
-#spec3DContainer {
-    position: relative; width: 100%; height: 340px;
-    border-radius: 12px; overflow: hidden; flex-shrink: 0;
-    border: 1px solid rgba(0,180,255,0.15);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    margin-bottom: 12px;
-}
-#spec3DCanvas { width: 100%; height: 100%; display: block; pointer-events: all; cursor: grab; }
-#spec3DCanvas:active { cursor: grabbing; }
-#spec3DInfo {
-    position: absolute; top: 12px; right: 14px;
-    background: rgba(2,6,18,0.92); border: 1px solid rgba(0,180,255,0.4);
-    border-radius: 10px; padding: 10px 14px; font-family: 'Courier New', monospace;
-    pointer-events: none; backdrop-filter: blur(8px); min-width: 200px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    z-index: 10;
-}
-#spec3DTitle { font-size: 0.9rem; font-weight: bold; color: #00ccff; margin-bottom: 6px; }
-#spec3DDetails { font-size: 0.75rem; color: rgba(180,215,255,0.85); line-height: 1.9; }
-#spec3DHint {
-    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-    font-family: 'Courier New', monospace; font-size: 0.68rem;
-    color: rgba(100,150,200,0.35); pointer-events: none; white-space: nowrap;
-    letter-spacing: 0.05em;
-}
+    .spec-toolbar-title::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #00ff88;
+      box-shadow: 0 0 8px #00ff88;
+      animation: specPulse 2s ease-in-out infinite;
+    }
 
-/* LIGHT THEME RULES */
-body.bg-white {
-    background: #f0f4f8;
-    color: #111;
-}
-body.bg-white nav {
-    background: rgba(240, 244, 248, 0.95);
-    border-bottom-color: rgba(0, 102, 170, 0.25);
-}
-body.bg-white .nav-logo {
-    color: #0066aa;
-    text-shadow: 0 0 10px rgba(0, 102, 170, 0.3);
-}
-body.bg-white .nav-btn {
-    color: #444;
-}
-body.bg-white .nav-btn:hover, body.bg-white .nav-btn.active {
-    color: #0066aa;
-    background: rgba(0, 102, 170, 0.1);
-    border-color: rgba(0, 102, 170, 0.3);
-}
-body.bg-white .home-title {
-    background: linear-gradient(135deg, #0066aa, #009955, #cc3300);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-body.bg-white .home-sub {
-    color: #444;
-}
-body.bg-white .module-card {
-    background: rgba(255, 255, 255, 0.85);
-    border-color: rgba(0, 102, 170, 0.25);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
-body.bg-white .module-card .card-title {
-    color: #0066aa;
-}
-body.bg-white .module-card .card-desc {
-    color: #444;
-}
-body.bg-white .module-card:hover {
-    box-shadow: 0 15px 35px rgba(0, 102, 170, 0.15);
-    border-color: #0066aa;
-}
-body.bg-white .sec-title {
-    color: #0066aa;
-    text-shadow: 0 0 10px rgba(0, 102, 170, 0.2);
-}
-body.bg-white .sec-sub {
-    color: #555;
-}
-body.bg-white .sim-btn-wrapper h3 {
-    color: #0066aa !important;
-    text-shadow: none !important;
-}
-body.bg-white .sim-btn-wrapper p {
-    color: #444 !important;
-}
-body.bg-white #btn-abrir-sim {
-    background: rgba(0, 102, 170, 0.15);
-    border-color: #0066aa;
-    color: #0066aa;
-    box-shadow: 0 0 12px rgba(0, 102, 170, 0.2);
-}
-body.bg-white #btn-abrir-sim:hover {
-    background: rgba(0, 102, 170, 0.25);
-}
-body.bg-white .sim-tab-card {
-    background: rgba(255, 255, 255, 0.8);
-    border-color: rgba(0, 102, 170, 0.25);
-}
-body.bg-white .sim-tab-card:hover, body.bg-white .sim-tab-card.selected {
-    border-color: #0066aa;
-    background: rgba(0, 102, 170, 0.1);
-}
-body.bg-white .sim-tab-name {
-    color: #111;
-}
-body.bg-white .sim-tab-desc {
-    color: #555;
-}
-body.bg-white .sim-tabs-label {
-    color: #0066aa !important;
-    text-shadow: none !important;
-}
-body.bg-white #btn-launch-mode {
-    background: linear-gradient(135deg, #00aaee, #0066aa);
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(0, 102, 170, 0.35);
-}
-body.bg-white .sim-selected-label {
-    color: #0066aa;
-}
-body.bg-white .pt-btn {
-    background: rgba(255, 255, 255, 0.8);
-    border-color: rgba(0, 102, 170, 0.25);
-    color: #333;
-}
-body.bg-white .pt-btn:hover, body.bg-white .pt-btn.active {
-    background: rgba(0, 102, 170, 0.15);
-    border-color: #0066aa;
-    color: #0066aa;
-}
-body.bg-white .leg {
-    color: #444;
-}
-body.bg-white .el-btn {
-    background: rgba(255, 255, 255, 0.9);
-    border-color: rgba(0, 102, 170, 0.2);
-}
-body.bg-white .el-num {
-    color: #666;
-}
-body.bg-white .el-sym {
-    color: #111;
-}
-body.bg-white .el-name {
-    color: #444;
-}
-body.bg-white .el-btn:hover {
-    box-shadow: 0 0 15px rgba(0, 102, 170, 0.4);
-}
-body.bg-white .el-btn.active-el {
-    border-color: #0066aa;
-    box-shadow: 0 0 16px rgba(0, 102, 170, 0.5);
-}
-body.bg-white .el-detail {
-    background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(0, 102, 170, 0.3);
-    color: #111;
-}
-body.bg-white .el-detail-info h3 {
-    color: #0066aa;
-}
-body.bg-white .el-detail-info p {
-    color: #444;
-}
-body.bg-white .el-prop {
-    background: rgba(0, 102, 170, 0.06);
-    border-color: rgba(0, 102, 170, 0.2);
-}
-body.bg-white .el-prop-label {
-    color: #0066aa;
-}
-body.bg-white .el-prop-val {
-    color: #111;
-}
-</style>
+    @keyframes specPulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.3
+      }
+    }
+
+    .spec-mode-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    @media (min-width: 600px) {
+      .spec-mode-group:first-of-type {
+        margin-left: auto;
+      }
+    }
+
+    .spec-mode-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 204, 255, 0.2);
+      color: rgba(255, 255, 255, 0.6);
+      padding: clamp(6px, 1.5vw, 8px) clamp(12px, 2.5vw, 24px);
+      font-family: 'Courier New', monospace;
+      font-size: clamp(0.72rem, 1.8vw, 0.82rem);
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(.4, 0, .2, 1);
+      border-radius: 20px;
+    }
+
+    .spec-mode-btn:hover {
+      background: rgba(0, 204, 255, 0.1);
+      color: #fff;
+      border-color: rgba(0, 204, 255, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .spec-mode-btn.active {
+      background: linear-gradient(135deg, #00ccff, #0088cc);
+      color: #000 !important;
+      font-weight: 900;
+      text-shadow: none !important;
+      border-color: transparent;
+      box-shadow: 0 4px 18px rgba(0, 204, 255, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* ── Bandas espectrais ── */
+    #specBandsContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: #030508;
+      border: 1px solid rgba(0, 180, 255, 0.15);
+      border-radius: 12px;
+      padding: 8px;
+      box-shadow: inset 0 2px 20px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.03);
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    body.bg-white #specBandsContainer {
+      border-color: rgba(0, 60, 120, 0.3);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), inset 0 2px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .serie-canvas {
+      width: 100%;
+      height: clamp(65px, 12vh, 90px);
+      display: block;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    /* ── Painel de dados científicos ── */
+    #spectrumPanel {
+      background: linear-gradient(135deg, rgba(6, 12, 28, 0.98) 0%, rgba(3, 8, 20, 0.99) 100%);
+      border: 1px solid rgba(0, 180, 255, 0.2);
+      border-radius: 12px;
+      padding: clamp(10px, 2.5vw, 16px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 16px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+    }
+
+    @media (min-width: 640px) {
+      #spectrumPanel {
+        flex-direction: row;
+      }
+
+      .spec-panel-left {
+        border-right: 1px solid rgba(0, 180, 255, 0.12);
+        border-bottom: none;
+        padding-right: 18px;
+        padding-bottom: 0;
+        min-width: 180px;
+      }
+
+      .spec-panel-right {
+        padding-left: 18px;
+      }
+    }
+
+    body.bg-white #spectrumPanel {
+      background: linear-gradient(135deg, #111927 0%, #0a1220 100%);
+      border-color: rgba(0, 100, 200, 0.35);
+    }
+
+    .spec-panel-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      border-bottom: 1px solid rgba(0, 180, 255, 0.12);
+      padding-bottom: 10px;
+    }
+
+    .spec-panel-formula {
+      font-family: 'Courier New', monospace;
+      font-size: clamp(0.75rem, 1.8vw, 0.82rem);
+      color: rgba(100, 180, 255, 0.5);
+      line-height: 1.5;
+    }
+
+    .spec-panel-formula span {
+      color: rgba(0, 230, 255, 0.8);
+      font-weight: bold;
+    }
+
+    .spec-panel-hint {
+      font-family: 'Courier New', monospace;
+      font-size: 0.7rem;
+      color: rgba(80, 130, 180, 0.5);
+      font-style: italic;
+    }
+
+    .spec-panel-right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px clamp(12px, 3vw, 24px);
+      align-items: center;
+      flex: 1;
+    }
+
+    .spec-data-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .spec-data-key {
+      font-family: 'Courier New', monospace;
+      font-size: 0.65rem;
+      color: rgba(80, 140, 200, 0.6);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .spec-data-val {
+      font-family: 'Courier New', monospace;
+      font-size: clamp(0.82rem, 2vw, 0.9rem);
+      color: #00ff88;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+    }
+
+    .spec-data-val.dim {
+      color: rgba(60, 100, 150, 0.5);
+      font-style: italic;
+    }
+
+    .spec-data-val.highlight {
+      color: #ffdd44;
+      text-shadow: 0 0 12px rgba(255, 220, 0, 0.5);
+    }
+
+    #specColorSwatch {
+      width: 40px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 10px currentColor;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    .spec-transition-badge {
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      padding: 4px 12px;
+      border-radius: 6px;
+      background: rgba(0, 204, 255, 0.08);
+      border: 1px solid rgba(0, 204, 255, 0.2);
+      color: #aaddff;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Cena 3D espectro ── */
+    #spec3DContainer {
+      position: relative;
+      width: 100%;
+      height: clamp(220px, 45vh, 420px);
+      min-height: 200px;
+      border-radius: 12px;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 1px solid rgba(0, 180, 255, 0.15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      margin-bottom: 4px;
+    }
+
+    #spec3DCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: all;
+      cursor: grab;
+    }
+
+    #spec3DCanvas:active {
+      cursor: grabbing;
+    }
+
+    #spec3DInfo {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(2, 6, 18, 0.92);
+      border: 1px solid rgba(0, 180, 255, 0.4);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-family: 'Courier New', monospace;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+      max-width: calc(100% - 20px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+    }
+
+    #spec3DTitle {
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+      font-weight: bold;
+      color: #00ccff;
+      margin-bottom: 4px;
+    }
+
+    #spec3DDetails {
+      font-size: clamp(0.7rem, 1.8vw, 0.75rem);
+      color: rgba(180, 215, 255, 0.85);
+      line-height: 1.7;
+    }
+
+    #spec3DHint {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Courier New', monospace;
+      font-size: clamp(0.55rem, 1.6vw, 0.68rem);
+      color: rgba(100, 150, 200, 0.45);
+      pointer-events: none;
+      white-space: nowrap;
+      letter-spacing: 0.05em;
+      max-width: 95%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* LIGHT THEME RULES */
+    body.bg-white {
+      background: #f0f4f8;
+      color: #111;
+    }
+
+    body.bg-white nav {
+      background: rgba(240, 244, 248, 0.95);
+      border-bottom-color: rgba(0, 102, 170, 0.25);
+    }
+
+    body.bg-white .nav-logo {
+      color: #0066aa;
+      text-shadow: 0 0 10px rgba(0, 102, 170, 0.3);
+    }
+
+    body.bg-white .nav-btn {
+      color: #444;
+    }
+
+    body.bg-white .nav-btn:hover,
+    body.bg-white .nav-btn.active {
+      color: #0066aa;
+      background: rgba(0, 102, 170, 0.1);
+      border-color: rgba(0, 102, 170, 0.3);
+    }
+
+    body.bg-white .home-title {
+      background: linear-gradient(135deg, #0066aa, #009955, #cc3300);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    body.bg-white .home-sub {
+      color: #444;
+    }
+
+    body.bg-white .module-card {
+      background: rgba(255, 255, 255, 0.85);
+      border-color: rgba(0, 102, 170, 0.25);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    body.bg-white .module-card .card-title {
+      color: #0066aa;
+    }
+
+    body.bg-white .module-card .card-desc {
+      color: #444;
+    }
+
+    body.bg-white .module-card:hover {
+      box-shadow: 0 15px 35px rgba(0, 102, 170, 0.15);
+      border-color: #0066aa;
+    }
+
+    body.bg-white .sec-title {
+      color: #0066aa;
+      text-shadow: 0 0 10px rgba(0, 102, 170, 0.2);
+    }
+
+    body.bg-white .sec-sub {
+      color: #555;
+    }
+
+    body.bg-white .sim-btn-wrapper h3 {
+      color: #0066aa !important;
+      text-shadow: none !important;
+    }
+
+    body.bg-white .sim-btn-wrapper p {
+      color: #444 !important;
+    }
+
+    body.bg-white #btn-abrir-sim {
+      background: rgba(0, 102, 170, 0.15);
+      border-color: #0066aa;
+      color: #0066aa;
+      box-shadow: 0 0 12px rgba(0, 102, 170, 0.2);
+    }
+
+    body.bg-white #btn-abrir-sim:hover {
+      background: rgba(0, 102, 170, 0.25);
+    }
+
+    body.bg-white .sim-tab-card {
+      background: rgba(255, 255, 255, 0.8);
+      border-color: rgba(0, 102, 170, 0.25);
+    }
+
+    body.bg-white .sim-tab-card:hover,
+    body.bg-white .sim-tab-card.selected {
+      border-color: #0066aa;
+      background: rgba(0, 102, 170, 0.1);
+    }
+
+    body.bg-white .sim-tab-name {
+      color: #111;
+    }
+
+    body.bg-white .sim-tab-desc {
+      color: #555;
+    }
+
+    body.bg-white .sim-tabs-label {
+      color: #0066aa !important;
+      text-shadow: none !important;
+    }
+
+    body.bg-white #btn-launch-mode {
+      background: linear-gradient(135deg, #00aaee, #0066aa);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(0, 102, 170, 0.35);
+    }
+
+    body.bg-white .sim-selected-label {
+      color: #0066aa;
+    }
+
+    body.bg-white .pt-btn {
+      background: rgba(255, 255, 255, 0.8);
+      border-color: rgba(0, 102, 170, 0.25);
+      color: #333;
+    }
+
+    body.bg-white .pt-btn:hover,
+    body.bg-white .pt-btn.active {
+      background: rgba(0, 102, 170, 0.15);
+      border-color: #0066aa;
+      color: #0066aa;
+    }
+
+    body.bg-white .leg {
+      color: #444;
+    }
+
+    body.bg-white .el-btn {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(0, 102, 170, 0.2);
+    }
+
+    body.bg-white .el-num {
+      color: #666;
+    }
+
+    body.bg-white .el-sym {
+      color: #111;
+    }
+
+    body.bg-white .el-name {
+      color: #444;
+    }
+
+    body.bg-white .el-btn:hover {
+      box-shadow: 0 0 15px rgba(0, 102, 170, 0.4);
+    }
+
+    body.bg-white .el-btn.active-el {
+      border-color: #0066aa;
+      box-shadow: 0 0 16px rgba(0, 102, 170, 0.5);
+    }
+
+    body.bg-white .el-detail {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(0, 102, 170, 0.3);
+      color: #111;
+    }
+
+    body.bg-white .el-detail-info h3 {
+      color: #0066aa;
+    }
+
+    body.bg-white .el-detail-info p {
+      color: #444;
+    }
+
+    body.bg-white .el-prop {
+      background: rgba(0, 102, 170, 0.06);
+      border-color: rgba(0, 102, 170, 0.2);
+    }
+
+    body.bg-white .el-prop-label {
+      color: #0066aa;
+    }
+
+    body.bg-white .el-prop-val {
+      color: #111;
+    }
+  </style>
 </head>
+
 <body>
-<!-- PARTICLES CANVAS -->
-<canvas id="particles-canvas"></canvas>
-<!-- NAV -->
-<nav>
-  <div class="nav-logo" onclick="goSection('home')">⚛ QUANTUM HUB</div>
-  <div class="nav-links">
-    <button class="nav-btn active" id="nav-home" onclick="goSection('home')">🏠 Home</button>
-    <button class="nav-btn" id="nav-proton" onclick="goSection('proton')">⚛ Orbitais e Transições</button>
-    <button class="nav-btn" id="nav-espectro" onclick="goSection('espectro')">📊 Espectro</button>
-    <button class="nav-btn" id="nav-tabela" onclick="goSection('tabela')">🧪 Tabela</button>
-    <button class="nav-btn" id="btn-theme-toggle" onclick="toggleMainTheme()">⬜ Tema Claro</button>
-  </div>
-</nav>
-<!-- HOME -->
-<section id="home" class="section active">
-  <div class="container home-content">
-    <h1 class="home-title">QUANTUM HUB</h1>
-    <p class="home-sub">Plataforma interativa de Física Quântica e Química. Explore átomos, orbitais, ondas e muito mais com visualizações 3D.</p>
-    <div class="modules-grid">
-      <div class="module-card" onclick="goSection('proton')">
-        <span class="card-icon">⚛️</span>
-        <div class="card-title">Simulador de Orbitais e Transições</div>
-        <div class="card-desc">Simulador de orbitais atômicos em 3D com modelos Semi-clássico e Quântico. Interaja com o hidrogênio e seus níveis de excitação.</div>
-        <span class="card-tag">Three.js 3D</span>
-      </div>
-      <div class="module-card" onclick="goSection('espectro')">
-        <span class="card-icon">📊</span>
-        <div class="card-title">Espectro do Hidrogênio</div>
-        <div class="card-desc">Simulador interativo das séries espectrais do átomo de Hidrogênio (Lyman, Balmer, Paschen e Brackett) com modelo 3D.</div>
-        <span class="card-tag">Three.js 3D</span>
-      </div>
-      <div class="module-card" onclick="goSection('tabela')">
-        <span class="card-icon">🧪</span>
-        <div class="card-title">Tabela Periódica</div>
-        <div class="card-desc">Explore os 118 elementos com informações detalhadas, filtros por categoria e propriedades físicas e químicas.</div>
-        <span class="card-tag">Interativa</span>
+  <!-- PARTICLES CANVAS -->
+  <canvas id="particles-canvas"></canvas>
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo" onclick="goSection('home')">⚛ QUANTUM HUB</div>
+    <div class="nav-links">
+      <button class="nav-btn active" id="nav-home" onclick="goSection('home')">🏠 Home</button>
+      <button class="nav-btn" id="nav-proton" onclick="goSection('proton')">⚛ Orbitais e Transições</button>
+      <button class="nav-btn" id="nav-espectro" onclick="goSection('espectro')">📊 Espectro</button>
+      <button class="nav-btn" id="btn-theme-toggle" onclick="toggleMainTheme()">⬜ Tema Claro</button>
+    </div>
+  </nav>
+  <!-- HOME -->
+  <section id="home" class="section active">
+    <div class="container home-content">
+      <h1 class="home-title">QUANTUM HUB</h1>
+      <p class="home-sub">Plataforma interativa de Física Quântica e Química. Explore átomos, orbitais, ondas e muito
+        mais com visualizações 3D.</p>
+      <div class="modules-grid">
+        <div class="module-card" onclick="goSection('proton')">
+          <span class="card-icon">⚛️</span>
+          <div class="card-title">Simulador de Orbitais e Transições</div>
+          <div class="card-desc">Simulador de orbitais atômicos em 3D com modelos Semi-clássico e Quântico. Interaja com
+            o hidrogênio e seus níveis de excitação.</div>
+          <span class="card-tag">Three.js 3D</span>
+        </div>
+        <div class="module-card" onclick="goSection('espectro')">
+          <span class="card-icon">📊</span>
+          <div class="card-title">Espectro do Hidrogênio</div>
+          <div class="card-desc">Simulador interativo das séries espectrais do átomo de Hidrogênio (Lyman, Balmer,
+            Paschen e Brackett) com modelo 3D.</div>
+          <span class="card-tag">Three.js 3D</span>
+        </div>
       </div>
     </div>
-  </div>
-</section>
-<!-- SIMULADOR DE ORBITAIS E TRANSIÇÕES EMBED -->
-<section id="proton" class="section">
-  <div class="container">
-    <div class="sec-header"><h2 class="sec-title">⚛️ Simulador de Orbitais e Transições</h2><p class="sec-sub">Simulador de Orbitais Atômicos</p></div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:48px 36px;">
-      <div class="sim-launch-area">
+  </section>
+  <!-- SIMULADOR DE ORBITAIS E TRANSIÇÕES EMBED -->
+  <section id="proton" class="section">
+    <div class="container">
+      <div class="sec-header">
+        <h2 class="sec-title">⚛️ Simulador de Orbitais e Transições</h2>
+        <p class="sec-sub">Simulador de Orbitais Atômicos</p>
+      </div>
+      <div
+        style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:clamp(20px, 4vw, 48px) clamp(14px, 3vw, 36px);">
+        <div class="sim-launch-area">
 
-        <!-- Botão principal / Introdução -->
-        <div class="sim-btn-wrapper" id="sim-intro-wrapper">
-          <div style="font-size:3rem;margin-bottom:8px;filter:drop-shadow(0 0 16px rgba(0,204,255,0.5));">⚛️</div>
-          <h3 style="color:var(--cyan);margin-bottom:8px;font-size:1.3rem;text-shadow:0 0 20px rgba(0,204,255,0.4);">Simulador de Orbitais e Transições</h3>
-          <p style="color:rgba(255,255,255,0.5);margin-bottom:22px;max-width:460px;text-align:center;font-size:0.9rem;line-height:1.7;">Explore os modelos atômicos Semi-clássico, Quântico ou o Espectro de Emissão. Clique abaixo para configurar.</p>
-          <button id="btn-abrir-sim" onclick="startSimSelection()">Iniciar</button>
+          <!-- Botão principal / Introdução -->
+          <div class="sim-btn-wrapper" id="sim-intro-wrapper">
+            <div style="font-size:3rem;margin-bottom:8px;filter:drop-shadow(0 0 16px rgba(0,204,255,0.5));">⚛️</div>
+            <h3 style="color:var(--cyan);margin-bottom:8px;font-size:1.3rem;text-shadow:0 0 20px rgba(0,204,255,0.4);">
+              Simulador de Orbitais e Transições</h3>
+            <p
+              style="color:rgba(255,255,255,0.5);margin-bottom:22px;max-width:460px;text-align:center;font-size:0.9rem;line-height:1.7;">
+              Explore os modelos atômicos Semi-clássico, Quântico ou o Espectro de Emissão. Clique abaixo para
+              configurar.</p>
+            <button id="btn-abrir-sim" onclick="startSimSelection()">Iniciar</button>
+          </div>
+
+          <!-- Área de Configuração -->
+          <div class="sim-tabs-section" id="sim-tabs-section">
+            <div class="sim-tabs-label"
+              style="font-size:0.85rem; color:#fff; text-shadow:0 0 10px rgba(0,204,255,0.5); margin-bottom:15px;">—
+              Selecione o Modelo Principal —</div>
+
+            <div style="display:flex; justify-content:center; gap:15px; margin-bottom:30px; flex-wrap:wrap;">
+              <div class="sim-tab-card" style="min-width:clamp(120px, 28%, 180px);flex:1 1 140px;" id="main-bohr"
+                onclick="selectMainMode('bohr', this)">
+                <div class="sim-tab-badge"></div>
+                <div class="sim-tab-icon">🪐</div>
+                <div class="sim-tab-name">Modelo Semi-clássico</div>
+                <div class="sim-tab-desc">Órbitas circulares e saltos quânticos</div>
+              </div>
+              <div class="sim-tab-card selected" style="min-width:clamp(120px, 28%, 180px);flex:1 1 140px;"
+                id="main-quantum" onclick="selectMainMode('quantum', this)">
+                <div class="sim-tab-badge"></div>
+                <div class="sim-tab-icon">⚛️</div>
+                <div class="sim-tab-name">Modelo Quântico</div>
+                <div class="sim-tab-desc">Orbitais s, p, d, f em 3D</div>
+              </div>
+              <div class="sim-tab-card"
+                style="min-width:clamp(120px, 28%, 180px);flex:1 1 140px;border-color:rgba(255,170,0,0.4);"
+                id="main-construcao" onclick="selectMainMode('construcao', this)">
+                <div class="sim-tab-badge" style="background:#ffaa00;"></div>
+                <div class="sim-tab-icon">🚧</div>
+                <div class="sim-tab-name" style="color:#ffaa00;">Em construção</div>
+                <div class="sim-tab-desc">Próxima atualização em desenvolvimento</div>
+              </div>
+            </div>
+
+            <div id="quantum-sub-options" style="transition:all 0.3s;">
+              <div class="sim-tabs-label">— Visualização do Modelo Quântico —</div>
+              <div class="sim-tabs-grid">
+                <div class="sim-tab-card" id="tab-solido" onclick="selectSimTab('solid', this)">
+                  <div class="sim-tab-badge"></div>
+                  <div class="sim-tab-icon">🔵</div>
+                  <div class="sim-tab-name">Sólido</div>
+                  <div class="sim-tab-desc">Superfície opaca com iluminação volumétrica</div>
+                </div>
+                <div class="sim-tab-card" id="tab-wireframe" onclick="selectSimTab('wireframe', this)">
+                  <div class="sim-tab-badge"></div>
+                  <div class="sim-tab-icon">🔷</div>
+                  <div class="sim-tab-name">Wireframe</div>
+                  <div class="sim-tab-desc">Grade estrutural revelando a geometria interna</div>
+                </div>
+                <div class="sim-tab-card" id="tab-nuvem" onclick="selectSimTab('cloud', this)">
+                  <div class="sim-tab-badge"></div>
+                  <div class="sim-tab-icon">✨</div>
+                  <div class="sim-tab-name">Nuvem</div>
+                  <div class="sim-tab-desc">Densidade de probabilidade quântica em pontos</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CTA de lançamento -->
+            <div class="sim-open-cta" id="sim-open-cta">
+              <div style="display:flex;flex-direction:column;align-items:center;">
+                <button id="btn-launch-mode" onclick="launchSimulator()">
+                  <span id="btn-launch-icon">🚀</span>
+                  <span id="btn-launch-text">Abrir Simulador</span>
+                </button>
+                <div class="sim-selected-label" id="sim-selected-label">modo selecionado: —</div>
+              </div>
+            </div>
+          </div>
+
         </div>
-
-        <!-- Área de Configuração -->
-        <div class="sim-tabs-section" id="sim-tabs-section">
-          <div class="sim-tabs-label" style="font-size:0.85rem; color:#fff; text-shadow:0 0 10px rgba(0,204,255,0.5); margin-bottom:15px;">— Selecione o Modelo Principal —</div>
-          
-          <div style="display:flex; justify-content:center; gap:15px; margin-bottom:30px; flex-wrap:wrap;">
-            <div class="sim-tab-card" style="min-width:180px;" id="main-bohr" onclick="selectMainMode('bohr', this)">
-               <div class="sim-tab-badge"></div>
-               <div class="sim-tab-icon">🪐</div>
-               <div class="sim-tab-name">Modelo Semi-clássico</div>
-               <div class="sim-tab-desc">Órbitas circulares e saltos quânticos</div>
-            </div>
-            <div class="sim-tab-card selected" style="min-width:180px;" id="main-quantum" onclick="selectMainMode('quantum', this)">
-               <div class="sim-tab-badge"></div>
-               <div class="sim-tab-icon">⚛️</div>
-               <div class="sim-tab-name">Modelo Quântico</div>
-               <div class="sim-tab-desc">Orbitais s, p, d, f em 3D</div>
-            </div>
-            <div class="sim-tab-card" style="min-width:180px;border-color:rgba(255,170,0,0.4);" id="main-construcao" onclick="selectMainMode('construcao', this)">
-               <div class="sim-tab-badge" style="background:#ffaa00;"></div>
-               <div class="sim-tab-icon">🚧</div>
-               <div class="sim-tab-name" style="color:#ffaa00;">Em construção</div>
-               <div class="sim-tab-desc">Próxima atualização em desenvolvimento</div>
-            </div>
-          </div>
-
-          <div id="quantum-sub-options" style="transition:all 0.3s;">
-            <div class="sim-tabs-label">— Visualização do Modelo Quântico —</div>
-            <div class="sim-tabs-grid">
-              <div class="sim-tab-card" id="tab-solido" onclick="selectSimTab('solid', this)">
-                <div class="sim-tab-badge"></div>
-                <div class="sim-tab-icon">🔵</div>
-                <div class="sim-tab-name">Sólido</div>
-                <div class="sim-tab-desc">Superfície opaca com iluminação volumétrica</div>
-              </div>
-              <div class="sim-tab-card" id="tab-wireframe" onclick="selectSimTab('wireframe', this)">
-                <div class="sim-tab-badge"></div>
-                <div class="sim-tab-icon">🔷</div>
-                <div class="sim-tab-name">Wireframe</div>
-                <div class="sim-tab-desc">Grade estrutural revelando a geometria interna</div>
-              </div>
-              <div class="sim-tab-card" id="tab-transparente" onclick="selectSimTab('transparent', this)">
-                <div class="sim-tab-badge"></div>
-                <div class="sim-tab-icon">🫧</div>
-                <div class="sim-tab-name">Transparente</div>
-                <div class="sim-tab-desc">Superfície translúcida com profundidade visível</div>
-              </div>
-              <div class="sim-tab-card" id="tab-nuvem" onclick="selectSimTab('cloud', this)">
-                <div class="sim-tab-badge"></div>
-                <div class="sim-tab-icon">✨</div>
-                <div class="sim-tab-name">Nuvem</div>
-                <div class="sim-tab-desc">Densidade de probabilidade quântica em pontos</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- CTA de lançamento -->
-          <div class="sim-open-cta" id="sim-open-cta">
-            <div style="display:flex;flex-direction:column;align-items:center;">
-              <button id="btn-launch-mode" onclick="launchSimulator()">
-                <span id="btn-launch-icon">🚀</span>
-                <span id="btn-launch-text">Abrir Simulador</span>
-              </button>
-              <div class="sim-selected-label" id="sim-selected-label">modo selecionado: —</div>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
-  </div>
-</section>
-<!-- ESPECTRO EMBED -->
-<section id="espectro" class="section">
-  <div class="container">
-    <div class="sec-header"><h2 class="sec-title">📊 Espectro do Hidrogênio</h2><p class="sec-sub">Simulador de Espectroscopia Quântica</p></div>
-    <div id="spectrum-container">
+  </section>
+  <!-- ESPECTRO EMBED -->
+  <section id="espectro" class="section">
+    <div class="container">
+      <div class="sec-header">
+        <h2 class="sec-title">📊 Espectro do Hidrogênio</h2>
+        <p class="sec-sub">Simulador de Espectroscopia Quântica</p>
+      </div>
+      <div id="spectrum-container">
         <!-- Toolbar científica -->
         <div id="specToolbar">
-            <div class="spec-toolbar-title">Espectroscópio &mdash; H (Z=1)</div>
-            <div class="spec-mode-group">
-                <button class="spec-mode-btn emission active" id="btnEmission" onclick="setSpecMode('emission')">EMISSÃO</button>
-                <button class="spec-mode-btn absorption" id="btnAbsorption" onclick="setSpecMode('absorption')">ABSORÇÃO</button>
-            </div>
-            <div class="spec-mode-group" style="margin-left: 10px;">
-                <button class="spec-mode-btn active" id="specBgBlack" onclick="setBackground('black')" style="padding: 8px 14px;">⬛ Preto</button>
-                <button class="spec-mode-btn" id="specBgWhite" onclick="setBackground('white')" style="padding: 8px 14px;">⬜ Branco</button>
-            </div>
+          <div class="spec-toolbar-title">Espectroscópio &mdash; H (Z=1)</div>
+          <div class="spec-mode-group">
+            <button class="spec-mode-btn emission active" id="btnEmission"
+              onclick="setSpecMode('emission')">EMISSÃO</button>
+            <button class="spec-mode-btn absorption" id="btnAbsorption"
+              onclick="setSpecMode('absorption')">ABSORÇÃO</button>
+          </div>
+          <div class="spec-mode-group" style="margin-left: 10px;">
+            <button class="spec-mode-btn active" id="specBgBlack" onclick="setBackground('black')"
+              style="padding: 8px 14px;">⬛ Preto</button>
+            <button class="spec-mode-btn" id="specBgWhite" onclick="setBackground('white')" style="padding: 8px 14px;">⬜
+              Branco</button>
+          </div>
         </div>
 
         <!-- Cena 3D Three.js -->
         <div id="spec3DContainer">
-            <canvas id="spec3DCanvas"></canvas>
-            <div id="spec3DInfo" style="display:none;">
-                <div id="spec3DTitle"></div>
-                <div id="spec3DDetails"></div>
-            </div>
-            <div id="spec3DHint">ARRASte PARA ROTACIONAR &nbsp;·&nbsp; CLIQUE NA LINHA ESPECTRAL</div>
+          <canvas id="spec3DCanvas"></canvas>
+          <div id="spec3DInfo" style="display:none;">
+            <div id="spec3DTitle"></div>
+            <div id="spec3DDetails"></div>
+          </div>
+          <div id="spec3DHint">ARRASte PARA ROTACIONAR &nbsp;·&nbsp; CLIQUE NA LINHA ESPECTRAL</div>
         </div>
 
         <!-- 4 faixas 2D —espectroscópio real— -->
         <div id="specBandsContainer">
-            <canvas class="serie-canvas" id="band1" data-serie="1"></canvas>
-            <canvas class="serie-canvas" id="band2" data-serie="2"></canvas>
-            <canvas class="serie-canvas" id="band3" data-serie="3"></canvas>
-            <canvas class="serie-canvas" id="band4" data-serie="4"></canvas>
+          <canvas class="serie-canvas" id="band1" data-serie="1"></canvas>
+          <canvas class="serie-canvas" id="band2" data-serie="2"></canvas>
+          <canvas class="serie-canvas" id="band3" data-serie="3"></canvas>
+          <canvas class="serie-canvas" id="band4" data-serie="4"></canvas>
         </div>
 
         <!-- Painel de dados científicos -->
         <div id="spectrumPanel">
-            <div class="spec-panel-left">
-                <div class="spec-panel-formula">
-                    <span>ΔE</span> = 13.6 &times; (1/n₁² &minus; 1/n₂²) eV<br>
-                    <span>λ</span> = hc / ΔE &nbsp;=&nbsp; 1239.84 / ΔE &nbsp;nm
-                </div>
-                <div class="spec-panel-hint">↑ Clique em uma linha espectral</div>
+          <div class="spec-panel-left">
+            <div class="spec-panel-formula">
+              <span>ΔE</span> = 13.6 &times; (1/n₁² &minus; 1/n₂²) eV<br>
+              <span>λ</span> = hc / ΔE &nbsp;=&nbsp; 1239.84 / ΔE &nbsp;nm
             </div>
-            <div class="spec-panel-right">
-                <div class="spec-data-item">
-                    <div class="spec-data-key">Transição</div>
-                    <div class="spec-data-val dim" id="specTransition">—</div>
-                </div>
-                <div class="spec-data-item">
-                    <div class="spec-data-key">Comprimento &lambda;</div>
-                    <div class="spec-data-val dim" id="specLambda">—</div>
-                </div>
-                <div class="spec-data-item">
-                    <div class="spec-data-key">Energia &Delta;E</div>
-                    <div class="spec-data-val dim highlight" id="specDeltaE">—</div>
-                </div>
-                <div class="spec-data-item">
-                    <div class="spec-data-key">Região EM</div>
-                    <div class="spec-data-val dim" id="specRegion">—</div>
-                </div>
-                <div id="specColorSwatch" style="opacity:0"></div>
+            <div class="spec-panel-hint">↑ Clique em uma linha espectral</div>
+          </div>
+          <div class="spec-panel-right">
+            <div class="spec-data-item">
+              <div class="spec-data-key">Transição</div>
+              <div class="spec-data-val dim" id="specTransition">—</div>
             </div>
+            <div class="spec-data-item">
+              <div class="spec-data-key">Comprimento &lambda;</div>
+              <div class="spec-data-val dim" id="specLambda">—</div>
+            </div>
+            <div class="spec-data-item">
+              <div class="spec-data-key">Energia &Delta;E</div>
+              <div class="spec-data-val dim highlight" id="specDeltaE">—</div>
+            </div>
+            <div class="spec-data-item">
+              <div class="spec-data-key">Região EM</div>
+              <div class="spec-data-val dim" id="specRegion">—</div>
+            </div>
+            <div id="specColorSwatch" style="opacity:0"></div>
+          </div>
         </div>
+      </div>
     </div>
-  </div>
-</section>
-<!-- TABELA PERIÓDICA -->
-<section id="tabela" class="section">
-  <div class="container">
-    <div class="sec-header"><h2 class="sec-title">🧪 Tabela Periódica</h2><p class="sec-sub">Clique em qualquer elemento para ver detalhes</p></div>
-    <div class="pt-controls" id="pt-filters">
-      <button class="pt-btn active" onclick="filterElements('all',this)">Todos</button>
-      <button class="pt-btn" onclick="filterElements('metal-a',this)">M. Alcalinos</button>
-      <button class="pt-btn" onclick="filterElements('metal-b',this)">M. Alcalino-terrosos</button>
-      <button class="pt-btn" onclick="filterElements('metal-t',this)">M. Transição</button>
-      <button class="pt-btn" onclick="filterElements('met',this)">Metaloides</button>
-      <button class="pt-btn" onclick="filterElements('nomet',this)">Não Metais</button>
-      <button class="pt-btn" onclick="filterElements('hal',this)">Halogênios</button>
-      <button class="pt-btn" onclick="filterElements('nob',this)">Gases Nobres</button>
-      <button class="pt-btn" onclick="filterElements('lan',this)">Lantanídeos</button>
-      <button class="pt-btn" onclick="filterElements('act',this)">Actinídeos</button>
+  </section>
+  </section>
+  <!-- EM CONSTRUÇÃO -->
+  <!-- EM CONSTRUÇÃO -->
+  <section id="construcao" class="section">
+    <div class="container">
+      <div class="sec-header">
+        <h2 class="sec-title">🚧 Em construção</h2>
+        <p class="sec-sub">Prévia da próxima atualização — novos recursos em desenvolvimento</p>
+      </div>
+      <div
+        style="width:100%;height:calc(100vh - 180px);border-radius:16px;overflow:hidden;border:1px solid rgba(255,170,0,0.3);box-shadow:0 0 40px rgba(255,170,0,0.1);">
+        <iframe src="Proxima ATT.html" style="width:100%;height:100%;border:none;" id="iframe-construcao"
+          title="Em construção"></iframe>
+      </div>
     </div>
-    <div class="pt-legend">
-      <div class="leg"><div class="leg-dot" style="background:rgba(255,107,107,0.6)"></div>Metal Alcalino</div>
-      <div class="leg"><div class="leg-dot" style="background:rgba(255,220,100,0.5)"></div>M. Alcalino-terroso</div>
-      <div class="leg"><div class="leg-dot" style="background:rgba(255,180,80,0.5)"></div>Metal Transição</div>
-      <div class="leg"><div class="leg-dot" style="background:rgba(200,200,200,0.4)"></div>Metaloide</div>
-      <div class="leg"><div class="leg-dot" style="background:rgba(100,255,200,0.4)"></div>Não-metal</div>
-      <div class="leg"><div class="leg-dot" style="background:rgba(80,200,255,0.4)"></div>Halogênio</div>
-      <div class="leg"><div class="leg-dot" style="background:rgba(150,100,255,0.5)"></div>Gás Nobre</div>
-      <div class="leg"><div class="leg-dot" style="background:rgba(255,150,220,0.5)"></div>Lantanídeo</div>
-      <div class="leg"><div class="leg-dot" style="background:rgba(200,150,255,0.5)"></div>Actinídeo</div>
-    </div>
-    <div class="pt-wrapper"><div class="pt-grid" id="pt-grid"></div></div>
-    <div class="el-detail" id="el-detail"></div>
-  </div>
-</section>
-<!-- EM CONSTRUÇÃO -->
-<section id="construcao" class="section">
-  <div class="container">
-    <div class="sec-header">
-      <h2 class="sec-title">🚧 Em construção</h2>
-      <p class="sec-sub">Prévia da próxima atualização — novos recursos em desenvolvimento</p>
-    </div>
-    <div style="width:100%;height:calc(100vh - 180px);border-radius:16px;overflow:hidden;border:1px solid rgba(255,170,0,0.3);box-shadow:0 0 40px rgba(255,170,0,0.1);">
-      <iframe src="Proxima ATT.html" style="width:100%;height:100%;border:none;" id="iframe-construcao" title="Em construção"></iframe>
-    </div>
-  </div>
-</section>
-<script>
-function toggleMainTheme() {
-  const isWhite = !document.body.classList.contains('bg-white');
-  setBackground(isWhite ? 'white' : 'black');
-}
-
-function setBackground(bg) {
-  const isWhite = bg === 'white';
-  document.body.classList.toggle('bg-white', isWhite);
-
-  if (spec3DRenderer) {
-    const bgCol = isWhite ? 0xf0f4f8 : 0x05060f;
-    spec3DRenderer.setClearColor(bgCol, 1);
-    if (spec3DScene) {
-      spec3DScene.background = new THREE.Color(bgCol);
-      spec3DScene.fog = new THREE.Fog(bgCol, 18, 40);
+  </section>
+  <script>
+    function toggleMainTheme() {
+      const isWhite = !document.body.classList.contains('bg-white');
+      setBackground(isWhite ? 'white' : 'black');
     }
-  }
 
-  const specBgBlack = document.getElementById('specBgBlack');
-  const specBgWhite = document.getElementById('specBgWhite');
-  if (specBgBlack) specBgBlack.classList.toggle('active', !isWhite);
-  if (specBgWhite) specBgWhite.classList.toggle('active', isWhite);
+    function setBackground(bg) {
+      const isWhite = bg === 'white';
+      document.body.classList.toggle('bg-white', isWhite);
 
-  const themeBtn = document.getElementById('btn-theme-toggle');
-  if (themeBtn) {
-    themeBtn.innerHTML = isWhite ? '⬛ Tema Escuro' : '⬜ Tema Claro';
-  }
-
-  setTimeout(drawAllBands, 30);
-}
-
-// NAVIGATION
-function goSection(id){
-  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
-  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
-  document.getElementById(id).classList.add('active');
-  document.getElementById('nav-'+id).classList.add('active');
-  if(id==='tabela'&&!ptBuilt) buildPeriodicTable();
-  
-  if(id==='espectro') {
-    if (!spec3DRenderer) {
-        initSpec3D();
-    } else {
-        buildSpec3DScene();
-        if (!spec3DAnimId) animateSpec3D();
-    }
-    requestAnimationFrame(() => {
-        drawAllBands();
-        bindAllBandEvents();
-    });
-  } else {
-    stopSpec3D();
-  }
-}
-
-// ══════════════════════════════════════════════════
-// SIMULADOR — Abas de Modo de Visualização
-// ══════════════════════════════════════════════════
-var simTabsVisible = false;
-var currentMainMode = 'quantum';
-var selectedQuantumView = null;
-
-var quantumViewData = {
-  solid:      { name: 'Sólido',      icon: '🔵' },
-  wireframe:  { name: 'Wireframe',   icon: '🔷' },
-  transparent:{ name: 'Transparente',icon: '🫧' },
-  cloud:      { name: 'Nuvem',       icon: '✨' }
-};
-
-function startSimSelection() {
-  simTabsVisible = !simTabsVisible;
-  var tabs = document.getElementById('sim-tabs-section');
-  var btn  = document.getElementById('btn-abrir-sim');
-  if (simTabsVisible) {
-    tabs.classList.add('visible');
-    btn.textContent = 'Fechar';
-    if(currentMainMode === 'quantum' && !selectedQuantumView) {
-      document.getElementById('sim-open-cta').classList.remove('visible');
-    } else {
-      document.getElementById('sim-open-cta').classList.add('visible');
-    }
-  } else {
-    tabs.classList.remove('visible');
-    btn.innerHTML = 'Iniciar';
-  }
-}
-
-function selectMainMode(mode, el) {
-  currentMainMode = mode;
-  document.getElementById('main-bohr').classList.remove('selected');
-  document.getElementById('main-quantum').classList.remove('selected');
-  document.getElementById('main-construcao').classList.remove('selected');
-  el.classList.add('selected');
-  
-  var quantumOptions = document.getElementById('quantum-sub-options');
-  var launchIcon = document.getElementById('btn-launch-icon');
-  var launchText = document.getElementById('btn-launch-text');
-  var labelInfo = document.getElementById('sim-selected-label');
-  var cta = document.getElementById('sim-open-cta');
-
-  if (mode === 'bohr') {
-    quantumOptions.style.display = 'none';
-    launchIcon.textContent = '🪐';
-    launchText.textContent = 'Abrir Modelo Semi-clássico';
-    labelInfo.textContent = 'MODO SELECIONADO: SEMI-CLÁSSICO';
-    cta.classList.add('visible');
-  } else if (mode === 'spectrum') {
-    quantumOptions.style.display = 'none';
-    launchIcon.textContent = '🌈';
-    launchText.textContent = 'Abrir Espectro';
-    labelInfo.textContent = 'MODO SELECIONADO: ESPECTRO';
-    cta.classList.add('visible');
-  } else if (mode === 'quantum') {
-    quantumOptions.style.display = 'block';
-    if (selectedQuantumView) {
-      var data = quantumViewData[selectedQuantumView];
-      launchIcon.textContent = data.icon;
-      launchText.textContent = 'Abrir Quântico (' + data.name + ')';
-      labelInfo.textContent = 'MODO: QUÂNTICO - ' + data.name.toUpperCase();
-      cta.classList.add('visible');
-    } else {
-      cta.classList.remove('visible');
-    }
-  } else if (mode === 'construcao') {
-    quantumOptions.style.display = 'none';
-    launchIcon.textContent = '🚧';
-    launchText.textContent = 'Abrir Em Construção';
-    labelInfo.textContent = 'MODO SELECIONADO: EM CONSTRUÇÃO';
-    cta.classList.add('visible');
-  }
-}
-
-function selectSimTab(view, el) {
-  selectedQuantumView = view;
-  var subCards = document.getElementById('quantum-sub-options').querySelectorAll('.sim-tab-card');
-  subCards.forEach(function(c){ c.classList.remove('selected'); });
-  el.classList.add('selected');
-  
-  if (currentMainMode === 'quantum') {
-    var data = quantumViewData[view];
-    document.getElementById('btn-launch-icon').textContent = data.icon;
-    document.getElementById('btn-launch-text').textContent = 'Abrir Quântico (' + data.name + ')';
-    document.getElementById('sim-selected-label').textContent = 'MODO: QUÂNTICO - ' + data.name.toUpperCase();
-    document.getElementById('sim-open-cta').classList.add('visible');
-  }
-}
-
-function launchSimulator() {
-  if (currentMainMode === 'construcao') {
-    window.open('Proxima ATT.html', '_blank');
-    return;
-  }
-  var url = 'PROTON.html?mode=' + currentMainMode;
-  if (currentMainMode === 'quantum' && selectedQuantumView) {
-    url += '&view=' + selectedQuantumView;
-  }
-  window.open(url, '_blank');
-}
-
-// PARTICLES
-var pCanvas=document.getElementById('particles-canvas');
-var pCtx=pCanvas.getContext('2d');
-var particles=[];
-function resizeParticles(){pCanvas.width=window.innerWidth;pCanvas.height=window.innerHeight;}
-resizeParticles();
-window.addEventListener('resize',resizeParticles);
-for(var i=0;i<80;i++){
-  particles.push({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:Math.random()*1.5+0.5,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,a:Math.random()});
-}
-function animParticles(){
-  pCtx.clearRect(0,0,pCanvas.width,pCanvas.height);
-  particles.forEach(function(p){
-    p.x+=p.vx; p.y+=p.vy; p.a+=0.01;
-    if(p.x<0)p.x=pCanvas.width; if(p.x>pCanvas.width)p.x=0;
-    if(p.y<0)p.y=pCanvas.height; if(p.y>pCanvas.height)p.y=0;
-    pCtx.beginPath();
-    pCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    pCtx.fillStyle='rgba(0,204,255,'+(0.2+Math.sin(p.a)*0.15)+')';
-    pCtx.fill();
-  });
-  requestAnimationFrame(animParticles);
-}
-animParticles();
-
-// PERIODIC TABLE DATA
-var elements = [
-  {"n":1,"sym":"H","name":"Hidrogênio","cat":"nomet","g":1,"p":1,"mass":1.008,"state":"gas","config":"1s1","en":2.2},
-  {"n":2,"sym":"He","name":"Hélio","cat":"nob","g":18,"p":1,"mass":4.0026,"state":"gas","config":"1s2","en":null},
-  {"n":3,"sym":"Li","name":"Lítio","cat":"metal-a","g":1,"p":2,"mass":6.94,"state":"solid","config":"1s2 2s1","en":0.98},
-  {"n":4,"sym":"Be","name":"Berílio","cat":"metal-b","g":2,"p":2,"mass":9.0122,"state":"solid","config":"1s2 2s2","en":1.57},
-  {"n":5,"sym":"B","name":"Boro","cat":"met","g":13,"p":2,"mass":10.81,"state":"solid","config":"1s2 2s2 2p1","en":2.04},
-  {"n":6,"sym":"C","name":"Carbono","cat":"nomet","g":14,"p":2,"mass":12.011,"state":"solid","config":"1s2 2s2 2p2","en":2.55},
-  {"n":7,"sym":"N","name":"Nitrogênio","cat":"nomet","g":15,"p":2,"mass":14.007,"state":"gas","config":"1s2 2s2 2p3","en":3.04},
-  {"n":8,"sym":"O","name":"Oxigênio","cat":"nomet","g":16,"p":2,"mass":15.999,"state":"gas","config":"1s2 2s2 2p4","en":3.44},
-  {"n":9,"sym":"F","name":"Flúor","cat":"hal","g":17,"p":2,"mass":18.998,"state":"gas","config":"1s2 2s2 2p5","en":3.98},
-  {"n":10,"sym":"Ne","name":"Neônio","cat":"nob","g":18,"p":2,"mass":20.18,"state":"gas","config":"1s2 2s2 2p6","en":null},
-  {"n":11,"sym":"Na","name":"Sódio","cat":"metal-a","g":1,"p":3,"mass":22.99,"state":"solid","config":"[Ne] 3s1","en":0.93},
-  {"n":12,"sym":"Mg","name":"Magnésio","cat":"metal-b","g":2,"p":3,"mass":24.305,"state":"solid","config":"[Ne] 3s2","en":1.31},
-  {"n":13,"sym":"Al","name":"Alumínio","cat":"metal-t","g":13,"p":3,"mass":26.982,"state":"solid","config":"[Ne] 3s2 3p1","en":1.61},
-  {"n":14,"sym":"Si","name":"Silício","cat":"met","g":14,"p":3,"mass":28.085,"state":"solid","config":"[Ne] 3s2 3p2","en":1.9},
-  {"n":15,"sym":"P","name":"Fósforo","cat":"nomet","g":15,"p":3,"mass":30.974,"state":"solid","config":"[Ne] 3s2 3p3","en":2.19},
-  {"n":16,"sym":"S","name":"Enxofre","cat":"nomet","g":16,"p":3,"mass":32.06,"state":"solid","config":"[Ne] 3s2 3p4","en":2.58},
-  {"n":17,"sym":"Cl","name":"Cloro","cat":"hal","g":17,"p":3,"mass":35.45,"state":"gas","config":"[Ne] 3s2 3p5","en":3.16},
-  {"n":18,"sym":"Ar","name":"Argônio","cat":"nob","g":18,"p":3,"mass":39.948,"state":"gas","config":"[Ne] 3s2 3p6","en":null},
-  {"n":19,"sym":"K","name":"Potássio","cat":"metal-a","g":1,"p":4,"mass":39.098,"state":"solid","config":"[Ar] 4s1","en":0.82},
-  {"n":20,"sym":"Ca","name":"Cálcio","cat":"metal-b","g":2,"p":4,"mass":40.078,"state":"solid","config":"[Ar] 4s2","en":1},
-  {"n":21,"sym":"Sc","name":"Escândio","cat":"metal-t","g":3,"p":4,"mass":44.956,"state":"solid","config":"[Ar] 3d1 4s2","en":1.36},
-  {"n":22,"sym":"Ti","name":"Titânio","cat":"metal-t","g":4,"p":4,"mass":47.867,"state":"solid","config":"[Ar] 3d2 4s2","en":1.54},
-  {"n":23,"sym":"V","name":"Vanádio","cat":"metal-t","g":5,"p":4,"mass":50.942,"state":"solid","config":"[Ar] 3d3 4s2","en":1.63},
-  {"n":24,"sym":"Cr","name":"Cromo","cat":"metal-t","g":6,"p":4,"mass":51.996,"state":"solid","config":"[Ar] 3d5 4s1","en":1.66},
-  {"n":25,"sym":"Mn","name":"Manganês","cat":"metal-t","g":7,"p":4,"mass":54.938,"state":"solid","config":"[Ar] 3d5 4s2","en":1.55},
-  {"n":26,"sym":"Fe","name":"Ferro","cat":"metal-t","g":8,"p":4,"mass":55.845,"state":"solid","config":"[Ar] 3d6 4s2","en":1.83},
-  {"n":27,"sym":"Co","name":"Cobalto","cat":"metal-t","g":9,"p":4,"mass":58.933,"state":"solid","config":"[Ar] 3d7 4s2","en":1.88},
-  {"n":28,"sym":"Ni","name":"Níquel","cat":"metal-t","g":10,"p":4,"mass":58.693,"state":"solid","config":"[Ar] 3d8 4s2","en":1.91},
-  {"n":29,"sym":"Cu","name":"Cobre","cat":"metal-t","g":11,"p":4,"mass":63.546,"state":"solid","config":"[Ar] 3d10 4s1","en":1.9},
-  {"n":30,"sym":"Zn","name":"Zinco","cat":"metal-t","g":12,"p":4,"mass":65.38,"state":"solid","config":"[Ar] 3d10 4s2","en":1.65},
-  {"n":31,"sym":"Ga","name":"Gálio","cat":"metal-t","g":13,"p":4,"mass":69.723,"state":"solid","config":"[Ar] 3d10 4s2 4p1","en":1.81},
-  {"n":32,"sym":"Ge","name":"Germânio","cat":"met","g":14,"p":4,"mass":72.63,"state":"solid","config":"[Ar] 3d10 4s2 4p2","en":2.01},
-  {"n":33,"sym":"As","name":"Arsênio","cat":"met","g":15,"p":4,"mass":74.922,"state":"solid","config":"[Ar] 3d10 4s2 4p3","en":2.18},
-  {"n":34,"sym":"Se","name":"Selênio","cat":"nomet","g":16,"p":4,"mass":78.971,"state":"solid","config":"[Ar] 3d10 4s2 4p4","en":2.55},
-  {"n":35,"sym":"Br","name":"Bromo","cat":"hal","g":17,"p":4,"mass":79.904,"state":"liquid","config":"[Ar] 3d10 4s2 4p5","en":2.96},
-  {"n":36,"sym":"Kr","name":"Criptônio","cat":"nob","g":18,"p":4,"mass":83.798,"state":"gas","config":"[Ar] 3d10 4s2 4p6","en":3},
-  {"n":37,"sym":"Rb","name":"Rubídio","cat":"metal-a","g":1,"p":5,"mass":85.468,"state":"solid","config":"[Kr] 5s1","en":0.82},
-  {"n":38,"sym":"Sr","name":"Estrôncio","cat":"metal-b","g":2,"p":5,"mass":87.621,"state":"solid","config":"[Kr] 5s2","en":0.95},
-  {"n":39,"sym":"Y","name":"Ítrio","cat":"metal-t","g":3,"p":5,"mass":88.906,"state":"solid","config":"[Kr] 4d1 5s2","en":1.22},
-  {"n":40,"sym":"Zr","name":"Zircônio","cat":"metal-t","g":4,"p":5,"mass":91.224,"state":"solid","config":"[Kr] 4d2 5s2","en":1.33},
-  {"n":41,"sym":"Nb","name":"Nióbio","cat":"metal-t","g":5,"p":5,"mass":92.906,"state":"solid","config":"[Kr] 4d4 5s1","en":1.6},
-  {"n":42,"sym":"Mo","name":"Molibdênio","cat":"metal-t","g":6,"p":5,"mass":95.95,"state":"solid","config":"[Kr] 4d5 5s1","en":2.16},
-  {"n":43,"sym":"Tc","name":"Tecnécio","cat":"metal-t","g":7,"p":5,"mass":98,"state":"solid","config":"[Kr] 4d5 5s2","en":1.9},
-  {"n":44,"sym":"Ru","name":"Rutênio","cat":"metal-t","g":8,"p":5,"mass":101.07,"state":"solid","config":"[Kr] 4d7 5s1","en":2.2},
-  {"n":45,"sym":"Rh","name":"Ródio","cat":"metal-t","g":9,"p":5,"mass":102.91,"state":"solid","config":"[Kr] 4d8 5s1","en":2.28},
-  {"n":46,"sym":"Pd","name":"Paládio","cat":"metal-t","g":10,"p":5,"mass":106.42,"state":"solid","config":"[Kr] 4d10","en":2.2},
-  {"n":47,"sym":"Ag","name":"Prata","cat":"metal-t","g":11,"p":5,"mass":107.87,"state":"solid","config":"[Kr] 4d10 5s1","en":1.93},
-  {"n":48,"sym":"Cd","name":"Cádmio","cat":"metal-t","g":12,"p":5,"mass":112.41,"state":"solid","config":"[Kr] 4d10 5s2","en":1.69},
-  {"n":49,"sym":"In","name":"Índio","cat":"metal-t","g":13,"p":5,"mass":114.82,"state":"solid","config":"[Kr] 4d10 5s2 5p1","en":1.78},
-  {"n":50,"sym":"Sn","name":"Estanho","cat":"metal-t","g":14,"p":5,"mass":118.71,"state":"solid","config":"[Kr] 4d10 5s2 5p2","en":1.96},
-  {"n":51,"sym":"Sb","name":"Antimônio","cat":"met","g":15,"p":5,"mass":121.76,"state":"solid","config":"[Kr] 4d10 5s2 5p3","en":2.05},
-  {"n":52,"sym":"Te","name":"Telúrio","cat":"met","g":16,"p":5,"mass":127.6,"state":"solid","config":"[Kr] 4d10 5s2 5p4","en":2.1},
-  {"n":53,"sym":"I","name":"Iodo","cat":"hal","g":17,"p":5,"mass":126.9,"state":"solid","config":"[Kr] 4d10 5s2 5p5","en":2.66},
-  {"n":54,"sym":"Xe","name":"Xenônio","cat":"nob","g":18,"p":5,"mass":131.29,"state":"gas","config":"[Kr] 4d10 5s2 5p6","en":2.6},
-  {"n":55,"sym":"Cs","name":"Césio","cat":"metal-a","g":1,"p":6,"mass":132.91,"state":"solid","config":"[Xe] 6s1","en":0.79},
-  {"n":56,"sym":"Ba","name":"Bário","cat":"metal-b","g":2,"p":6,"mass":137.33,"state":"solid","config":"[Xe] 6s2","en":0.89},
-  {"n":57,"sym":"La","name":"Lantânio","cat":"lan","g":3,"p":6,"mass":138.91,"state":"solid","config":"[Xe] 5d1 6s2","en":1.1},
-  {"n":58,"sym":"Ce","name":"Cério","cat":"lan","g":3,"p":6,"mass":140.12,"state":"solid","config":"[Xe] 4f1 5d1 6s2","en":1.12},
-  {"n":59,"sym":"Pr","name":"Praseodímio","cat":"lan","g":3,"p":6,"mass":140.91,"state":"solid","config":"[Xe] 4f3 6s2","en":1.13},
-  {"n":60,"sym":"Nd","name":"Neodímio","cat":"lan","g":3,"p":6,"mass":144.24,"state":"solid","config":"[Xe] 4f4 6s2","en":1.14},
-  {"n":61,"sym":"Pm","name":"Promécio","cat":"lan","g":3,"p":6,"mass":145,"state":"solid","config":"[Xe] 4f5 6s2","en":1.13},
-  {"n":62,"sym":"Sm","name":"Samário","cat":"lan","g":3,"p":6,"mass":150.36,"state":"solid","config":"[Xe] 4f6 6s2","en":1.17},
-  {"n":63,"sym":"Eu","name":"Európio","cat":"lan","g":3,"p":6,"mass":151.96,"state":"solid","config":"[Xe] 4f7 6s2","en":1.2},
-  {"n":64,"sym":"Gd","name":"Gadolínio","cat":"lan","g":3,"p":6,"mass":157.25,"state":"solid","config":"[Xe] 4f7 5d1 6s2","en":1.2},
-  {"n":65,"sym":"Tb","name":"Térbio","cat":"lan","g":3,"p":6,"mass":158.93,"state":"solid","config":"[Xe] 4f9 6s2","en":1.1},
-  {"n":66,"sym":"Dy","name":"Disprósio","cat":"lan","g":3,"p":6,"mass":162.5,"state":"solid","config":"[Xe] 4f10 6s2","en":1.22},
-  {"n":67,"sym":"Ho","name":"Hólmio","cat":"lan","g":3,"p":6,"mass":164.93,"state":"solid","config":"[Xe] 4f11 6s2","en":1.23},
-  {"n":68,"sym":"Er","name":"Érbio","cat":"lan","g":3,"p":6,"mass":167.26,"state":"solid","config":"[Xe] 4f12 6s2","en":1.24},
-  {"n":69,"sym":"Tm","name":"Túlio","cat":"lan","g":3,"p":6,"mass":168.93,"state":"solid","config":"[Xe] 4f13 6s2","en":1.25},
-  {"n":70,"sym":"Yb","name":"Itérbio","cat":"lan","g":3,"p":6,"mass":173.05,"state":"solid","config":"[Xe] 4f14 6s2","en":1.1},
-  {"n":71,"sym":"Lu","name":"Lutécio","cat":"lan","g":3,"p":6,"mass":174.97,"state":"solid","config":"[Xe] 4f14 5d1 6s2","en":1.27},
-  {"n":72,"sym":"Hf","name":"Háfnio","cat":"metal-t","g":4,"p":6,"mass":178.49,"state":"solid","config":"[Xe] 4f14 5d2 6s2","en":1.3},
-  {"n":73,"sym":"Ta","name":"Tântalo","cat":"metal-t","g":5,"p":6,"mass":180.95,"state":"solid","config":"[Xe] 4f14 5d3 6s2","en":1.5},
-  {"n":74,"sym":"W","name":"Tungstênio","cat":"metal-t","g":6,"p":6,"mass":183.84,"state":"solid","config":"[Xe] 4f14 5d4 6s2","en":2.36},
-  {"n":75,"sym":"Re","name":"Rênio","cat":"metal-t","g":7,"p":6,"mass":186.21,"state":"solid","config":"[Xe] 4f14 5d5 6s2","en":1.9},
-  {"n":76,"sym":"Os","name":"Ósmio","cat":"metal-t","g":8,"p":6,"mass":190.23,"state":"solid","config":"[Xe] 4f14 5d6 6s2","en":2.2},
-  {"n":77,"sym":"Ir","name":"Irídio","cat":"metal-t","g":9,"p":6,"mass":192.22,"state":"solid","config":"[Xe] 4f14 5d7 6s2","en":2.2},
-  {"n":78,"sym":"Pt","name":"Platina","cat":"metal-t","g":10,"p":6,"mass":195.08,"state":"solid","config":"[Xe] 4f14 5d9 6s1","en":2.28},
-  {"n":79,"sym":"Au","name":"Ouro","cat":"metal-t","g":11,"p":6,"mass":196.97,"state":"solid","config":"[Xe] 4f14 5d10 6s1","en":2.54},
-  {"n":80,"sym":"Hg","name":"Mercúrio","cat":"metal-t","g":12,"p":6,"mass":200.59,"state":"liquid","config":"[Xe] 4f14 5d10 6s2","en":2},
-  {"n":81,"sym":"Tl","name":"Tálio","cat":"metal-t","g":13,"p":6,"mass":204.38,"state":"solid","config":"[Xe] 4f14 5d10 6s2 6p1","en":1.62},
-  {"n":82,"sym":"Pb","name":"Chumbo","cat":"metal-t","g":14,"p":6,"mass":207.2,"state":"solid","config":"[Xe] 4f14 5d10 6s2 6p2","en":2.33},
-  {"n":83,"sym":"Bi","name":"Bismuto","cat":"metal-t","g":15,"p":6,"mass":208.98,"state":"solid","config":"[Xe] 4f14 5d10 6s2 6p3","en":2.02},
-  {"n":84,"sym":"Po","name":"Polônio","cat":"metal-t","g":16,"p":6,"mass":209,"state":"solid","config":"[Xe] 4f14 5d10 6s2 6p4","en":2},
-  {"n":85,"sym":"At","name":"Astato","cat":"hal","g":17,"p":6,"mass":210,"state":"solid","config":"[Xe] 4f14 5d10 6s2 6p5","en":2.2},
-  {"n":86,"sym":"Rn","name":"Radônio","cat":"nob","g":18,"p":6,"mass":222,"state":"gas","config":"[Xe] 4f14 5d10 6s2 6p6","en":2.2},
-  {"n":87,"sym":"Fr","name":"Frâncio","cat":"metal-a","g":1,"p":7,"mass":223,"state":"solid","config":"[Rn] 7s1","en":0.79},
-  {"n":88,"sym":"Ra","name":"Rádio","cat":"metal-b","g":2,"p":7,"mass":226,"state":"solid","config":"[Rn] 7s2","en":0.9},
-  {"n":89,"sym":"Ac","name":"Actínio","cat":"act","g":3,"p":7,"mass":227,"state":"solid","config":"[Rn] 6d1 7s2","en":1.1},
-  {"n":90,"sym":"Th","name":"Tório","cat":"act","g":3,"p":7,"mass":232.04,"state":"solid","config":"[Rn] 6d2 7s2","en":1.3},
-  {"n":91,"sym":"Pa","name":"Protactínio","cat":"act","g":3,"p":7,"mass":231.04,"state":"solid","config":"[Rn] 5f2 6d1 7s2","en":1.5},
-  {"n":92,"sym":"U","name":"Urânio","cat":"act","g":3,"p":7,"mass":238.03,"state":"solid","config":"[Rn] 5f3 6d1 7s2","en":1.38},
-  {"n":93,"sym":"Np","name":"Netúnio","cat":"act","g":3,"p":7,"mass":237,"state":"solid","config":"[Rn] 5f4 6d1 7s2","en":1.36},
-  {"n":94,"sym":"Pu","name":"Plutônio","cat":"act","g":3,"p":7,"mass":244,"state":"solid","config":"[Rn] 5f6 7s2","en":1.28},
-  {"n":95,"sym":"Am","name":"Amerício","cat":"act","g":3,"p":7,"mass":243,"state":"solid","config":"[Rn] 5f7 7s2","en":1.13},
-  {"n":96,"sym":"Cm","name":"Cúrio","cat":"act","g":3,"p":7,"mass":247,"state":"solid","config":"[Rn] 5f7 6d1 7s2","en":1.28},
-  {"n":97,"sym":"Bk","name":"Berquélio","cat":"act","g":3,"p":7,"mass":247,"state":"solid","config":"[Rn] 5f9 7s2","en":1.3},
-  {"n":98,"sym":"Cf","name":"Califórnio","cat":"act","g":3,"p":7,"mass":251,"state":"solid","config":"[Rn] 5f10 7s2","en":1.3},
-  {"n":99,"sym":"Es","name":"Enstênio","cat":"act","g":3,"p":7,"mass":252,"state":"solid","config":"[Rn] 5f11 7s2","en":1.3},
-  {"n":100,"sym":"Fm","name":"Férmio","cat":"act","g":3,"p":7,"mass":257,"state":"solid","config":"[Rn] 5f12 7s2","en":1.3},
-  {"n":101,"sym":"Md","name":"Mendelévio","cat":"act","g":3,"p":7,"mass":258,"state":"solid","config":"[Rn] 5f13 7s2","en":1.3},
-  {"n":102,"sym":"No","name":"Nobélio","cat":"act","g":3,"p":7,"mass":259,"state":"solid","config":"[Rn] 5f14 7s2","en":1.3},
-  {"n":103,"sym":"Lr","name":"Laurêncio","cat":"act","g":3,"p":7,"mass":262,"state":"solid","config":"[Rn] 5f14 7p1 7s2","en":1.3},
-  {"n":104,"sym":"Rf","name":"Rutherfórdio","cat":"metal-t","g":4,"p":7,"mass":267,"state":"solid","config":"[Rn] 5f14 6d2 7s2","en":null},
-  {"n":105,"sym":"Db","name":"Dúbnio","cat":"metal-t","g":5,"p":7,"mass":268,"state":"solid","config":"[Rn] 5f14 6d3 7s2","en":null},
-  {"n":106,"sym":"Sg","name":"Seabórgio","cat":"metal-t","g":6,"p":7,"mass":269,"state":"solid","config":"[Rn] 5f14 6d4 7s2","en":null},
-  {"n":107,"sym":"Bh","name":"Bório","cat":"metal-t","g":7,"p":7,"mass":270,"state":"solid","config":"[Rn] 5f14 6d5 7s2","en":null},
-  {"n":108,"sym":"Hs","name":"Hássio","cat":"metal-t","g":8,"p":7,"mass":269,"state":"solid","config":"[Rn] 5f14 6d6 7s2","en":null},
-  {"n":109,"sym":"Mt","name":"Meitnério","cat":"metal-t","g":9,"p":7,"mass":278,"state":"solid","config":"[Rn] 5f14 6d7 7s2","en":null},
-  {"n":110,"sym":"Ds","name":"Darmstádio","cat":"metal-t","g":10,"p":7,"mass":281,"state":"solid","config":"[Rn] 5f14 6d8 7s2","en":null},
-  {"n":111,"sym":"Rg","name":"Roentgênio","cat":"metal-t","g":11,"p":7,"mass":282,"state":"solid","config":"[Rn] 5f14 6d9 7s2","en":null},
-  {"n":112,"sym":"Cn","name":"Copernício","cat":"metal-t","g":12,"p":7,"mass":285,"state":"liquid","config":"[Rn] 5f14 6d10 7s2","en":null},
-  {"n":113,"sym":"Nh","name":"Nipônio","cat":"metal-t","g":13,"p":7,"mass":286,"state":"solid","config":"[Rn] 5f14 6d10 7s2 7p1","en":null},
-  {"n":114,"sym":"Fl","name":"Fleróvio","cat":"metal-t","g":14,"p":7,"mass":289,"state":"solid","config":"[Rn] 5f14 6d10 7s2 7p2","en":null},
-  {"n":115,"sym":"Mc","name":"Moscóvio","cat":"metal-t","g":15,"p":7,"mass":289,"state":"solid","config":"[Rn] 5f14 6d10 7s2 7p3","en":null},
-  {"n":116,"sym":"Lv","name":"Livermório","cat":"metal-t","g":16,"p":7,"mass":293,"state":"solid","config":"[Rn] 5f14 6d10 7s2 7p4","en":null},
-  {"n":117,"sym":"Ts","name":"Tennesso","cat":"hal","g":17,"p":7,"mass":294,"state":"solid","config":"[Rn] 5f14 6d10 7s2 7p5","en":null},
-  {"n":118,"sym":"Og","name":"Oganésson","cat":"nob","g":18,"p":7,"mass":294,"state":"solid","config":"[Rn] 5f14 6d10 7s2 7p6","en":null},
-];
-
-var ptBuilt=false;
-function buildPeriodicTable(){
-  ptBuilt=true;
-  var grid=document.getElementById('pt-grid');
-  grid.innerHTML='';
-  var cellMap={};
-  elements.forEach(function(el){
-    var col=el.g, row=el.p;
-    if(el.cat==='lan'){ row=9; col=el.n-56+2; }
-    if(el.cat==='act'){ row=10; col=el.n-88+2; }
-    cellMap[row+'-'+col]=el;
-  });
-  for(var r=1;r<=10;r++){
-    for(var c=1;c<=18;c++){
-      var el=cellMap[r+'-'+c];
-      var div=document.createElement('div');
-      if(!el){
-        div.className='el-btn el-hidden';
-        div.innerHTML='&nbsp;';
-      } else {
-        div.className='el-btn el-'+el.cat;
-        div.id='el-'+el.n;
-        div.title=el.name;
-        div.innerHTML='<span class="el-num">'+el.n+'</span><span class="el-sym">'+el.sym+'</span><span class="el-name">'+el.name.substring(0,7)+'</span>';
-        (function(e){div.onclick=function(){showElement(e);};})(el);
-        div.setAttribute('data-cat',el.cat);
+      if (spec3DRenderer) {
+        const bgCol = isWhite ? 0xf0f4f8 : 0x05060f;
+        spec3DRenderer.setClearColor(bgCol, 1);
+        if (spec3DScene) {
+          spec3DScene.background = new THREE.Color(bgCol);
+          spec3DScene.fog = new THREE.Fog(bgCol, 18, 40);
+        }
       }
-      grid.appendChild(div);
+
+      const specBgBlack = document.getElementById('specBgBlack');
+      const specBgWhite = document.getElementById('specBgWhite');
+      if (specBgBlack) specBgBlack.classList.toggle('active', !isWhite);
+      if (specBgWhite) specBgWhite.classList.toggle('active', isWhite);
+
+      const themeBtn = document.getElementById('btn-theme-toggle');
+      if (themeBtn) {
+        themeBtn.innerHTML = isWhite ? '⬛ Tema Escuro' : '⬜ Tema Claro';
+      }
+
+      setTimeout(drawAllBands, 30);
     }
-  }
-}
 
-function filterElements(cat,btn){
-  document.querySelectorAll('#pt-filters .pt-btn').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
-  document.querySelectorAll('.el-btn').forEach(function(el){
-    if(el.classList.contains('el-hidden')) return;
-    var elCat=el.getAttribute('data-cat');
-    el.style.opacity=(cat==='all'||elCat===cat)?'1':'0.15';
-    el.style.filter=(cat==='all'||elCat===cat)?'':'grayscale(1)';
-  });
-}
+    // NAVIGATION
+    function goSection(id) {
+      document.querySelectorAll('.section').forEach(function (s) { s.classList.remove('active'); });
+      document.querySelectorAll('.nav-btn').forEach(function (b) { b.classList.remove('active'); });
+      document.getElementById(id).classList.add('active');
+      if (document.getElementById('nav-' + id)) document.getElementById('nav-' + id).classList.add('active');
 
-function showElement(el){
-  document.querySelectorAll('.el-btn').forEach(function(b){b.classList.remove('active-el');});
-  var btn=document.getElementById('el-'+el.n);
-  if(btn) btn.classList.add('active-el');
-  var detail=document.getElementById('el-detail');
-  var stateMap={solid:'S\u00f3lido',gas:'Gasoso',liquid:'L\u00edquido'};
-  var catMap={'metal-a':'Metal Alcalino','metal-t':'Metal de Transi\u00e7\u00e3o','metal-b':'Metal Alcalino-terroso','nomet':'N\u00e3o Metal','nob':'G\u00e1s Nobre','hal':'Halog\u00eanio','met':'Metaloide','lan':'Latan\u00eddeo','act':'Actin\u00eddeo'};
-  detail.innerHTML=
-    '<div class="el-detail-header">'+
-      '<div class="el-big-sym">'+el.sym+'</div>'+
-      '<div class="el-detail-info"><h3>'+el.name+'</h3><p>Z = '+el.n+' &nbsp;|&nbsp; '+(catMap[el.cat]||el.cat)+'</p></div>'+
-    '</div>'+
-    '<div class="el-props">'+
-      '<div class="el-prop"><div class="el-prop-label">Massa At\u00f4mica</div><div class="el-prop-val">'+el.mass+' u</div></div>'+
-      '<div class="el-prop"><div class="el-prop-label">N\u00ba At\u00f4mico</div><div class="el-prop-val">'+el.n+'</div></div>'+
-      '<div class="el-prop"><div class="el-prop-label">Estado F\u00edsico</div><div class="el-prop-val">'+(stateMap[el.state]||el.state)+'</div></div>'+
-      '<div class="el-prop"><div class="el-prop-label">Config. Eletr\u00f4nica</div><div class="el-prop-val" style="font-size:0.85rem">'+el.config+'</div></div>'+
-      '<div class="el-prop"><div class="el-prop-label">Eletronegatividade</div><div class="el-prop-val">'+(el.en||'&mdash;')+'</div></div>'+
-      '<div class="el-prop"><div class="el-prop-label">Per\u00edodo</div><div class="el-prop-val">'+el.p+'</div></div>'+
-    '</div>';
-  detail.classList.add('show');
-  detail.style.display='block';
-  detail.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
+      if (id === 'espectro') {
+        if (!spec3DRenderer) {
+          initSpec3D();
+        } else {
+          buildSpec3DScene();
+          if (!spec3DAnimId) animateSpec3D();
+        }
+        requestAnimationFrame(() => {
+          drawAllBands();
+          bindAllBandEvents();
+        });
+      } else {
+        stopSpec3D();
+      }
+    }
 
-// ══════════════════════════════════════════════════
-// ESPECTRO — Espectroscópio Científico (Importado de Atualização.html)
-// ══════════════════════════════════════════════════
-const hc_eVnm = 1239.84;
-const serieColors = { 1:'#aa55ff', 2:'#00cc66', 3:'#ff7722', 4:'#ffaa00' };
-const serieNames  = { 1:'Lyman', 2:'Balmer', 3:'Paschen', 4:'Brackett' };
-const serieRegion = { 1:'UV extremo', 2:'Visível / UV', 3:'IV próximo', 4:'IV médio' };
-let specMode = 'emission';
-let hoveredInfo = null; // {n1, n2}
+    // ══════════════════════════════════════════════════
+    // SIMULADOR — Abas de Modo de Visualização
+    // ══════════════════════════════════════════════════
+    var simTabsVisible = false;
+    var currentMainMode = 'quantum';
+    var selectedQuantumView = null;
 
-function hydrogenWavelength(n1, n2) {
-    if (n2 <= n1) return null;
-    const dE = 13.6 * (1/(n1*n1) - 1/(n2*n2));
-    return hc_eVnm / dE;
-}
+    var quantumViewData = {
+      solid: { name: 'Sólido', icon: '🔵' },
+      wireframe: { name: 'Wireframe', icon: '🔷' },
+      cloud: { name: 'Nuvem', icon: '✨' }
+    };
 
-function wavelengthToColor(nm) {
-    let r, g, b;
-    if      (nm < 380)  { r=0.5; g=0;   b=0.5; }
-    else if (nm < 440)  { r=(440-nm)/60; g=0; b=1; }
-    else if (nm < 490)  { r=0; g=(nm-440)/50; b=1; }
-    else if (nm < 510)  { r=0; g=1; b=(510-nm)/20; }
-    else if (nm < 580)  { r=(nm-510)/70; g=1; b=0; }
-    else if (nm < 645)  { r=1; g=(645-nm)/65; b=0; }
-    else if (nm < 750)  { r=1; g=0; b=0; }
-    else                { r=0.5; g=0; b=0; }
-    let a = 1;
-    if (nm < 420) a = 0.3 + 0.7*(nm-380)/40;
-    else if (nm > 700) a = 0.3 + 0.7*(750-nm)/50;
-    return { r:Math.round(r*255), g:Math.round(g*255), b:Math.round(b*255), a };
-}
+    function startSimSelection() {
+      simTabsVisible = !simTabsVisible;
+      var tabs = document.getElementById('sim-tabs-section');
+      var btn = document.getElementById('btn-abrir-sim');
+      if (simTabsVisible) {
+        tabs.classList.add('visible');
+        btn.textContent = 'Fechar';
+        if (currentMainMode === 'quantum' && !selectedQuantumView) {
+          document.getElementById('sim-open-cta').classList.remove('visible');
+        } else {
+          document.getElementById('sim-open-cta').classList.add('visible');
+        }
+      } else {
+        tabs.classList.remove('visible');
+        btn.innerHTML = 'Iniciar';
+      }
+    }
 
-function regionForNm(nm) {
-    if (nm < 200)  return 'UV extremo';
-    if (nm < 380)  return 'Ultravioleta (UV)';
-    if (nm < 750)  return 'Visível';
-    if (nm < 1400) return 'Infravermelho próximo';
-    return 'Infravermelho';
-}
+    function selectMainMode(mode, el) {
+      currentMainMode = mode;
+      document.getElementById('main-bohr').classList.remove('selected');
+      document.getElementById('main-quantum').classList.remove('selected');
+      document.getElementById('main-construcao').classList.remove('selected');
+      el.classList.add('selected');
 
-window.setSpecMode = function(mode) {
-    specMode = mode;
-    const btnE = document.getElementById('btnEmission');
-    const btnA = document.getElementById('btnAbsorption');
-    if (btnE) { btnE.classList.toggle('active', mode === 'emission'); }
-    if (btnA) { btnA.classList.toggle('active', mode === 'absorption'); }
-    drawAllBands();
-    if (spec3DRenderer) { spec3DLineTimer = 0; buildSpec3DScene(); }
-};
+      var quantumOptions = document.getElementById('quantum-sub-options');
+      var launchIcon = document.getElementById('btn-launch-icon');
+      var launchText = document.getElementById('btn-launch-text');
+      var labelInfo = document.getElementById('sim-selected-label');
+      var cta = document.getElementById('sim-open-cta');
 
-// ── Cena 3D do Espectro ──
-let spec3DScene, spec3DCamera, spec3DRenderer, spec3DAnimId;
-let spec3DDragging = false, spec3DLastX = 0, spec3DLastY = 0;
-let spec3DRotY = -0.3, spec3DRotX = 0.18;
-let spec3DSpectralLines = [];
-let spec3DPhotons = [];
-let spec3D_screenLines = [];
-let spec3D_tubeLight = null;
-let spec3DLineTimer = 0;
+      if (mode === 'bohr') {
+        quantumOptions.style.display = 'none';
+        launchIcon.textContent = '🪐';
+        launchText.textContent = 'Abrir Modelo Semi-clássico';
+        labelInfo.textContent = 'MODO SELECIONADO: SEMI-CLÁSSICO';
+        cta.classList.add('visible');
+      } else if (mode === 'spectrum') {
+        quantumOptions.style.display = 'none';
+        launchIcon.textContent = '🌈';
+        launchText.textContent = 'Abrir Espectro';
+        labelInfo.textContent = 'MODO SELECIONADO: ESPECTRO';
+        cta.classList.add('visible');
+      } else if (mode === 'quantum') {
+        quantumOptions.style.display = 'block';
+        if (selectedQuantumView) {
+          var data = quantumViewData[selectedQuantumView];
+          launchIcon.textContent = data.icon;
+          launchText.textContent = 'Abrir Quântico (' + data.name + ')';
+          labelInfo.textContent = 'MODO: QUÂNTICO - ' + data.name.toUpperCase();
+          cta.classList.add('visible');
+        } else {
+          cta.classList.remove('visible');
+        }
+      } else if (mode === 'construcao') {
+        quantumOptions.style.display = 'none';
+        launchIcon.textContent = '🚧';
+        launchText.textContent = 'Abrir Em Construção';
+        labelInfo.textContent = 'MODO SELECIONADO: EM CONSTRUÇÃO';
+        cta.classList.add('visible');
+      }
+    }
 
-function bindSpec3DEvents() {
-    const canvas = document.getElementById('spec3DCanvas');
-    const cont   = document.getElementById('spec3DContainer');
-    if (!canvas || canvas._evBound) return;
-    canvas._evBound = true;
+    function selectSimTab(view, el) {
+      selectedQuantumView = view;
+      var subCards = document.getElementById('quantum-sub-options').querySelectorAll('.sim-tab-card');
+      subCards.forEach(function (c) { c.classList.remove('selected'); });
+      el.classList.add('selected');
 
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
+      if (currentMainMode === 'quantum') {
+        var data = quantumViewData[view];
+        document.getElementById('btn-launch-icon').textContent = data.icon;
+        document.getElementById('btn-launch-text').textContent = 'Abrir Quântico (' + data.name + ')';
+        document.getElementById('sim-selected-label').textContent = 'MODO: QUÂNTICO - ' + data.name.toUpperCase();
+        document.getElementById('sim-open-cta').classList.add('visible');
+      }
+    }
 
-    canvas.addEventListener('mousedown', e => {
+    function launchSimulator() {
+      if (currentMainMode === 'construcao') {
+        window.open('Proxima ATT.html', '_blank');
+        return;
+      }
+      var url = 'PROTON.html?mode=' + currentMainMode;
+      if (currentMainMode === 'quantum' && selectedQuantumView) {
+        url += '&view=' + selectedQuantumView;
+      }
+      window.open(url, '_blank');
+    }
+
+    // PARTICLES
+    var pCanvas = document.getElementById('particles-canvas');
+    var pCtx = pCanvas.getContext('2d');
+    var particles = [];
+    function resizeParticles() { pCanvas.width = window.innerWidth; pCanvas.height = window.innerHeight; }
+    resizeParticles();
+    window.addEventListener('resize', resizeParticles);
+    for (var i = 0; i < 80; i++) {
+      particles.push({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, r: Math.random() * 1.5 + 0.5, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, a: Math.random() });
+    }
+    function animParticles() {
+      pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+      particles.forEach(function (p) {
+        p.x += p.vx; p.y += p.vy; p.a += 0.01;
+        if (p.x < 0) p.x = pCanvas.width; if (p.x > pCanvas.width) p.x = 0;
+        if (p.y < 0) p.y = pCanvas.height; if (p.y > pCanvas.height) p.y = 0;
+        pCtx.beginPath();
+        pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        pCtx.fillStyle = 'rgba(0,204,255,' + (0.2 + Math.sin(p.a) * 0.15) + ')';
+        pCtx.fill();
+      });
+      requestAnimationFrame(animParticles);
+    }
+    animParticles();
+
+    // PERIODIC TABLE DATA
+    var elements = [
+      { "n": 1, "sym": "H", "name": "Hidrogênio", "cat": "nomet", "g": 1, "p": 1, "mass": 1.008, "state": "gas", "config": "1s1", "en": 2.2 },
+      { "n": 2, "sym": "He", "name": "Hélio", "cat": "nob", "g": 18, "p": 1, "mass": 4.0026, "state": "gas", "config": "1s2", "en": null },
+      { "n": 3, "sym": "Li", "name": "Lítio", "cat": "metal-a", "g": 1, "p": 2, "mass": 6.94, "state": "solid", "config": "1s2 2s1", "en": 0.98 },
+      { "n": 4, "sym": "Be", "name": "Berílio", "cat": "metal-b", "g": 2, "p": 2, "mass": 9.0122, "state": "solid", "config": "1s2 2s2", "en": 1.57 },
+      { "n": 5, "sym": "B", "name": "Boro", "cat": "met", "g": 13, "p": 2, "mass": 10.81, "state": "solid", "config": "1s2 2s2 2p1", "en": 2.04 },
+      { "n": 6, "sym": "C", "name": "Carbono", "cat": "nomet", "g": 14, "p": 2, "mass": 12.011, "state": "solid", "config": "1s2 2s2 2p2", "en": 2.55 },
+      { "n": 7, "sym": "N", "name": "Nitrogênio", "cat": "nomet", "g": 15, "p": 2, "mass": 14.007, "state": "gas", "config": "1s2 2s2 2p3", "en": 3.04 },
+      { "n": 8, "sym": "O", "name": "Oxigênio", "cat": "nomet", "g": 16, "p": 2, "mass": 15.999, "state": "gas", "config": "1s2 2s2 2p4", "en": 3.44 },
+      { "n": 9, "sym": "F", "name": "Flúor", "cat": "hal", "g": 17, "p": 2, "mass": 18.998, "state": "gas", "config": "1s2 2s2 2p5", "en": 3.98 },
+      { "n": 10, "sym": "Ne", "name": "Neônio", "cat": "nob", "g": 18, "p": 2, "mass": 20.18, "state": "gas", "config": "1s2 2s2 2p6", "en": null },
+      { "n": 11, "sym": "Na", "name": "Sódio", "cat": "metal-a", "g": 1, "p": 3, "mass": 22.99, "state": "solid", "config": "[Ne] 3s1", "en": 0.93 },
+      { "n": 12, "sym": "Mg", "name": "Magnésio", "cat": "metal-b", "g": 2, "p": 3, "mass": 24.305, "state": "solid", "config": "[Ne] 3s2", "en": 1.31 },
+      { "n": 13, "sym": "Al", "name": "Alumínio", "cat": "metal-t", "g": 13, "p": 3, "mass": 26.982, "state": "solid", "config": "[Ne] 3s2 3p1", "en": 1.61 },
+      { "n": 14, "sym": "Si", "name": "Silício", "cat": "met", "g": 14, "p": 3, "mass": 28.085, "state": "solid", "config": "[Ne] 3s2 3p2", "en": 1.9 },
+      { "n": 15, "sym": "P", "name": "Fósforo", "cat": "nomet", "g": 15, "p": 3, "mass": 30.974, "state": "solid", "config": "[Ne] 3s2 3p3", "en": 2.19 },
+      { "n": 16, "sym": "S", "name": "Enxofre", "cat": "nomet", "g": 16, "p": 3, "mass": 32.06, "state": "solid", "config": "[Ne] 3s2 3p4", "en": 2.58 },
+      { "n": 17, "sym": "Cl", "name": "Cloro", "cat": "hal", "g": 17, "p": 3, "mass": 35.45, "state": "gas", "config": "[Ne] 3s2 3p5", "en": 3.16 },
+      { "n": 18, "sym": "Ar", "name": "Argônio", "cat": "nob", "g": 18, "p": 3, "mass": 39.948, "state": "gas", "config": "[Ne] 3s2 3p6", "en": null },
+      { "n": 19, "sym": "K", "name": "Potássio", "cat": "metal-a", "g": 1, "p": 4, "mass": 39.098, "state": "solid", "config": "[Ar] 4s1", "en": 0.82 },
+      { "n": 20, "sym": "Ca", "name": "Cálcio", "cat": "metal-b", "g": 2, "p": 4, "mass": 40.078, "state": "solid", "config": "[Ar] 4s2", "en": 1 },
+      { "n": 21, "sym": "Sc", "name": "Escândio", "cat": "metal-t", "g": 3, "p": 4, "mass": 44.956, "state": "solid", "config": "[Ar] 3d1 4s2", "en": 1.36 },
+      { "n": 22, "sym": "Ti", "name": "Titânio", "cat": "metal-t", "g": 4, "p": 4, "mass": 47.867, "state": "solid", "config": "[Ar] 3d2 4s2", "en": 1.54 },
+      { "n": 23, "sym": "V", "name": "Vanádio", "cat": "metal-t", "g": 5, "p": 4, "mass": 50.942, "state": "solid", "config": "[Ar] 3d3 4s2", "en": 1.63 },
+      { "n": 24, "sym": "Cr", "name": "Cromo", "cat": "metal-t", "g": 6, "p": 4, "mass": 51.996, "state": "solid", "config": "[Ar] 3d5 4s1", "en": 1.66 },
+      { "n": 25, "sym": "Mn", "name": "Manganês", "cat": "metal-t", "g": 7, "p": 4, "mass": 54.938, "state": "solid", "config": "[Ar] 3d5 4s2", "en": 1.55 },
+      { "n": 26, "sym": "Fe", "name": "Ferro", "cat": "metal-t", "g": 8, "p": 4, "mass": 55.845, "state": "solid", "config": "[Ar] 3d6 4s2", "en": 1.83 },
+      { "n": 27, "sym": "Co", "name": "Cobalto", "cat": "metal-t", "g": 9, "p": 4, "mass": 58.933, "state": "solid", "config": "[Ar] 3d7 4s2", "en": 1.88 },
+      { "n": 28, "sym": "Ni", "name": "Níquel", "cat": "metal-t", "g": 10, "p": 4, "mass": 58.693, "state": "solid", "config": "[Ar] 3d8 4s2", "en": 1.91 },
+      { "n": 29, "sym": "Cu", "name": "Cobre", "cat": "metal-t", "g": 11, "p": 4, "mass": 63.546, "state": "solid", "config": "[Ar] 3d10 4s1", "en": 1.9 },
+      { "n": 30, "sym": "Zn", "name": "Zinco", "cat": "metal-t", "g": 12, "p": 4, "mass": 65.38, "state": "solid", "config": "[Ar] 3d10 4s2", "en": 1.65 },
+      { "n": 31, "sym": "Ga", "name": "Gálio", "cat": "metal-t", "g": 13, "p": 4, "mass": 69.723, "state": "solid", "config": "[Ar] 3d10 4s2 4p1", "en": 1.81 },
+      { "n": 32, "sym": "Ge", "name": "Germânio", "cat": "met", "g": 14, "p": 4, "mass": 72.63, "state": "solid", "config": "[Ar] 3d10 4s2 4p2", "en": 2.01 },
+      { "n": 33, "sym": "As", "name": "Arsênio", "cat": "met", "g": 15, "p": 4, "mass": 74.922, "state": "solid", "config": "[Ar] 3d10 4s2 4p3", "en": 2.18 },
+      { "n": 34, "sym": "Se", "name": "Selênio", "cat": "nomet", "g": 16, "p": 4, "mass": 78.971, "state": "solid", "config": "[Ar] 3d10 4s2 4p4", "en": 2.55 },
+      { "n": 35, "sym": "Br", "name": "Bromo", "cat": "hal", "g": 17, "p": 4, "mass": 79.904, "state": "liquid", "config": "[Ar] 3d10 4s2 4p5", "en": 2.96 },
+      { "n": 36, "sym": "Kr", "name": "Criptônio", "cat": "nob", "g": 18, "p": 4, "mass": 83.798, "state": "gas", "config": "[Ar] 3d10 4s2 4p6", "en": 3 },
+      { "n": 37, "sym": "Rb", "name": "Rubídio", "cat": "metal-a", "g": 1, "p": 5, "mass": 85.468, "state": "solid", "config": "[Kr] 5s1", "en": 0.82 },
+      { "n": 38, "sym": "Sr", "name": "Estrôncio", "cat": "metal-b", "g": 2, "p": 5, "mass": 87.621, "state": "solid", "config": "[Kr] 5s2", "en": 0.95 },
+      { "n": 39, "sym": "Y", "name": "Ítrio", "cat": "metal-t", "g": 3, "p": 5, "mass": 88.906, "state": "solid", "config": "[Kr] 4d1 5s2", "en": 1.22 },
+      { "n": 40, "sym": "Zr", "name": "Zircônio", "cat": "metal-t", "g": 4, "p": 5, "mass": 91.224, "state": "solid", "config": "[Kr] 4d2 5s2", "en": 1.33 },
+      { "n": 41, "sym": "Nb", "name": "Nióbio", "cat": "metal-t", "g": 5, "p": 5, "mass": 92.906, "state": "solid", "config": "[Kr] 4d4 5s1", "en": 1.6 },
+      { "n": 42, "sym": "Mo", "name": "Molibdênio", "cat": "metal-t", "g": 6, "p": 5, "mass": 95.95, "state": "solid", "config": "[Kr] 4d5 5s1", "en": 2.16 },
+      { "n": 43, "sym": "Tc", "name": "Tecnécio", "cat": "metal-t", "g": 7, "p": 5, "mass": 98, "state": "solid", "config": "[Kr] 4d5 5s2", "en": 1.9 },
+      { "n": 44, "sym": "Ru", "name": "Rutênio", "cat": "metal-t", "g": 8, "p": 5, "mass": 101.07, "state": "solid", "config": "[Kr] 4d7 5s1", "en": 2.2 },
+      { "n": 45, "sym": "Rh", "name": "Ródio", "cat": "metal-t", "g": 9, "p": 5, "mass": 102.91, "state": "solid", "config": "[Kr] 4d8 5s1", "en": 2.28 },
+      { "n": 46, "sym": "Pd", "name": "Paládio", "cat": "metal-t", "g": 10, "p": 5, "mass": 106.42, "state": "solid", "config": "[Kr] 4d10", "en": 2.2 },
+      { "n": 47, "sym": "Ag", "name": "Prata", "cat": "metal-t", "g": 11, "p": 5, "mass": 107.87, "state": "solid", "config": "[Kr] 4d10 5s1", "en": 1.93 },
+      { "n": 48, "sym": "Cd", "name": "Cádmio", "cat": "metal-t", "g": 12, "p": 5, "mass": 112.41, "state": "solid", "config": "[Kr] 4d10 5s2", "en": 1.69 },
+      { "n": 49, "sym": "In", "name": "Índio", "cat": "metal-t", "g": 13, "p": 5, "mass": 114.82, "state": "solid", "config": "[Kr] 4d10 5s2 5p1", "en": 1.78 },
+      { "n": 50, "sym": "Sn", "name": "Estanho", "cat": "metal-t", "g": 14, "p": 5, "mass": 118.71, "state": "solid", "config": "[Kr] 4d10 5s2 5p2", "en": 1.96 },
+      { "n": 51, "sym": "Sb", "name": "Antimônio", "cat": "met", "g": 15, "p": 5, "mass": 121.76, "state": "solid", "config": "[Kr] 4d10 5s2 5p3", "en": 2.05 },
+      { "n": 52, "sym": "Te", "name": "Telúrio", "cat": "met", "g": 16, "p": 5, "mass": 127.6, "state": "solid", "config": "[Kr] 4d10 5s2 5p4", "en": 2.1 },
+      { "n": 53, "sym": "I", "name": "Iodo", "cat": "hal", "g": 17, "p": 5, "mass": 126.9, "state": "solid", "config": "[Kr] 4d10 5s2 5p5", "en": 2.66 },
+      { "n": 54, "sym": "Xe", "name": "Xenônio", "cat": "nob", "g": 18, "p": 5, "mass": 131.29, "state": "gas", "config": "[Kr] 4d10 5s2 5p6", "en": 2.6 },
+      { "n": 55, "sym": "Cs", "name": "Césio", "cat": "metal-a", "g": 1, "p": 6, "mass": 132.91, "state": "solid", "config": "[Xe] 6s1", "en": 0.79 },
+      { "n": 56, "sym": "Ba", "name": "Bário", "cat": "metal-b", "g": 2, "p": 6, "mass": 137.33, "state": "solid", "config": "[Xe] 6s2", "en": 0.89 },
+      { "n": 57, "sym": "La", "name": "Lantânio", "cat": "lan", "g": 3, "p": 6, "mass": 138.91, "state": "solid", "config": "[Xe] 5d1 6s2", "en": 1.1 },
+      { "n": 58, "sym": "Ce", "name": "Cério", "cat": "lan", "g": 3, "p": 6, "mass": 140.12, "state": "solid", "config": "[Xe] 4f1 5d1 6s2", "en": 1.12 },
+      { "n": 59, "sym": "Pr", "name": "Praseodímio", "cat": "lan", "g": 3, "p": 6, "mass": 140.91, "state": "solid", "config": "[Xe] 4f3 6s2", "en": 1.13 },
+      { "n": 60, "sym": "Nd", "name": "Neodímio", "cat": "lan", "g": 3, "p": 6, "mass": 144.24, "state": "solid", "config": "[Xe] 4f4 6s2", "en": 1.14 },
+      { "n": 61, "sym": "Pm", "name": "Promécio", "cat": "lan", "g": 3, "p": 6, "mass": 145, "state": "solid", "config": "[Xe] 4f5 6s2", "en": 1.13 },
+      { "n": 62, "sym": "Sm", "name": "Samário", "cat": "lan", "g": 3, "p": 6, "mass": 150.36, "state": "solid", "config": "[Xe] 4f6 6s2", "en": 1.17 },
+      { "n": 63, "sym": "Eu", "name": "Európio", "cat": "lan", "g": 3, "p": 6, "mass": 151.96, "state": "solid", "config": "[Xe] 4f7 6s2", "en": 1.2 },
+      { "n": 64, "sym": "Gd", "name": "Gadolínio", "cat": "lan", "g": 3, "p": 6, "mass": 157.25, "state": "solid", "config": "[Xe] 4f7 5d1 6s2", "en": 1.2 },
+      { "n": 65, "sym": "Tb", "name": "Térbio", "cat": "lan", "g": 3, "p": 6, "mass": 158.93, "state": "solid", "config": "[Xe] 4f9 6s2", "en": 1.1 },
+      { "n": 66, "sym": "Dy", "name": "Disprósio", "cat": "lan", "g": 3, "p": 6, "mass": 162.5, "state": "solid", "config": "[Xe] 4f10 6s2", "en": 1.22 },
+      { "n": 67, "sym": "Ho", "name": "Hólmio", "cat": "lan", "g": 3, "p": 6, "mass": 164.93, "state": "solid", "config": "[Xe] 4f11 6s2", "en": 1.23 },
+      { "n": 68, "sym": "Er", "name": "Érbio", "cat": "lan", "g": 3, "p": 6, "mass": 167.26, "state": "solid", "config": "[Xe] 4f12 6s2", "en": 1.24 },
+      { "n": 69, "sym": "Tm", "name": "Túlio", "cat": "lan", "g": 3, "p": 6, "mass": 168.93, "state": "solid", "config": "[Xe] 4f13 6s2", "en": 1.25 },
+      { "n": 70, "sym": "Yb", "name": "Itérbio", "cat": "lan", "g": 3, "p": 6, "mass": 173.05, "state": "solid", "config": "[Xe] 4f14 6s2", "en": 1.1 },
+      { "n": 71, "sym": "Lu", "name": "Lutécio", "cat": "lan", "g": 3, "p": 6, "mass": 174.97, "state": "solid", "config": "[Xe] 4f14 5d1 6s2", "en": 1.27 },
+      { "n": 72, "sym": "Hf", "name": "Háfnio", "cat": "metal-t", "g": 4, "p": 6, "mass": 178.49, "state": "solid", "config": "[Xe] 4f14 5d2 6s2", "en": 1.3 },
+      { "n": 73, "sym": "Ta", "name": "Tântalo", "cat": "metal-t", "g": 5, "p": 6, "mass": 180.95, "state": "solid", "config": "[Xe] 4f14 5d3 6s2", "en": 1.5 },
+      { "n": 74, "sym": "W", "name": "Tungstênio", "cat": "metal-t", "g": 6, "p": 6, "mass": 183.84, "state": "solid", "config": "[Xe] 4f14 5d4 6s2", "en": 2.36 },
+      { "n": 75, "sym": "Re", "name": "Rênio", "cat": "metal-t", "g": 7, "p": 6, "mass": 186.21, "state": "solid", "config": "[Xe] 4f14 5d5 6s2", "en": 1.9 },
+      { "n": 76, "sym": "Os", "name": "Ósmio", "cat": "metal-t", "g": 8, "p": 6, "mass": 190.23, "state": "solid", "config": "[Xe] 4f14 5d6 6s2", "en": 2.2 },
+      { "n": 77, "sym": "Ir", "name": "Irídio", "cat": "metal-t", "g": 9, "p": 6, "mass": 192.22, "state": "solid", "config": "[Xe] 4f14 5d7 6s2", "en": 2.2 },
+      { "n": 78, "sym": "Pt", "name": "Platina", "cat": "metal-t", "g": 10, "p": 6, "mass": 195.08, "state": "solid", "config": "[Xe] 4f14 5d9 6s1", "en": 2.28 },
+      { "n": 79, "sym": "Au", "name": "Ouro", "cat": "metal-t", "g": 11, "p": 6, "mass": 196.97, "state": "solid", "config": "[Xe] 4f14 5d10 6s1", "en": 2.54 },
+      { "n": 80, "sym": "Hg", "name": "Mercúrio", "cat": "metal-t", "g": 12, "p": 6, "mass": 200.59, "state": "liquid", "config": "[Xe] 4f14 5d10 6s2", "en": 2 },
+      { "n": 81, "sym": "Tl", "name": "Tálio", "cat": "metal-t", "g": 13, "p": 6, "mass": 204.38, "state": "solid", "config": "[Xe] 4f14 5d10 6s2 6p1", "en": 1.62 },
+      { "n": 82, "sym": "Pb", "name": "Chumbo", "cat": "metal-t", "g": 14, "p": 6, "mass": 207.2, "state": "solid", "config": "[Xe] 4f14 5d10 6s2 6p2", "en": 2.33 },
+      { "n": 83, "sym": "Bi", "name": "Bismuto", "cat": "metal-t", "g": 15, "p": 6, "mass": 208.98, "state": "solid", "config": "[Xe] 4f14 5d10 6s2 6p3", "en": 2.02 },
+      { "n": 84, "sym": "Po", "name": "Polônio", "cat": "metal-t", "g": 16, "p": 6, "mass": 209, "state": "solid", "config": "[Xe] 4f14 5d10 6s2 6p4", "en": 2 },
+      { "n": 85, "sym": "At", "name": "Astato", "cat": "hal", "g": 17, "p": 6, "mass": 210, "state": "solid", "config": "[Xe] 4f14 5d10 6s2 6p5", "en": 2.2 },
+      { "n": 86, "sym": "Rn", "name": "Radônio", "cat": "nob", "g": 18, "p": 6, "mass": 222, "state": "gas", "config": "[Xe] 4f14 5d10 6s2 6p6", "en": 2.2 },
+      { "n": 87, "sym": "Fr", "name": "Frâncio", "cat": "metal-a", "g": 1, "p": 7, "mass": 223, "state": "solid", "config": "[Rn] 7s1", "en": 0.79 },
+      { "n": 88, "sym": "Ra", "name": "Rádio", "cat": "metal-b", "g": 2, "p": 7, "mass": 226, "state": "solid", "config": "[Rn] 7s2", "en": 0.9 },
+      { "n": 89, "sym": "Ac", "name": "Actínio", "cat": "act", "g": 3, "p": 7, "mass": 227, "state": "solid", "config": "[Rn] 6d1 7s2", "en": 1.1 },
+      { "n": 90, "sym": "Th", "name": "Tório", "cat": "act", "g": 3, "p": 7, "mass": 232.04, "state": "solid", "config": "[Rn] 6d2 7s2", "en": 1.3 },
+      { "n": 91, "sym": "Pa", "name": "Protactínio", "cat": "act", "g": 3, "p": 7, "mass": 231.04, "state": "solid", "config": "[Rn] 5f2 6d1 7s2", "en": 1.5 },
+      { "n": 92, "sym": "U", "name": "Urânio", "cat": "act", "g": 3, "p": 7, "mass": 238.03, "state": "solid", "config": "[Rn] 5f3 6d1 7s2", "en": 1.38 },
+      { "n": 93, "sym": "Np", "name": "Netúnio", "cat": "act", "g": 3, "p": 7, "mass": 237, "state": "solid", "config": "[Rn] 5f4 6d1 7s2", "en": 1.36 },
+      { "n": 94, "sym": "Pu", "name": "Plutônio", "cat": "act", "g": 3, "p": 7, "mass": 244, "state": "solid", "config": "[Rn] 5f6 7s2", "en": 1.28 },
+      { "n": 95, "sym": "Am", "name": "Amerício", "cat": "act", "g": 3, "p": 7, "mass": 243, "state": "solid", "config": "[Rn] 5f7 7s2", "en": 1.13 },
+      { "n": 96, "sym": "Cm", "name": "Cúrio", "cat": "act", "g": 3, "p": 7, "mass": 247, "state": "solid", "config": "[Rn] 5f7 6d1 7s2", "en": 1.28 },
+      { "n": 97, "sym": "Bk", "name": "Berquélio", "cat": "act", "g": 3, "p": 7, "mass": 247, "state": "solid", "config": "[Rn] 5f9 7s2", "en": 1.3 },
+      { "n": 98, "sym": "Cf", "name": "Califórnio", "cat": "act", "g": 3, "p": 7, "mass": 251, "state": "solid", "config": "[Rn] 5f10 7s2", "en": 1.3 },
+      { "n": 99, "sym": "Es", "name": "Enstênio", "cat": "act", "g": 3, "p": 7, "mass": 252, "state": "solid", "config": "[Rn] 5f11 7s2", "en": 1.3 },
+      { "n": 100, "sym": "Fm", "name": "Férmio", "cat": "act", "g": 3, "p": 7, "mass": 257, "state": "solid", "config": "[Rn] 5f12 7s2", "en": 1.3 },
+      { "n": 101, "sym": "Md", "name": "Mendelévio", "cat": "act", "g": 3, "p": 7, "mass": 258, "state": "solid", "config": "[Rn] 5f13 7s2", "en": 1.3 },
+      { "n": 102, "sym": "No", "name": "Nobélio", "cat": "act", "g": 3, "p": 7, "mass": 259, "state": "solid", "config": "[Rn] 5f14 7s2", "en": 1.3 },
+      { "n": 103, "sym": "Lr", "name": "Laurêncio", "cat": "act", "g": 3, "p": 7, "mass": 262, "state": "solid", "config": "[Rn] 5f14 7p1 7s2", "en": 1.3 },
+      { "n": 104, "sym": "Rf", "name": "Rutherfórdio", "cat": "metal-t", "g": 4, "p": 7, "mass": 267, "state": "solid", "config": "[Rn] 5f14 6d2 7s2", "en": null },
+      { "n": 105, "sym": "Db", "name": "Dúbnio", "cat": "metal-t", "g": 5, "p": 7, "mass": 268, "state": "solid", "config": "[Rn] 5f14 6d3 7s2", "en": null },
+      { "n": 106, "sym": "Sg", "name": "Seabórgio", "cat": "metal-t", "g": 6, "p": 7, "mass": 269, "state": "solid", "config": "[Rn] 5f14 6d4 7s2", "en": null },
+      { "n": 107, "sym": "Bh", "name": "Bório", "cat": "metal-t", "g": 7, "p": 7, "mass": 270, "state": "solid", "config": "[Rn] 5f14 6d5 7s2", "en": null },
+      { "n": 108, "sym": "Hs", "name": "Hássio", "cat": "metal-t", "g": 8, "p": 7, "mass": 269, "state": "solid", "config": "[Rn] 5f14 6d6 7s2", "en": null },
+      { "n": 109, "sym": "Mt", "name": "Meitnério", "cat": "metal-t", "g": 9, "p": 7, "mass": 278, "state": "solid", "config": "[Rn] 5f14 6d7 7s2", "en": null },
+      { "n": 110, "sym": "Ds", "name": "Darmstádio", "cat": "metal-t", "g": 10, "p": 7, "mass": 281, "state": "solid", "config": "[Rn] 5f14 6d8 7s2", "en": null },
+      { "n": 111, "sym": "Rg", "name": "Roentgênio", "cat": "metal-t", "g": 11, "p": 7, "mass": 282, "state": "solid", "config": "[Rn] 5f14 6d9 7s2", "en": null },
+      { "n": 112, "sym": "Cn", "name": "Copernício", "cat": "metal-t", "g": 12, "p": 7, "mass": 285, "state": "liquid", "config": "[Rn] 5f14 6d10 7s2", "en": null },
+      { "n": 113, "sym": "Nh", "name": "Nipônio", "cat": "metal-t", "g": 13, "p": 7, "mass": 286, "state": "solid", "config": "[Rn] 5f14 6d10 7s2 7p1", "en": null },
+      { "n": 114, "sym": "Fl", "name": "Fleróvio", "cat": "metal-t", "g": 14, "p": 7, "mass": 289, "state": "solid", "config": "[Rn] 5f14 6d10 7s2 7p2", "en": null },
+      { "n": 115, "sym": "Mc", "name": "Moscóvio", "cat": "metal-t", "g": 15, "p": 7, "mass": 289, "state": "solid", "config": "[Rn] 5f14 6d10 7s2 7p3", "en": null },
+      { "n": 116, "sym": "Lv", "name": "Livermório", "cat": "metal-t", "g": 16, "p": 7, "mass": 293, "state": "solid", "config": "[Rn] 5f14 6d10 7s2 7p4", "en": null },
+      { "n": 117, "sym": "Ts", "name": "Tennesso", "cat": "hal", "g": 17, "p": 7, "mass": 294, "state": "solid", "config": "[Rn] 5f14 6d10 7s2 7p5", "en": null },
+      { "n": 118, "sym": "Og", "name": "Oganésson", "cat": "nob", "g": 18, "p": 7, "mass": 294, "state": "solid", "config": "[Rn] 5f14 6d10 7s2 7p6", "en": null },
+    ];
+
+    var ptBuilt = false;
+    function buildPeriodicTable() {
+      ptBuilt = true;
+      var grid = document.getElementById('pt-grid');
+      grid.innerHTML = '';
+      var cellMap = {};
+      elements.forEach(function (el) {
+        var col = el.g, row = el.p;
+        if (el.cat === 'lan') { row = 9; col = el.n - 56 + 2; }
+        if (el.cat === 'act') { row = 10; col = el.n - 88 + 2; }
+        cellMap[row + '-' + col] = el;
+      });
+      for (var r = 1; r <= 10; r++) {
+        for (var c = 1; c <= 18; c++) {
+          var el = cellMap[r + '-' + c];
+          var div = document.createElement('div');
+          if (!el) {
+            div.className = 'el-btn el-hidden';
+            div.innerHTML = '&nbsp;';
+          } else {
+            div.className = 'el-btn el-' + el.cat;
+            div.id = 'el-' + el.n;
+            div.title = el.name;
+            div.innerHTML = '<span class="el-num">' + el.n + '</span><span class="el-sym">' + el.sym + '</span><span class="el-name">' + el.name.substring(0, 7) + '</span>';
+            (function (e) { div.onclick = function () { showElement(e); }; })(el);
+            div.setAttribute('data-cat', el.cat);
+          }
+          grid.appendChild(div);
+        }
+      }
+    }
+
+    function filterElements(cat, btn) {
+      document.querySelectorAll('#pt-filters .pt-btn').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      document.querySelectorAll('.el-btn').forEach(function (el) {
+        if (el.classList.contains('el-hidden')) return;
+        var elCat = el.getAttribute('data-cat');
+        el.style.opacity = (cat === 'all' || elCat === cat) ? '1' : '0.15';
+        el.style.filter = (cat === 'all' || elCat === cat) ? '' : 'grayscale(1)';
+      });
+    }
+
+    function showElement(el) {
+      document.querySelectorAll('.el-btn').forEach(function (b) { b.classList.remove('active-el'); });
+      var btn = document.getElementById('el-' + el.n);
+      if (btn) btn.classList.add('active-el');
+      var detail = document.getElementById('el-detail');
+      var stateMap = { solid: 'S\u00f3lido', gas: 'Gasoso', liquid: 'L\u00edquido' };
+      var catMap = { 'metal-a': 'Metal Alcalino', 'metal-t': 'Metal de Transi\u00e7\u00e3o', 'metal-b': 'Metal Alcalino-terroso', 'nomet': 'N\u00e3o Metal', 'nob': 'G\u00e1s Nobre', 'hal': 'Halog\u00eanio', 'met': 'Metaloide', 'lan': 'Latan\u00eddeo', 'act': 'Actin\u00eddeo' };
+      detail.innerHTML =
+        '<div class="el-detail-header">' +
+        '<div class="el-big-sym">' + el.sym + '</div>' +
+        '<div class="el-detail-info"><h3>' + el.name + '</h3><p>Z = ' + el.n + ' &nbsp;|&nbsp; ' + (catMap[el.cat] || el.cat) + '</p></div>' +
+        '</div>' +
+        '<div class="el-props">' +
+        '<div class="el-prop"><div class="el-prop-label">Massa At\u00f4mica</div><div class="el-prop-val">' + el.mass + ' u</div></div>' +
+        '<div class="el-prop"><div class="el-prop-label">N\u00ba At\u00f4mico</div><div class="el-prop-val">' + el.n + '</div></div>' +
+        '<div class="el-prop"><div class="el-prop-label">Estado F\u00edsico</div><div class="el-prop-val">' + (stateMap[el.state] || el.state) + '</div></div>' +
+        '<div class="el-prop"><div class="el-prop-label">Config. Eletr\u00f4nica</div><div class="el-prop-val" style="font-size:0.85rem">' + el.config + '</div></div>' +
+        '<div class="el-prop"><div class="el-prop-label">Eletronegatividade</div><div class="el-prop-val">' + (el.en || '&mdash;') + '</div></div>' +
+        '<div class="el-prop"><div class="el-prop-label">Per\u00edodo</div><div class="el-prop-val">' + el.p + '</div></div>' +
+        '</div>';
+      detail.classList.add('show');
+      detail.style.display = 'block';
+      detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // ══════════════════════════════════════════════════
+    // ESPECTRO — Espectroscópio Científico (Importado de Atualização.html)
+    // ══════════════════════════════════════════════════
+    const hc_eVnm = 1239.84;
+    const serieColors = { 1: '#aa55ff', 2: '#00cc66', 3: '#ff7722', 4: '#ffaa00' };
+    const serieNames = { 1: 'Lyman', 2: 'Balmer', 3: 'Paschen', 4: 'Brackett' };
+    const serieRegion = { 1: 'UV extremo', 2: 'Visível / UV', 3: 'IV próximo', 4: 'IV médio' };
+    let specMode = 'emission';
+    let hoveredInfo = null; // {n1, n2}
+
+    function hydrogenWavelength(n1, n2) {
+      if (n2 <= n1) return null;
+      const dE = 13.6 * (1 / (n1 * n1) - 1 / (n2 * n2));
+      return hc_eVnm / dE;
+    }
+
+    function wavelengthToColor(nm) {
+      let r, g, b;
+      if (nm < 380) { r = 0.5; g = 0; b = 0.5; }
+      else if (nm < 440) { r = (440 - nm) / 60; g = 0; b = 1; }
+      else if (nm < 490) { r = 0; g = (nm - 440) / 50; b = 1; }
+      else if (nm < 510) { r = 0; g = 1; b = (510 - nm) / 20; }
+      else if (nm < 580) { r = (nm - 510) / 70; g = 1; b = 0; }
+      else if (nm < 645) { r = 1; g = (645 - nm) / 65; b = 0; }
+      else if (nm < 750) { r = 1; g = 0; b = 0; }
+      else { r = 0.5; g = 0; b = 0; }
+      let a = 1;
+      if (nm < 420) a = 0.3 + 0.7 * (nm - 380) / 40;
+      else if (nm > 700) a = 0.3 + 0.7 * (750 - nm) / 50;
+      return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255), a };
+    }
+
+    function regionForNm(nm) {
+      if (nm < 200) return 'UV extremo';
+      if (nm < 380) return 'Ultravioleta (UV)';
+      if (nm < 750) return 'Visível';
+      if (nm < 1400) return 'Infravermelho próximo';
+      return 'Infravermelho';
+    }
+
+    window.setSpecMode = function (mode) {
+      specMode = mode;
+      const btnE = document.getElementById('btnEmission');
+      const btnA = document.getElementById('btnAbsorption');
+      if (btnE) { btnE.classList.toggle('active', mode === 'emission'); }
+      if (btnA) { btnA.classList.toggle('active', mode === 'absorption'); }
+      drawAllBands();
+      if (spec3DRenderer) { spec3DLineTimer = 0; buildSpec3DScene(); }
+    };
+
+    // ── Cena 3D do Espectro ──
+    let spec3DScene, spec3DCamera, spec3DRenderer, spec3DAnimId;
+    let spec3DDragging = false, spec3DLastX = 0, spec3DLastY = 0;
+    let spec3DRotY = -0.3, spec3DRotX = 0.18;
+    let spec3DSpectralLines = [];
+    let spec3DPhotons = [];
+    let spec3D_screenLines = [];
+    let spec3D_tubeLight = null;
+    let spec3DLineTimer = 0;
+
+    function bindSpec3DEvents() {
+      const canvas = document.getElementById('spec3DCanvas');
+      const cont = document.getElementById('spec3DContainer');
+      if (!canvas || canvas._evBound) return;
+      canvas._evBound = true;
+
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      canvas.addEventListener('mousedown', e => {
         spec3DDragging = false;
         spec3DLastX = e.clientX;
         spec3DLastY = e.clientY;
-    });
+      });
 
-    canvas.addEventListener('mousemove', e => {
+      canvas.addEventListener('mousemove', e => {
         if (e.buttons !== 1) return;
         spec3DDragging = true;
         spec3DRotY += (e.clientX - spec3DLastX) * 0.008;
@@ -1314,37 +1710,37 @@ function bindSpec3DEvents() {
         spec3DRotX = Math.max(-0.5, Math.min(0.5, spec3DRotX));
         spec3DLastX = e.clientX;
         spec3DLastY = e.clientY;
-    });
+      });
 
-    canvas.addEventListener('click', e => {
+      canvas.addEventListener('click', e => {
         if (spec3DDragging) { spec3DDragging = false; return; }
         const rect = canvas.getBoundingClientRect();
-        mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
-        mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
         raycaster.setFromCamera(mouse, spec3DCamera);
         const hits = raycaster.intersectObjects(spec3DSpectralLines);
         if (!hits.length) return;
 
         const data = hits[0].object.userData;
-        const nm   = data.nm;
-        const dE   = hc_eVnm / nm;
+        const nm = data.nm;
+        const dE = hc_eVnm / nm;
         const n1 = 2, n2 = data.n2;
 
         // Painel flutuante
-        const info    = document.getElementById('spec3DInfo');
-        const title   = document.getElementById('spec3DTitle');
+        const info = document.getElementById('spec3DInfo');
+        const title = document.getElementById('spec3DTitle');
         const details = document.getElementById('spec3DDetails');
         if (info && title && details) {
-            info.style.display = 'block';
-            const c = wavelengthToColor(nm);
-            title.textContent  = `${data.name} — ${Math.round(nm*10)} Å`;
-            title.style.color  = `rgb(${c.r},${c.g},${c.b})`;
-            details.innerHTML  =
-                `Transição: n${n2} → n2<br>` +
-                `ΔE = ${dE.toFixed(3)} eV<br>` +
-                `λ = ${Math.round(nm)} nm<br>` +
-                `n = ${n2},  ℓ = 1,  mₗ = 0<br>` +
-                `Série de Balmer`;
+          info.style.display = 'block';
+          const c = wavelengthToColor(nm);
+          title.textContent = `${data.name} — ${Math.round(nm * 10)} Å`;
+          title.style.color = `rgb(${c.r},${c.g},${c.b})`;
+          details.innerHTML =
+            `Transição: n${n2} → n2<br>` +
+            `ΔE = ${dE.toFixed(3)} eV<br>` +
+            `λ = ${Math.round(nm)} nm<br>` +
+            `n = ${n2},  ℓ = 1,  mₗ = 0<br>` +
+            `Série de Balmer`;
         }
 
         // Painel inferior
@@ -1353,209 +1749,229 @@ function bindSpec3DEvents() {
         // Destacar linha clicada
         spec3DSpectralLines.forEach(l => l.scale.set(1, 1, 1));
         hits[0].object.scale.set(1, 2.5, 1);
-    });
+      });
 
-    // Touch
-    canvas.addEventListener('touchstart', e => {
+      // Touch
+      canvas.addEventListener('touchstart', e => {
         spec3DLastX = e.touches[0].clientX;
         spec3DLastY = e.touches[0].clientY;
-    }, { passive: true });
+      }, { passive: true });
 
-    canvas.addEventListener('touchmove', e => {
+      canvas.addEventListener('touchmove', e => {
         spec3DRotY += (e.touches[0].clientX - spec3DLastX) * 0.008;
         spec3DRotX += (e.touches[0].clientY - spec3DLastY) * 0.006;
-        spec3DRotX  = Math.max(-0.5, Math.min(0.5, spec3DRotX));
+        spec3DRotX = Math.max(-0.5, Math.min(0.5, spec3DRotX));
         spec3DLastX = e.touches[0].clientX;
         spec3DLastY = e.touches[0].clientY;
-    }, { passive: true });
+      }, { passive: true });
 
-    // Resize
-    window.addEventListener('resize', () => {
+      // Resize
+      window.addEventListener('resize', () => {
         if (!spec3DRenderer || !cont) return;
         const W = cont.clientWidth, H = cont.clientHeight;
         spec3DCamera.aspect = W / H;
         spec3DCamera.updateProjectionMatrix();
         spec3DRenderer.setSize(W, H);
-    });
-}
+      });
+    }
 
-function stopSpec3D() {
-    if (spec3DAnimId) cancelAnimationFrame(spec3DAnimId);
-    spec3DAnimId = null;
-}
+    function stopSpec3D() {
+      if (spec3DAnimId) cancelAnimationFrame(spec3DAnimId);
+      spec3DAnimId = null;
+    }
 
-const balmerVisible = [
-    { n2:3, nm:656.3, name:'Hα', greek:'α' },
-    { n2:4, nm:486.1, name:'Hβ', greek:'β' },
-    { n2:5, nm:434.0, name:'Hγ', greek:'γ' },
-    { n2:6, nm:410.2, name:'Hδ', greek:'δ' },
-];
+    const balmerVisible = [
+      { n2: 3, nm: 656.3, name: 'Hα', greek: 'α' },
+      { n2: 4, nm: 486.1, name: 'Hβ', greek: 'β' },
+      { n2: 5, nm: 434.0, name: 'Hγ', greek: 'γ' },
+      { n2: 6, nm: 410.2, name: 'Hδ', greek: 'δ' },
+    ];
 
-function nmToThreeColor(nm) {
-    const c = wavelengthToColor(nm);
-    return new THREE.Color(c.r/255, c.g/255, c.b/255);
-}
+    function nmToThreeColor(nm) {
+      const c = wavelengthToColor(nm);
+      return new THREE.Color(c.r / 255, c.g / 255, c.b / 255);
+    }
 
-function initSpec3D() {
-    const canvas = document.getElementById('spec3DCanvas');
-    const cont   = document.getElementById('spec3DContainer');
-    if (!canvas || !cont) return;
-    const W = cont.clientWidth  || 800;
-    const H = cont.clientHeight || 340;
+    function resizeSpec3D() {
+      const cont = document.getElementById('spec3DContainer');
+      if (!spec3DRenderer || !spec3DCamera || !cont) return;
+      const W = cont.clientWidth || 300;
+      const H = cont.clientHeight || 200;
+      if (W === 0 || H === 0) return;
+      spec3DCamera.aspect = W / H;
+      spec3DCamera.updateProjectionMatrix();
+      spec3DRenderer.setSize(W, H);
+    }
 
-    const isWhite = document.body.classList.contains('bg-white');
-    const bgCol = isWhite ? 0xf0f4f8 : 0x05060f;
+    function initSpec3D() {
+      const canvas = document.getElementById('spec3DCanvas');
+      const cont = document.getElementById('spec3DContainer');
+      if (!canvas || !cont) return;
+      const W = cont.clientWidth || 800;
+      const H = cont.clientHeight || 340;
 
-    spec3DScene    = new THREE.Scene();
-    spec3DScene.background = new THREE.Color(bgCol);
-    spec3DScene.fog        = new THREE.Fog(bgCol, 18, 40);
+      const isWhite = document.body.classList.contains('bg-white');
+      const bgCol = isWhite ? 0xf0f4f8 : 0x05060f;
 
-    spec3DCamera   = new THREE.PerspectiveCamera(42, W/H, 0.1, 100);
-    spec3DCamera.position.set(0, 4, 10);
-    spec3DCamera.lookAt(1, 0, 0);
+      spec3DScene = new THREE.Scene();
+      spec3DScene.background = new THREE.Color(bgCol);
+      spec3DScene.fog = new THREE.Fog(bgCol, 18, 40);
 
-    spec3DRenderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    spec3DRenderer.setSize(W, H);
-    spec3DRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    spec3DRenderer.setClearColor(bgCol, 1);
+      spec3DCamera = new THREE.PerspectiveCamera(42, W / H, 0.1, 100);
+      spec3DCamera.position.set(0, 4, 10);
+      spec3DCamera.lookAt(1, 0, 0);
 
-    buildSpec3DScene();
-    bindSpec3DEvents();
-    animateSpec3D();
-}
+      spec3DRenderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      spec3DRenderer.setSize(W, H);
+      spec3DRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      spec3DRenderer.setClearColor(bgCol, 1);
 
-function buildSpec3DScene() {
-    while (spec3DScene.children.length) spec3DScene.remove(spec3DScene.children[0]);
-    spec3DSpectralLines = [];
-    spec3DPhotons = [];
-    spec3DLineTimer    = 0;
+      buildSpec3DScene();
+      bindSpec3DEvents();
 
-    // Luzes
-    spec3DScene.add(new THREE.AmbientLight(0x1a2a44, 1.0));
-    const d1 = new THREE.DirectionalLight(0xffffff, 0.5);
-    d1.position.set(4, 8, 4); spec3DScene.add(d1);
+      if (window.ResizeObserver && cont && !cont._roBound) {
+        cont._roBound = true;
+        const ro = new ResizeObserver(() => {
+          resizeSpec3D();
+        });
+        ro.observe(cont);
+      }
 
-    // Mesa
-    const tabMat = new THREE.MeshPhongMaterial({ color: 0x090d18, shininess: 15 });
-    const tab = new THREE.Mesh(new THREE.BoxGeometry(22, 0.12, 6), tabMat);
-    tab.position.set(0, -1.55, 0); spec3DScene.add(tab);
+      animateSpec3D();
+    }
 
-    // Tubo de descarga
-    const tubeMat  = new THREE.MeshPhongMaterial({ color: 0x7799cc, transparent: true, opacity: 0.22, side: THREE.DoubleSide });
-    const tubeGlow = new THREE.MeshBasicMaterial({ color: specMode === 'emission' ? 0xff55bb : 0x4488ff, transparent: true, opacity: 0.55, side: THREE.DoubleSide });
-    const tubeGeo  = new THREE.CylinderGeometry(0.14, 0.14, 3.8, 16, 1, true);
-    const tg = new THREE.Mesh(tubeGeo, tubeMat);
-    const gi = new THREE.Mesh(tubeGeo, tubeGlow);
-    [tg, gi].forEach(m => { m.rotation.z = Math.PI/2; m.position.set(-7.5, 0.1, 0); spec3DScene.add(m); });
-    
-    // Eletrodos
-    const eMat = new THREE.MeshPhongMaterial({ color: 0x445566 });
-    [-2, 2].forEach(x => {
+    function buildSpec3DScene() {
+      while (spec3DScene.children.length) spec3DScene.remove(spec3DScene.children[0]);
+      spec3DSpectralLines = [];
+      spec3DPhotons = [];
+      spec3DLineTimer = 0;
+
+      // Luzes
+      spec3DScene.add(new THREE.AmbientLight(0x1a2a44, 1.0));
+      const d1 = new THREE.DirectionalLight(0xffffff, 0.5);
+      d1.position.set(4, 8, 4); spec3DScene.add(d1);
+
+      // Mesa
+      const tabMat = new THREE.MeshPhongMaterial({ color: 0x090d18, shininess: 15 });
+      const tab = new THREE.Mesh(new THREE.BoxGeometry(22, 0.12, 6), tabMat);
+      tab.position.set(0, -1.55, 0); spec3DScene.add(tab);
+
+      // Tubo de descarga
+      const tubeMat = new THREE.MeshPhongMaterial({ color: 0x7799cc, transparent: true, opacity: 0.22, side: THREE.DoubleSide });
+      const tubeGlow = new THREE.MeshBasicMaterial({ color: specMode === 'emission' ? 0xff55bb : 0x4488ff, transparent: true, opacity: 0.55, side: THREE.DoubleSide });
+      const tubeGeo = new THREE.CylinderGeometry(0.14, 0.14, 3.8, 16, 1, true);
+      const tg = new THREE.Mesh(tubeGeo, tubeMat);
+      const gi = new THREE.Mesh(tubeGeo, tubeGlow);
+      [tg, gi].forEach(m => { m.rotation.z = Math.PI / 2; m.position.set(-7.5, 0.1, 0); spec3DScene.add(m); });
+
+      // Eletrodos
+      const eMat = new THREE.MeshPhongMaterial({ color: 0x445566 });
+      [-2, 2].forEach(x => {
         const e = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.32, 8), eMat);
-        e.rotation.z = Math.PI/2; e.position.set(-7.5+x, 0.1, 0); spec3DScene.add(e);
-    });
-    
-    // Suportes
-    [-0.55, 0.55].forEach(z => {
+        e.rotation.z = Math.PI / 2; e.position.set(-7.5 + x, 0.1, 0); spec3DScene.add(e);
+      });
+
+      // Suportes
+      [-0.55, 0.55].forEach(z => {
         const s = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 1.7, 8), eMat);
         s.position.set(-7.5, -0.75, z); spec3DScene.add(s);
-    });
-    const tubeLight = new THREE.PointLight(specMode === 'emission' ? 0xff55bb : 0x4488ff, 1.4, 6);
-    tubeLight.position.set(-7.5, 0.1, 0); spec3DScene.add(tubeLight);
-    spec3D_tubeLight = tubeLight;
+      });
+      const tubeLight = new THREE.PointLight(specMode === 'emission' ? 0xff55bb : 0x4488ff, 1.4, 6);
+      tubeLight.position.set(-7.5, 0.1, 0); spec3DScene.add(tubeLight);
+      spec3D_tubeLight = tubeLight;
 
-    // Fenda
-    const slitMat = new THREE.MeshPhongMaterial({ color: 0x1a2233 });
-    const slitF = new THREE.Mesh(new THREE.BoxGeometry(0.25, 2.4, 1.0), slitMat);
-    slitF.position.set(-4.5, 0.1, 0); spec3DScene.add(slitF);
-    
-    // Abertura
-    const slitO = new THREE.Mesh(new THREE.BoxGeometry(0.28, 1.4, 0.06), new THREE.MeshBasicMaterial({ color: 0x000000 }));
-    slitO.position.set(-4.5, 0.1, 0); spec3DScene.add(slitO);
+      // Fenda
+      const slitMat = new THREE.MeshPhongMaterial({ color: 0x1a2233 });
+      const slitF = new THREE.Mesh(new THREE.BoxGeometry(0.25, 2.4, 1.0), slitMat);
+      slitF.position.set(-4.5, 0.1, 0); spec3DScene.add(slitF);
 
-    // Feixe único (antes do prisma)
-    const beamColor0 = specMode === 'absorption' ? 0xffffff : 0xff99cc;
-    const beamMat = new THREE.MeshBasicMaterial({ color: beamColor0, transparent: true, opacity: 0.30 });
-    const beamSingle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 3.4, 6), beamMat);
-    beamSingle.rotation.z = Math.PI/2;
-    beamSingle.position.set(-2.8, 0.1, 0);
-    spec3DScene.add(beamSingle);
+      // Abertura
+      const slitO = new THREE.Mesh(new THREE.BoxGeometry(0.28, 1.4, 0.06), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+      slitO.position.set(-4.5, 0.1, 0); spec3DScene.add(slitO);
 
-    // Prisma
-    const pts = [ new THREE.Vector2(0, 0), new THREE.Vector2(1.5, 0), new THREE.Vector2(0.75, 1.3) ];
-    const prismShape = new THREE.Shape(pts);
-    const prismGeo = new THREE.ExtrudeGeometry(prismShape, { depth: 0.9, bevelEnabled: false });
-    prismGeo.center();
-    const prismMat = new THREE.MeshPhongMaterial({
+      // Feixe único (antes do prisma)
+      const beamColor0 = specMode === 'absorption' ? 0xffffff : 0xff99cc;
+      const beamMat = new THREE.MeshBasicMaterial({ color: beamColor0, transparent: true, opacity: 0.30 });
+      const beamSingle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 3.4, 6), beamMat);
+      beamSingle.rotation.z = Math.PI / 2;
+      beamSingle.position.set(-2.8, 0.1, 0);
+      spec3DScene.add(beamSingle);
+
+      // Prisma
+      const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(1.5, 0), new THREE.Vector2(0.75, 1.3)];
+      const prismShape = new THREE.Shape(pts);
+      const prismGeo = new THREE.ExtrudeGeometry(prismShape, { depth: 0.9, bevelEnabled: false });
+      prismGeo.center();
+      const prismMat = new THREE.MeshPhongMaterial({
         color: 0xaad4ff, transparent: true, opacity: 0.38,
         shininess: 140, specular: 0xffffff, side: THREE.DoubleSide
-    });
-    const prism = new THREE.Mesh(prismGeo, prismMat);
-    prism.position.set(-0.5, 0.1, 0);
-    prism.rotation.y = 0.25;
-    spec3DScene.add(prism);
-    const prismEdge = new THREE.LineSegments(
+      });
+      const prism = new THREE.Mesh(prismGeo, prismMat);
+      prism.position.set(-0.5, 0.1, 0);
+      prism.rotation.y = 0.25;
+      spec3DScene.add(prism);
+      const prismEdge = new THREE.LineSegments(
         new THREE.EdgesGeometry(prismGeo),
         new THREE.LineBasicMaterial({ color: 0xbbddff, transparent: true, opacity: 0.7 })
-    );
-    prismEdge.position.copy(prism.position);
-    prismEdge.rotation.copy(prism.rotation);
-    spec3DScene.add(prismEdge);
+      );
+      prismEdge.position.copy(prism.position);
+      prismEdge.rotation.copy(prism.rotation);
+      spec3DScene.add(prismEdge);
 
-    // Tela VERTICAL (à direita, de frente para câmera)
-    const screenW = 6.0, screenH = 1.6;
+      // Tela VERTICAL (à direita, de frente para câmera)
+      const screenW = 6.0, screenH = 1.6;
 
-    // texturas
-    const texCanvas = document.createElement('canvas');
-    texCanvas.width = 512; texCanvas.height = 128;
-    const texCtx = texCanvas.getContext('2d');
+      // texturas
+      const texCanvas = document.createElement('canvas');
+      texCanvas.width = 512; texCanvas.height = 128;
+      const texCtx = texCanvas.getContext('2d');
 
-    if (specMode === 'absorption') {
+      if (specMode === 'absorption') {
         texCtx.fillStyle = '#ffffff';
         texCtx.fillRect(0, 0, 512, 128);
         balmerVisible.forEach((line, idx) => {
-            const xPx = 60 + (idx / (balmerVisible.length - 1)) * 392;
-            texCtx.fillStyle = '#000000';
-            texCtx.fillRect(xPx - 8, 0, 16, 128);
+          const xPx = 60 + (idx / (balmerVisible.length - 1)) * 392;
+          texCtx.fillStyle = '#000000';
+          texCtx.fillRect(xPx - 8, 0, 16, 128);
         });
-    } else {
+      } else {
         texCtx.fillStyle = '#080b18';
         texCtx.fillRect(0, 0, 512, 128);
-    }
+      }
 
-    const screenTex = new THREE.CanvasTexture(texCanvas);
-    const screenMat = new THREE.MeshBasicMaterial({ map: screenTex, side: THREE.DoubleSide });
-    const screenGeo = new THREE.PlaneGeometry(screenW, screenH);
-    const screen    = new THREE.Mesh(screenGeo, screenMat);
-    screen.rotation.y = -Math.PI / 2;
-    screen.position.set(6.8, 0.2, 0);
-    spec3DScene.add(screen);
+      const screenTex = new THREE.CanvasTexture(texCanvas);
+      const screenMat = new THREE.MeshBasicMaterial({ map: screenTex, side: THREE.DoubleSide });
+      const screenGeo = new THREE.PlaneGeometry(screenW, screenH);
+      const screen = new THREE.Mesh(screenGeo, screenMat);
+      screen.rotation.y = -Math.PI / 2;
+      screen.position.set(6.8, 0.2, 0);
+      spec3DScene.add(screen);
 
-    // Moldura
-    const frameMat2 = new THREE.MeshPhongMaterial({ color: 0x1a2a3a });
-    [
-        [0.08, 0.08, screenW+0.12,  6.8,  screenH/2+0.2, 0],
-        [0.08, 0.08, screenW+0.12,  6.8, -screenH/2+0.2, 0],
-        [0.08, screenH+0.12, 0.08,  6.8, 0.2,  screenW/2],
-        [0.08, screenH+0.12, 0.08,  6.8, 0.2, -screenW/2],
-    ].forEach(([gx, gy, gz, px, py, pz]) => {
+      // Moldura
+      const frameMat2 = new THREE.MeshPhongMaterial({ color: 0x1a2a3a });
+      [
+        [0.08, 0.08, screenW + 0.12, 6.8, screenH / 2 + 0.2, 0],
+        [0.08, 0.08, screenW + 0.12, 6.8, -screenH / 2 + 0.2, 0],
+        [0.08, screenH + 0.12, 0.08, 6.8, 0.2, screenW / 2],
+        [0.08, screenH + 0.12, 0.08, 6.8, 0.2, -screenW / 2],
+      ].forEach(([gx, gy, gz, px, py, pz]) => {
         const f = new THREE.Mesh(new THREE.BoxGeometry(gx, gy, gz), frameMat2);
         f.position.set(px, py, pz);
         spec3DScene.add(f);
-    });
+      });
 
-    // Linhas espectrais
-    spec3D_screenLines = [];
-    const lineData = balmerVisible;
-    const spreadZ  = screenW * 0.80;
-    lineData.forEach((line, idx) => {
-        const col  = nmToThreeColor(line.nm);
-        const zPos = -spreadZ/2 + (idx / (lineData.length - 1)) * spreadZ;
+      // Linhas espectrais
+      spec3D_screenLines = [];
+      const lineData = balmerVisible;
+      const spreadZ = screenW * 0.80;
+      lineData.forEach((line, idx) => {
+        const col = nmToThreeColor(line.nm);
+        const zPos = -spreadZ / 2 + (idx / (lineData.length - 1)) * spreadZ;
 
         const lineMat = new THREE.MeshBasicMaterial({
-            color: specMode === 'absorption' ? 0x000000 : col,
-            transparent: true,
-            opacity: specMode === 'absorption' ? 0 : 1
+          color: specMode === 'absorption' ? 0x000000 : col,
+          transparent: true,
+          opacity: specMode === 'absorption' ? 0 : 1
         });
         const lineGeo = new THREE.BoxGeometry(0.05, screenH * 0.88, 0.04);
         const lineMesh = new THREE.Mesh(lineGeo, lineMat);
@@ -1568,27 +1984,27 @@ function buildSpec3DScene() {
 
         // Halo
         if (specMode === 'emission') {
-            const hMat  = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0 });
-            const hMesh = new THREE.Mesh(new THREE.BoxGeometry(0.05, screenH*0.88, 0.22), hMat);
-            hMesh.position.set(6.82, 0.2, zPos);
-            hMesh.scale.set(1, 0, 1);
-            spec3DScene.add(hMesh);
-            spec3D_screenLines[idx].halo = hMesh;
-            const pt = new THREE.PointLight(col, 0, 3);
-            pt.position.set(6.5, 0.2, zPos);
-            spec3DScene.add(pt);
-            spec3D_screenLines[idx].light = pt;
+          const hMat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0 });
+          const hMesh = new THREE.Mesh(new THREE.BoxGeometry(0.05, screenH * 0.88, 0.22), hMat);
+          hMesh.position.set(6.82, 0.2, zPos);
+          hMesh.scale.set(1, 0, 1);
+          spec3DScene.add(hMesh);
+          spec3D_screenLines[idx].halo = hMesh;
+          const pt = new THREE.PointLight(col, 0, 3);
+          pt.position.set(6.5, 0.2, zPos);
+          spec3DScene.add(pt);
+          spec3D_screenLines[idx].light = pt;
         }
 
         // Feixe prisma -> parede
         const beamColor = specMode === 'absorption' ? 0xffffff : col;
-        const bLen = Math.sqrt(Math.pow(6.8-(-0.5),2) + Math.pow(zPos,2));
+        const bLen = Math.sqrt(Math.pow(6.8 - (-0.5), 2) + Math.pow(zPos, 2));
         const bGeo = new THREE.CylinderGeometry(0.015, 0.015, bLen, 5);
         const bMat2 = new THREE.MeshBasicMaterial({ color: beamColor, transparent: true, opacity: 0 });
         const bMesh = new THREE.Mesh(bGeo, bMat2);
         bMesh.rotation.z = Math.PI / 2;
-        bMesh.rotation.y = -Math.atan2(zPos, 6.8-(-0.5));
-        bMesh.position.set((-0.5+6.8)/2, 0.2, zPos/2);
+        bMesh.rotation.y = -Math.atan2(zPos, 6.8 - (-0.5));
+        bMesh.position.set((-0.5 + 6.8) / 2, 0.2, zPos / 2);
         spec3DScene.add(bMesh);
         spec3D_screenLines[idx].beam = bMesh;
 
@@ -1596,58 +2012,58 @@ function buildSpec3DScene() {
         const lc = document.createElement('canvas');
         lc.width = 140; lc.height = 52;
         const lx = lc.getContext('2d');
-        lx.fillStyle = `rgb(${Math.round(col.r*255)},${Math.round(col.g*255)},${Math.round(col.b*255)})`;
+        lx.fillStyle = `rgb(${Math.round(col.r * 255)},${Math.round(col.g * 255)},${Math.round(col.b * 255)})`;
         lx.font = 'bold 22px monospace'; lx.textAlign = 'center';
         lx.fillText(line.name, 70, 24);
         lx.font = '15px monospace';
-        lx.fillText(Math.round(line.nm*10)+' Å', 70, 44);
+        lx.fillText(Math.round(line.nm * 10) + ' Å', 70, 44);
         const tex = new THREE.CanvasTexture(lc);
         const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0 }));
-        spr.position.set(6.82, screenH/2 + 0.6, zPos);
+        spr.position.set(6.82, screenH / 2 + 0.6, zPos);
         spr.scale.set(1.2, 0.44, 1);
         spec3DScene.add(spr);
         spec3D_screenLines[idx].label = spr;
-    });
+      });
 
-    drawLevelHUD();
-}
+      drawLevelHUD();
+    }
 
-function drawLevelHUD() {
-    let hud = document.getElementById('spec3DHUD');
-    if (!hud) {
+    function drawLevelHUD() {
+      let hud = document.getElementById('spec3DHUD');
+      if (!hud) {
         hud = document.createElement('canvas');
         hud.id = 'spec3DHUD';
         hud.style.cssText = 'position:absolute;top:10px;left:10px;pointer-events:none;border-radius:8px;';
         document.getElementById('spec3DContainer').appendChild(hud);
-    }
-    const W = 160, H = 220;
-    hud.width = W; hud.height = H;
-    hud.style.width  = W + 'px';
-    hud.style.height = H + 'px';
+      }
+      const W = 160, H = 220;
+      hud.width = W; hud.height = H;
+      hud.style.width = W + 'px';
+      hud.style.height = H + 'px';
 
-    const ctx = hud.getContext('2d');
-    ctx.clearRect(0, 0, W, H);
+      const ctx = hud.getContext('2d');
+      ctx.clearRect(0, 0, W, H);
 
-    ctx.fillStyle = 'rgba(4,8,20,0.78)';
-    ctx.beginPath();
-    ctx.roundRect(0, 0, W, H, 8);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(0,180,255,0.25)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+      ctx.fillStyle = 'rgba(4,8,20,0.78)';
+      ctx.beginPath();
+      ctx.roundRect(0, 0, W, H, 8);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,180,255,0.25)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
 
-    ctx.fillStyle = '#6688aa';
-    ctx.font = '9px monospace';
-    ctx.fillText('Diagrama de Níveis', 10, 14);
+      ctx.fillStyle = '#6688aa';
+      ctx.font = '9px monospace';
+      ctx.fillText('Diagrama de Níveis', 10, 14);
 
-    const padL = 38, padT = 26, padB = 18;
-    const plotH = H - padT - padB;
-    function eY(n) { return padT + plotH * (1 - (1 - 1/n) / (1 - 1/6)); }
+      const padL = 38, padT = 26, padB = 18;
+      const plotH = H - padT - padB;
+      function eY(n) { return padT + plotH * (1 - (1 - 1 / n) / (1 - 1 / 6)); }
 
-    [5,4,3,2,1].forEach(n => {
+      [5, 4, 3, 2, 1].forEach(n => {
         const y = eY(n);
         const isBase = n === 2;
-        ctx.strokeStyle = isBase ? '#00ccff' : n===1 ? '#00ff88' : '#334466';
+        ctx.strokeStyle = isBase ? '#00ccff' : n === 1 ? '#00ff88' : '#334466';
         ctx.lineWidth = isBase ? 1.5 : 0.8;
         ctx.beginPath();
         ctx.moveTo(padL, y);
@@ -1656,17 +2072,17 @@ function drawLevelHUD() {
         ctx.fillStyle = isBase ? '#00ccff' : '#4a6a88';
         ctx.font = (isBase ? 'bold ' : '') + '9px monospace';
         ctx.textAlign = 'right';
-        ctx.fillText('n='+n, padL - 4, y + 3);
+        ctx.fillText('n=' + n, padL - 4, y + 3);
         if (isBase || n === 1) {
-            const E = -13.6/(n*n);
-            ctx.fillStyle = 'rgba(100,140,180,0.6)';
-            ctx.font = '7px monospace';
-            ctx.textAlign = 'left';
-            ctx.fillText(E.toFixed(1)+'eV', W - 38, y - 2);
+          const E = -13.6 / (n * n);
+          ctx.fillStyle = 'rgba(100,140,180,0.6)';
+          ctx.font = '7px monospace';
+          ctx.textAlign = 'left';
+          ctx.fillText(E.toFixed(1) + 'eV', W - 38, y - 2);
         }
-    });
+      });
 
-    balmerVisible.forEach((line, idx) => {
+      balmerVisible.forEach((line, idx) => {
         const c = wavelengthToColor(line.nm);
         const x = padL + 12 + idx * 22;
         const yTop = eY(Math.min(line.n2, 5));
@@ -1689,295 +2105,297 @@ function drawLevelHUD() {
 
         ctx.font = '7px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText('H'+line.greek, x, yTop - 2);
-    });
-}
-
-function spawnSpec3DPhoton() {
-    if (!spec3DScene || specMode !== 'emission') return;
-    const col = nmToThreeColor(balmerVisible[Math.floor(Math.random()*4)].nm);
-    const geo = new THREE.SphereGeometry(0.055, 5, 5);
-    const mat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.9 });
-    const m   = new THREE.Mesh(geo, mat);
-    m.position.set(-6.5, 0.1 + (Math.random()-0.5)*0.2, 0);
-    m.userData.vel  = new THREE.Vector3(0.055 + Math.random()*0.02, (Math.random()-0.5)*0.005, 0);
-    m.userData.life = 100;
-    spec3DScene.add(m);
-    spec3DPhotons.push(m);
-}
-
-function animateSpec3D() {
-    spec3DAnimId = requestAnimationFrame(animateSpec3D);
-    if (!spec3DRenderer || !spec3DScene) return;
-
-    spec3DScene.rotation.y = spec3DRotY;
-    spec3DScene.rotation.x = spec3DRotX;
-
-    if (spec3D_tubeLight) {
-        spec3D_tubeLight.intensity = 1.2 + Math.sin(Date.now()*0.006)*0.4;
+        ctx.fillText('H' + line.greek, x, yTop - 2);
+      });
     }
 
-    // Animação das linhas espectrais surgindo TODAS SIMULTANEAMENTE
-    spec3DLineTimer++;
-    if (spec3D_screenLines) {
+    function spawnSpec3DPhoton() {
+      if (!spec3DScene || specMode !== 'emission') return;
+      const col = nmToThreeColor(balmerVisible[Math.floor(Math.random() * 4)].nm);
+      const geo = new THREE.SphereGeometry(0.055, 5, 5);
+      const mat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.9 });
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(-6.5, 0.1 + (Math.random() - 0.5) * 0.2, 0);
+      m.userData.vel = new THREE.Vector3(0.055 + Math.random() * 0.02, (Math.random() - 0.5) * 0.005, 0);
+      m.userData.life = 100;
+      spec3DScene.add(m);
+      spec3DPhotons.push(m);
+    }
+
+    function animateSpec3D() {
+      spec3DAnimId = requestAnimationFrame(animateSpec3D);
+      if (!spec3DRenderer || !spec3DScene) return;
+
+      spec3DScene.rotation.y = spec3DRotY;
+      spec3DScene.rotation.x = spec3DRotX;
+
+      if (spec3D_tubeLight) {
+        spec3D_tubeLight.intensity = 1.2 + Math.sin(Date.now() * 0.006) * 0.4;
+      }
+
+      // Animação das linhas espectrais surgindo TODAS SIMULTANEAMENTE
+      spec3DLineTimer++;
+      if (spec3D_screenLines) {
         const progress = Math.min(1, spec3DLineTimer / 40);
         spec3D_screenLines.forEach((sl) => {
-            sl.mesh.scale.set(1, progress, 1);
-            if (sl.beam) sl.beam.material.opacity = progress * (specMode === 'absorption' ? 0.12 : 0.28);
-            if (sl.halo) { sl.halo.scale.set(1, progress, 1); sl.halo.material.opacity = progress * 0.28; }
-            if (sl.light) sl.light.intensity = progress * 0.65;
-            if (sl.label) sl.label.material.opacity = progress * 0.9;
+          sl.mesh.scale.set(1, progress, 1);
+          if (sl.beam) sl.beam.material.opacity = progress * (specMode === 'absorption' ? 0.12 : 0.28);
+          if (sl.halo) { sl.halo.scale.set(1, progress, 1); sl.halo.material.opacity = progress * 0.28; }
+          if (sl.light) sl.light.intensity = progress * 0.65;
+          if (sl.label) sl.label.material.opacity = progress * 0.9;
         });
-    }
+      }
 
-    if (specMode === 'emission' && Math.random() < 0.06) spawnSpec3DPhoton();
-    for (let i = spec3DPhotons.length-1; i >= 0; i--) {
+      if (specMode === 'emission' && Math.random() < 0.06) spawnSpec3DPhoton();
+      for (let i = spec3DPhotons.length - 1; i >= 0; i--) {
         const p = spec3DPhotons[i];
         p.position.add(p.userData.vel);
         p.userData.life--;
         p.material.opacity = p.userData.life / 100;
         if (p.userData.life <= 0 || p.position.x > 5.5) {
-            spec3DScene.remove(p); spec3DPhotons.splice(i,1);
+          spec3DScene.remove(p); spec3DPhotons.splice(i, 1);
         }
+      }
+
+      spec3DRenderer.render(spec3DScene, spec3DCamera);
     }
 
-    spec3DRenderer.render(spec3DScene, spec3DCamera);
-}
+    function drawAllBands() {
+      [1, 2, 3, 4].forEach(n1 => drawBand(n1));
+    }
 
-function drawAllBands() {
-    [1, 2, 3, 4].forEach(n1 => drawBand(n1));
-}
+    function drawBand(n1) {
+      const canvas = document.getElementById('band' + n1);
+      if (!canvas) return;
+      const W = canvas.parentElement ? (canvas.parentElement.clientWidth || 900) : 900;
+      const H = 90;
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
 
-function drawBand(n1) {
-    const canvas = document.getElementById('band' + n1);
-    if (!canvas) return;
-    const W = canvas.parentElement ? (canvas.parentElement.clientWidth || 900) : 900;
-    const H = 90;
-    canvas.width  = W;
-    canvas.height = H;
-    const ctx = canvas.getContext('2d');
+      const col = serieColors[n1];
+      const serieName = serieNames[n1];
 
-    const col = serieColors[n1];
-    const serieName = serieNames[n1];
-
-    const lines = [];
-    for (let n2 = n1+1; n2 <= n1+8; n2++) {
+      const lines = [];
+      for (let n2 = n1 + 1; n2 <= n1 + 8; n2++) {
         const nm = hydrogenWavelength(n1, n2);
         if (!nm) continue;
         const rel = 1 / Math.pow(n2 - n1, 0.75);
-        const greek = ['α','β','γ','δ','ε','ζ','η','θ'][n2-n1-1] || ('n'+n2);
+        const greek = ['α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ'][n2 - n1 - 1] || ('n' + n2);
         lines.push({ n2, nm, rel, greek });
-    }
+      }
 
-    const nmVals = lines.map(l => l.nm);
-    const nmMin0 = Math.min(...nmVals), nmMax0 = Math.max(...nmVals);
-    const span = Math.max(300, (nmMax0 - nmMin0) * 1.5);
-    const mid  = (nmMin0 + nmMax0) / 2;
-    const nmA  = mid - span/2, nmB = mid + span/2;
+      const nmVals = lines.map(l => l.nm);
+      const nmMin0 = Math.min(...nmVals), nmMax0 = Math.max(...nmVals);
+      const span = Math.max(300, (nmMax0 - nmMin0) * 1.5);
+      const mid = (nmMin0 + nmMax0) / 2;
+      const nmA = mid - span / 2, nmB = mid + span / 2;
 
-    const padL = 66, padR = 12, padT = 22, padB = 16;
-    const plotW = W - padL - padR;
-    const bandH = H - padT - padB;
-    const toX   = nm => padL + (nm - nmA) / (nmB - nmA) * plotW;
+      const padL = W < 480 ? 50 : 66, padR = W < 480 ? 8 : 12, padT = 22, padB = 16;
+      const plotW = W - padL - padR;
+      const bandH = H - padT - padB;
+      const toX = nm => padL + (nm - nmA) / (nmB - nmA) * plotW;
 
-    ctx.fillStyle = '#020409';
-    ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#020409';
+      ctx.fillRect(0, 0, W, H);
 
-    if (specMode === 'absorption') {
+      if (specMode === 'absorption') {
         const grad = ctx.createLinearGradient(padL, 0, padL + plotW, 0);
         for (let i = 0; i <= 200; i++) {
-            const nm = nmA + (nmB - nmA) * i / 200;
-            if (nm >= 380 && nm < 750) {
-                const c = wavelengthToColor(nm);
-                grad.addColorStop(i/200, `rgba(${c.r},${c.g},${c.b},${Math.min(1, c.a * 1.2)})`);
-            } else if (nm < 380) {
-                grad.addColorStop(i/200, `rgba(60,0,80,0.7)`);
-            } else {
-                grad.addColorStop(i/200, `rgba(60,0,0,0.5)`);
-            }
+          const nm = nmA + (nmB - nmA) * i / 200;
+          if (nm >= 380 && nm < 750) {
+            const c = wavelengthToColor(nm);
+            grad.addColorStop(i / 200, `rgba(${c.r},${c.g},${c.b},${Math.min(1, c.a * 1.2)})`);
+          } else if (nm < 380) {
+            grad.addColorStop(i / 200, `rgba(60,0,80,0.7)`);
+          } else {
+            grad.addColorStop(i / 200, `rgba(60,0,0,0.5)`);
+          }
         }
         ctx.fillStyle = grad;
         ctx.fillRect(padL, padT, plotW, bandH);
-        
-        const vigL = ctx.createLinearGradient(padL, 0, padL+30, 0);
+
+        const vigL = ctx.createLinearGradient(padL, 0, padL + 30, 0);
         vigL.addColorStop(0, 'rgba(2,4,9,0.8)'); vigL.addColorStop(1, 'rgba(2,4,9,0)');
         ctx.fillStyle = vigL; ctx.fillRect(padL, padT, 30, bandH);
-        
-        const vigR = ctx.createLinearGradient(padL+plotW-30, 0, padL+plotW, 0);
+
+        const vigR = ctx.createLinearGradient(padL + plotW - 30, 0, padL + plotW, 0);
         vigR.addColorStop(0, 'rgba(2,4,9,0)'); vigR.addColorStop(1, 'rgba(2,4,9,0.8)');
-        ctx.fillStyle = vigR; ctx.fillRect(padL+plotW-30, padT, 30, bandH);
-    } else {
+        ctx.fillStyle = vigR; ctx.fillRect(padL + plotW - 30, padT, 30, bandH);
+      } else {
         ctx.fillStyle = '#010208';
         ctx.fillRect(padL, padT, plotW, bandH);
-    }
+      }
 
-    ctx.strokeStyle = 'rgba(0,150,255,0.1)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(padL+0.5, padT+0.5, plotW-1, bandH-1);
+      ctx.strokeStyle = 'rgba(0,150,255,0.1)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(padL + 0.5, padT + 0.5, plotW - 1, bandH - 1);
 
-    canvas._lines = [];
-    lines.forEach(line => {
+      canvas._lines = [];
+      lines.forEach(line => {
         const x = toX(line.nm);
-        if (x < padL-10 || x > padL+plotW+10) return;
-        const isHov = hoveredInfo && hoveredInfo.n1===n1 && hoveredInfo.n2===line.n2;
+        if (x < padL - 10 || x > padL + plotW + 10) return;
+        const isHov = hoveredInfo && hoveredInfo.n1 === n1 && hoveredInfo.n2 === line.n2;
 
         if (specMode === 'emission') {
-            const isVis = line.nm >= 380 && line.nm < 750;
-            let r, g, b;
-            if (isVis) {
-                const c = wavelengthToColor(line.nm); r=c.r; g=c.g; b=c.b;
-            } else {
-                const hex = col.replace('#','');
-                r=parseInt(hex.slice(0,2),16); g=parseInt(hex.slice(2,4),16); b=parseInt(hex.slice(4,6),16);
-            }
-            const inten = isHov ? 1.0 : 0.4 + line.rel*0.6;
-            const gR    = isHov ? 20 : 10 * line.rel;
-            
-            const gg = ctx.createLinearGradient(x-gR*2,0,x+gR*2,0);
-            gg.addColorStop(0,   `rgba(${r},${g},${b},0)`);
-            gg.addColorStop(0.5, `rgba(${r},${g},${b},${0.20*inten})`);
-            gg.addColorStop(1,   `rgba(${r},${g},${b},0)`);
-            ctx.fillStyle=gg; ctx.fillRect(x-gR*2, padT, gR*4, bandH);
-            
-            const lw = isHov ? 3 : 1.0 + line.rel*1.6;
-            const lg = ctx.createLinearGradient(x-lw,0,x+lw,0);
-            lg.addColorStop(0,   `rgba(${r},${g},${b},0)`);
-            lg.addColorStop(0.3, `rgba(${r},${g},${b},${0.7*inten})`);
-            lg.addColorStop(0.5, `rgba(255,255,255,${0.95*inten})`);
-            lg.addColorStop(0.7, `rgba(${r},${g},${b},${0.7*inten})`);
-            lg.addColorStop(1,   `rgba(${r},${g},${b},0)`);
-            ctx.fillStyle=lg; ctx.fillRect(x-lw, padT+1, lw*2, bandH-2);
+          const isVis = line.nm >= 380 && line.nm < 750;
+          let r, g, b;
+          if (isVis) {
+            const c = wavelengthToColor(line.nm); r = c.r; g = c.g; b = c.b;
+          } else {
+            const hex = col.replace('#', '');
+            r = parseInt(hex.slice(0, 2), 16); g = parseInt(hex.slice(2, 4), 16); b = parseInt(hex.slice(4, 6), 16);
+          }
+          const inten = isHov ? 1.0 : 0.4 + line.rel * 0.6;
+          const gR = isHov ? 20 : 10 * line.rel;
+
+          const gg = ctx.createLinearGradient(x - gR * 2, 0, x + gR * 2, 0);
+          gg.addColorStop(0, `rgba(${r},${g},${b},0)`);
+          gg.addColorStop(0.5, `rgba(${r},${g},${b},${0.20 * inten})`);
+          gg.addColorStop(1, `rgba(${r},${g},${b},0)`);
+          ctx.fillStyle = gg; ctx.fillRect(x - gR * 2, padT, gR * 4, bandH);
+
+          const lw = isHov ? 3 : 1.0 + line.rel * 1.6;
+          const lg = ctx.createLinearGradient(x - lw, 0, x + lw, 0);
+          lg.addColorStop(0, `rgba(${r},${g},${b},0)`);
+          lg.addColorStop(0.3, `rgba(${r},${g},${b},${0.7 * inten})`);
+          lg.addColorStop(0.5, `rgba(255,255,255,${0.95 * inten})`);
+          lg.addColorStop(0.7, `rgba(${r},${g},${b},${0.7 * inten})`);
+          lg.addColorStop(1, `rgba(${r},${g},${b},0)`);
+          ctx.fillStyle = lg; ctx.fillRect(x - lw, padT + 1, lw * 2, bandH - 2);
         } else {
-            const lw = isHov ? 3.5 : 1.5 + line.rel*2;
-            ctx.fillStyle='rgba(0,0,0,0.92)';
-            ctx.fillRect(x-lw/2, padT, lw, bandH);
-            if (isHov) {
-                ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
-                ctx.strokeRect(x-lw/2-2, padT, lw+4, bandH); ctx.setLineDash([]);
-            }
+          const lw = isHov ? 3.5 : 1.5 + line.rel * 2;
+          ctx.fillStyle = 'rgba(0,0,0,0.92)';
+          ctx.fillRect(x - lw / 2, padT, lw, bandH);
+          if (isHov) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+            ctx.strokeRect(x - lw / 2 - 2, padT, lw + 4, bandH); ctx.setLineDash([]);
+          }
         }
 
-        if ((line.n2-n1 <= 4) || isHov) {
-            const isVis = specMode==='emission' && line.nm>=380 && line.nm<750;
-            const c = isVis ? wavelengthToColor(line.nm) : null;
-            ctx.fillStyle = isHov ? 'rgba(255,255,255,0.95)'
-                : (c ? `rgba(${c.r},${c.g},${c.b},0.75)` : 'rgba(140,170,220,0.5)');
-            ctx.font = `${isHov?'bold ':''} ${isHov?9:7}px 'Courier New',monospace`;
-            ctx.textAlign = 'center';
-            ctx.fillText('H'+line.greek, x, padT-9);
-            ctx.fillStyle = 'rgba(100,140,200,0.4)';
-            ctx.font = `6px 'Courier New',monospace`;
-            ctx.fillText(Math.round(line.nm)+'nm', x, padT-1);
+        if ((line.n2 - n1 <= 4) || isHov) {
+          const isVis = specMode === 'emission' && line.nm >= 380 && line.nm < 750;
+          const c = isVis ? wavelengthToColor(line.nm) : null;
+          ctx.fillStyle = isHov ? 'rgba(255,255,255,0.95)'
+            : (c ? `rgba(${c.r},${c.g},${c.b},0.75)` : 'rgba(140,170,220,0.5)');
+          ctx.font = `${isHov ? 'bold ' : ''} ${isHov ? 9 : 7}px 'Courier New',monospace`;
+          ctx.textAlign = 'center';
+          ctx.fillText('H' + line.greek, x, padT - 9);
+          ctx.fillStyle = 'rgba(100,140,200,0.4)';
+          ctx.font = `6px 'Courier New',monospace`;
+          ctx.fillText(Math.round(line.nm) + 'nm', x, padT - 1);
         }
-        canvas._lines.push({n1, n2:line.n2, nm:line.nm, rel:line.rel, greek:line.greek, x});
-    });
+        canvas._lines.push({ n1, n2: line.n2, nm: line.nm, rel: line.rel, greek: line.greek, x });
+      });
 
-    const botY = padT + bandH;
-    ctx.strokeStyle='rgba(0,100,200,0.2)'; ctx.lineWidth=0.8;
-    ctx.beginPath(); ctx.moveTo(padL,botY); ctx.lineTo(padL+plotW,botY); ctx.stroke();
-    const nmRange = nmB-nmA;
-    const step = nmRange<200?10:nmRange<600?50:nmRange<1500?100:500;
-    for (let nm=Math.ceil(nmA/step)*step; nm<=nmB; nm+=step) {
-        const x=toX(nm);
-        if (x<padL||x>padL+plotW) continue;
-        ctx.strokeStyle='rgba(60,120,200,0.3)'; ctx.lineWidth=0.8;
-        ctx.beginPath(); ctx.moveTo(x,botY); ctx.lineTo(x,botY+3); ctx.stroke();
-        ctx.fillStyle='rgba(70,130,210,0.55)';
-        ctx.font=`6px 'Courier New',monospace`; ctx.textAlign='center';
-        ctx.fillText(Math.round(nm), x, botY+10);
+      const botY = padT + bandH;
+      ctx.strokeStyle = 'rgba(0,100,200,0.2)'; ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.moveTo(padL, botY); ctx.lineTo(padL + plotW, botY); ctx.stroke();
+      const nmRange = nmB - nmA;
+      const step = nmRange < 200 ? 10 : nmRange < 600 ? 50 : nmRange < 1500 ? 100 : 500;
+      for (let nm = Math.ceil(nmA / step) * step; nm <= nmB; nm += step) {
+        const x = toX(nm);
+        if (x < padL || x > padL + plotW) continue;
+        ctx.strokeStyle = 'rgba(60,120,200,0.3)'; ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.moveTo(x, botY); ctx.lineTo(x, botY + 3); ctx.stroke();
+        ctx.fillStyle = 'rgba(70,130,210,0.55)';
+        ctx.font = `6px 'Courier New',monospace`; ctx.textAlign = 'center';
+        ctx.fillText(Math.round(nm), x, botY + 10);
+      }
+
+      ctx.fillStyle = col;
+      ctx.font = `bold 9px 'Courier New',monospace`;
+      ctx.textAlign = 'right';
+      ctx.fillText(serieName, padL - 4, padT + bandH / 2 - 3);
+      ctx.fillStyle = 'rgba(80,120,180,0.5)';
+      ctx.font = `6px 'Courier New',monospace`;
+      ctx.fillText('n₁=' + n1, padL - 4, padT + bandH / 2 + 6);
     }
 
-    ctx.fillStyle = col;
-    ctx.font = `bold 9px 'Courier New',monospace`;
-    ctx.textAlign='right';
-    ctx.fillText(serieName, padL-4, padT+bandH/2-3);
-    ctx.fillStyle='rgba(80,120,180,0.5)';
-    ctx.font=`6px 'Courier New',monospace`;
-    ctx.fillText('n₁='+n1, padL-4, padT+bandH/2+6);
-}
+    function updateSpecInfo(n1, n2, nm) {
+      const hc_eVnm = 1239.84193;
+      const dE = hc_eVnm / nm;
+      const col = serieColors[n1];
 
-function updateSpecInfo(n1, n2, nm) {
-    const hc_eVnm = 1239.84193;
-    const dE = hc_eVnm / nm;
-    const col = serieColors[n1];
-
-    const setVal = (id, text) => {
+      const setVal = (id, text) => {
         const el = document.getElementById(id);
         if (el) { el.textContent = text; el.classList.remove('dim'); }
-    };
+      };
 
-    setVal('specTransition', `n${n2} → n${n1}  (${serieNames[n1]})`);
-    setVal('specDeltaE',     dE.toFixed(4) + ' eV');
-    setVal('specLambda',     Math.round(nm) + ' nm  (' + Math.round(nm*10) + ' Å)');
-    setVal('specRegion',     regionForNm(nm));
+      setVal('specTransition', `n${n2} → n${n1}  (${serieNames[n1]})`);
+      setVal('specDeltaE', dE.toFixed(4) + ' eV');
+      setVal('specLambda', Math.round(nm) + ' nm  (' + Math.round(nm * 10) + ' Å)');
+      setVal('specRegion', regionForNm(nm));
 
-    const sw = document.getElementById('specColorSwatch');
-    if (sw) {
+      const sw = document.getElementById('specColorSwatch');
+      if (sw) {
         sw.style.opacity = '1';
         if (nm >= 380 && nm < 750) {
-            const c = wavelengthToColor(nm);
-            sw.style.background = `rgb(${c.r},${c.g},${c.b})`;
-            sw.style.boxShadow  = `0 0 12px rgb(${c.r},${c.g},${c.b})`;
+          const c = wavelengthToColor(nm);
+          sw.style.background = `rgb(${c.r},${c.g},${c.b})`;
+          sw.style.boxShadow = `0 0 12px rgb(${c.r},${c.g},${c.b})`;
         } else {
-            sw.style.background = col;
-            sw.style.boxShadow  = `0 0 10px ${col}`;
+          sw.style.background = col;
+          sw.style.boxShadow = `0 0 10px ${col}`;
         }
+      }
     }
-}
 
-function bindAllBandEvents() {
-    [1,2,3,4].forEach(n1 => {
-        const canvas = document.getElementById('band'+n1);
+    function bindAllBandEvents() {
+      [1, 2, 3, 4].forEach(n1 => {
+        const canvas = document.getElementById('band' + n1);
         if (!canvas || canvas._evBound) return;
         canvas._evBound = true;
 
-        canvas.addEventListener('mousemove', function(e) {
-            const rect = canvas.getBoundingClientRect();
-            const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
-            const hits = canvas._lines || [];
-            let best = null, bestD = 999;
-            hits.forEach(h => { const d = Math.abs(h.x - mx); if (d < bestD) { bestD = d; best = h; } });
-            const newHov = (best && bestD < 26) ? {n1: best.n1, n2: best.n2} : null;
-            const changed = JSON.stringify(newHov) !== JSON.stringify(hoveredInfo);
-            if (changed) {
-                hoveredInfo = newHov;
-                canvas.style.cursor = newHov ? 'pointer' : 'default';
-                drawBand(n1);
-                if (newHov) updateSpecInfo(newHov.n1, newHov.n2, best.nm);
-            }
+        canvas.addEventListener('mousemove', function (e) {
+          const rect = canvas.getBoundingClientRect();
+          const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+          const hits = canvas._lines || [];
+          let best = null, bestD = 999;
+          hits.forEach(h => { const d = Math.abs(h.x - mx); if (d < bestD) { bestD = d; best = h; } });
+          const newHov = (best && bestD < 26) ? { n1: best.n1, n2: best.n2 } : null;
+          const changed = JSON.stringify(newHov) !== JSON.stringify(hoveredInfo);
+          if (changed) {
+            hoveredInfo = newHov;
+            canvas.style.cursor = newHov ? 'pointer' : 'default';
+            drawBand(n1);
+            if (newHov) updateSpecInfo(newHov.n1, newHov.n2, best.nm);
+          }
         });
 
-        canvas.addEventListener('mouseleave', function() {
-            if (hoveredInfo && hoveredInfo.n1 === n1) {
-                hoveredInfo = null;
-                drawBand(n1);
-            }
+        canvas.addEventListener('mouseleave', function () {
+          if (hoveredInfo && hoveredInfo.n1 === n1) {
+            hoveredInfo = null;
+            drawBand(n1);
+          }
         });
 
-        canvas.addEventListener('click', function(e) {
-            const rect = canvas.getBoundingClientRect();
-            const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
-            const hits = canvas._lines || [];
-            let best = null, bestD = 999;
-            hits.forEach(h => { const d = Math.abs(h.x - mx); if (d < bestD) { bestD = d; best = h; } });
-            if (best && bestD < 26) updateSpecInfo(best.n1, best.n2, best.nm);
+        canvas.addEventListener('click', function (e) {
+          const rect = canvas.getBoundingClientRect();
+          const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+          const hits = canvas._lines || [];
+          let best = null, bestD = 999;
+          hits.forEach(h => { const d = Math.abs(h.x - mx); if (d < bestD) { bestD = d; best = h; } });
+          if (best && bestD < 26) updateSpecInfo(best.n1, best.n2, best.nm);
         });
-    });
-}
+      });
+    }
 
-function drawSpectrum()   { drawAllBands(); bindAllBandEvents(); }
-function redrawSpectrum() { drawSpectrum(); }
+    function drawSpectrum() { drawAllBands(); bindAllBandEvents(); }
+    function redrawSpectrum() { drawSpectrum(); }
 
-// Redesenhar o espectro se estiver ativo e a janela for redimensionada
-let specResizeTimeout;
-window.addEventListener('resize', () => {
-    if (document.getElementById('espectro').classList.contains('active')) {
+    // Redesenhar o espectro se estiver ativo e a janela for redimensionada
+    let specResizeTimeout;
+    window.addEventListener('resize', () => {
+      resizeSpec3D();
+      if (document.getElementById('espectro').classList.contains('active')) {
         clearTimeout(specResizeTimeout);
         specResizeTimeout = setTimeout(() => {
-            drawSpectrum();
+          drawSpectrum();
         }, 150);
-    }
-});
-</script>
+      }
+    });
+  </script>
 </body>
+
 </html>

@@ -1155,36 +1155,38 @@
             line-height: 1.4 !important;
         }
 
-        .energy-display {
-            top: 15px !important;
-            right: 15px !important;
-            padding: 12px 16px !important;
-            min-width: 150px !important;
+        @media (min-width: 901px) {
+            .energy-display {
+                top: 15px !important;
+                right: 15px !important;
+                padding: 12px 16px !important;
+                min-width: 150px !important;
+            }
+            .energy-display-title { font-size: 0.75rem !important; margin-bottom: 5px !important; }
+            .energy-value { font-size: 1.4rem !important; }
+            .energy-unit  { font-size: 0.85rem !important; }
+            .energy-level-info { font-size: 0.75rem !important; margin-top: 5px !important; margin-bottom: 5px !important; }
+            .rotation-hint {
+                font-size: 0.8rem !important;
+                padding: 8px 12px !important;
+                bottom: 12px !important;
+            }
+            .quantum-numbers { gap: 5px !important; flex-wrap: wrap !important; }
+            .qn-item { font-size: 0.8rem !important; }
         }
 
-        .energy-display-title { font-size: 0.75rem !important; margin-bottom: 5px !important; }
-        .energy-value { font-size: 1.4rem !important; }
-        .energy-unit  { font-size: 0.85rem !important; }
-        .energy-level-info { font-size: 0.75rem !important; margin-top: 5px !important; margin-bottom: 5px !important; }
-
-        .rotation-hint {
-            font-size: 0.8rem !important;
-            padding: 8px 12px !important;
-            bottom: 12px !important;
-        }
-
-        .quantum-numbers { gap: 5px !important; flex-wrap: wrap !important; }
-        .qn-item { font-size: 0.8rem !important; }
-
-        /* Mobile: restore scroll */
+        /* Mobile: restore scroll & compact overlays */
         @media (max-width: 900px) {
             html, body { height: auto !important; overflow: auto !important; }
             .container { height: auto !important; overflow: visible !important; }
             .main-content {
                 flex-direction: column !important;
-                flex-wrap: wrap !important;
+                flex-wrap: nowrap !important;
                 overflow: visible !important;
                 min-height: 0 !important;
+                align-items: stretch !important;
+                padding: 0 !important;
+                gap: 0 !important;
             }
             #canvas-container, #bohr-container {
                 flex: none !important;
@@ -1192,17 +1194,81 @@
                 height: 70vw !important;
                 min-height: 300px !important;
                 max-height: 500px !important;
+                order: 0 !important;
+            }
+            #spectrum-container {
+                order: 0 !important;
+            }
+            .quick-bar {
+                order: 1 !important;
             }
             .controls {
                 width: 100% !important;
                 max-width: 100% !important;
                 height: auto !important;
                 overflow-y: visible !important;
+                order: 2 !important;
             }
             .header {
                 padding: 6px 10px !important;
                 gap: 5px 10px !important;
             }
+            .energy-display {
+                top: 6px !important;
+                right: 6px !important;
+                padding: 6px 10px !important;
+                min-width: auto !important;
+                max-width: 125px !important;
+                background: rgba(8, 12, 24, 0.75) !important;
+                backdrop-filter: blur(10px) !important;
+                -webkit-backdrop-filter: blur(10px) !important;
+                border-radius: 10px !important;
+                border: 1px solid rgba(0, 204, 255, 0.25) !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important;
+            }
+            .energy-display-title {
+                font-size: 0.5rem !important;
+                margin-bottom: 2px !important;
+                letter-spacing: 0.5px !important;
+            }
+            .energy-value {
+                font-size: 0.85rem !important;
+                gap: 2px !important;
+            }
+            .energy-unit {
+                font-size: 0.6rem !important;
+            }
+            .energy-level-info {
+                font-size: 0.52rem !important;
+                margin-top: 2px !important;
+                margin-bottom: 2px !important;
+            }
+            .quantum-numbers {
+                gap: 2px !important;
+            }
+            .qn-item {
+                font-size: 0.55rem !important;
+                padding: 1px 3px !important;
+            }
+            .rotation-hint {
+                font-size: 0.65rem !important;
+                padding: 4px 8px !important;
+                bottom: 6px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .energy-display {
+                top: 5px !important;
+                right: 5px !important;
+                padding: 4px 8px !important;
+                max-width: 110px !important;
+            }
+            .energy-display-title { font-size: 0.45rem !important; }
+            .energy-value { font-size: 0.78rem !important; }
+            .energy-unit { font-size: 0.55rem !important; }
+            .energy-level-info { font-size: 0.48rem !important; }
+            .qn-item { font-size: 0.5rem !important; }
         }
 
         /* ══════════════════════════════════════════════════
@@ -1373,8 +1439,232 @@
             color: rgba(100,150,200,0.35); pointer-events: none; white-space: nowrap;
             letter-spacing: 0.05em;
         }
+
+        /* ══════════════════════════════════════════════════
+           QUICK BAR — 3 botões acessíveis logo abaixo do canvas
+        ══════════════════════════════════════════════════ */
+        .quick-bar {
+            display: none; /* oculto em desktop – controles já ficam na sidebar */
+        }
+
+        @media (max-width: 900px) {
+            .quick-bar {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                padding: 10px 12px;
+                background: rgba(8, 12, 24, 0.85);
+                backdrop-filter: blur(14px);
+                -webkit-backdrop-filter: blur(14px);
+                border-top: 1px solid rgba(0,204,255,0.15);
+                border-bottom: 1px solid rgba(0,204,255,0.15);
+                flex-shrink: 0;
+                order: 1; /* entre o canvas e os painéis */
+            }
+
+            .quick-bar .qb-btn {
+                flex: 1;
+                max-width: 150px;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(0,204,255,0.25);
+                color: #e2e8f0;
+                border-radius: 12px;
+                padding: 9px 8px;
+                font-size: 0.78rem;
+                font-family: 'Inter', sans-serif;
+                font-weight: 500;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 5px;
+                transition: all 0.2s ease;
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+                user-select: none;
+                outline: none;
+                white-space: nowrap;
+            }
+            .quick-bar .qb-btn:active {
+                transform: scale(0.96);
+                background: rgba(0,204,255,0.15);
+            }
+            .quick-bar .qb-btn.qb-energy {
+                border-color: rgba(255,69,0,0.35);
+                color: #ffaa88;
+            }
+            .quick-bar .qb-btn.qb-emission {
+                border-color: rgba(0,255,136,0.3);
+                color: #88ffcc;
+            }
+            body.bg-white .quick-bar {
+                background: rgba(255,255,255,0.95);
+                border-color: #e2e8f0;
+            }
+            body.bg-white .quick-bar .qb-btn {
+                background: #fff;
+                border-color: #cbd5e1;
+                color: #334155;
+            }
+        }
+
+        /* ══════════════════════════════════════════════════
+           SISTEMA DE ACORDEÃO PARA CONTROLES MÓVEIS
+        ══════════════════════════════════════════════════ */
+
+        /* Em desktop: acordeões são sempre abertos (sem cabeçalho interativo) */
+        .accordion-header {
+            display: none;
+        }
+        .accordion-content {
+            display: block;
+        }
+
+        @media (max-width: 900px) {
+            /* Na sidebar mobile, .controls ocupa largura total */
+            .controls {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                order: 2;
+            }
+
+            /* Cada control-group vira um card acordeão */
+            .control-group {
+                margin-bottom: 0 !important;
+                border-bottom: 1px solid rgba(0,204,255,0.1);
+            }
+            .control-group:first-child {
+                border-top: 1px solid rgba(0,204,255,0.1);
+            }
+
+            /* Header do acordeão — substitui o h3 */
+            .accordion-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                padding: 13px 16px;
+                background: rgba(8, 12, 28, 0.82);
+                border: none;
+                color: #00ccff;
+                font-family: 'Outfit', sans-serif;
+                font-size: 0.88rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1.2px;
+                cursor: pointer;
+                text-align: left;
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+                user-select: none;
+                outline: none;
+                transition: background 0.2s;
+            }
+            .accordion-header:active {
+                background: rgba(0,204,255,0.08);
+            }
+            body.bg-white .accordion-header {
+                background: #f8fafc;
+                color: #1e3a8a;
+            }
+            body.bg-white .accordion-header:active {
+                background: #f1f5f9;
+            }
+
+            .accordion-icon {
+                font-size: 0.75rem;
+                transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+                flex-shrink: 0;
+                opacity: 0.7;
+            }
+            .accordion-header.open .accordion-icon {
+                transform: rotate(180deg);
+            }
+
+            /* Conteúdo recolhível */
+            .accordion-content {
+                display: none;
+                padding: 12px 16px 16px;
+                background: rgba(6, 10, 22, 0.7);
+                animation: accordionFadeIn 0.22s ease;
+            }
+            .accordion-content.open {
+                display: block;
+            }
+            body.bg-white .accordion-content {
+                background: #fff;
+            }
+
+            @keyframes accordionFadeIn {
+                from { opacity: 0; transform: translateY(-4px); }
+                to   { opacity: 1; transform: translateY(0); }
+            }
+
+            /* Esconder h3 original dentro dos grupos (o header do acordeão substitui) */
+            .control-group > h3 {
+                display: none !important;
+            }
+
+            /* Botões ocupam 50% em grid de 2 dentro dos acordeões */
+            .accordion-content .btn {
+                width: calc(50% - 6px) !important;
+                margin: 3px !important;
+            }
+            /* Botões de fundo: linha compacta */
+            .bg-btn-row {
+                display: flex;
+                gap: 8px;
+            }
+            .bg-btn-row .btn {
+                flex: 1;
+                width: auto !important;
+            }
+
+            /* Texto de info mais compacto */
+            .info-text {
+                font-size: 0.78rem !important;
+                padding: 10px 12px !important;
+            }
+
+            /* Atom-info compacto */
+            .atom-info {
+                padding: 10px 12px !important;
+                margin: 0 0 8px !important;
+                text-align: left !important;
+            }
+            .atom-info-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 4px 12px;
+                margin-top: 6px;
+            }
+            .atom-info-grid p {
+                margin: 0 !important;
+                font-size: 0.82rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .quick-bar .qb-btn {
+                font-size: 0.7rem;
+                padding: 8px 6px;
+                gap: 4px;
+            }
+            .accordion-header {
+                font-size: 0.8rem;
+                padding: 11px 14px;
+            }
+            .accordion-content .btn {
+                font-size: 0.72rem !important;
+                padding: 8px 8px !important;
+            }
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -1518,49 +1808,106 @@
                 </div>
             </div>
 
+            <!-- ═══════════════════════════════════════
+                 QUICK BAR — visível somente em mobile,
+                 fica entre o canvas e os acordeões
+            ═══════════════════════════════════════ -->
+            <div class="quick-bar">
+                <button class="qb-btn" onclick="toggleRotation()" title="Pausar/Retomar Rotação">
+                    <span id="qbRotationIcon">⏸️</span>
+                    <span id="qbRotationLabel">Pausar</span>
+                </button>
+                <button class="qb-btn qb-energy" onclick="toggleElectrons()" title="Mostrar/Ocultar Elétrons">
+                    <span id="qbElectronIcon">👁️</span>
+                    <span id="qbElectronLabel">Elétrons</span>
+                </button>
+                <button class="qb-btn qb-emission" onclick="resetView()" title="Resetar Câmera">
+                    🔄 Resetar
+                </button>
+            </div>
+
             <div class="controls">
-                <div class="control-group">
+                <!-- ─── 📊 INFORMAÇÕES DO ÁTOMO ─── -->
+                <div class="control-group" id="cg-info">
                     <h3>📊 Informações do Átomo</h3>
-                    <div class="atom-info">
-                        <h4 id="atomName">Hidrogênio (H)</h4>
-                        <p>Prótons: <span id="protons">1</span></p>
-                        <p>Elétrons: <span id="electrons">1</span></p>
-                        <p>Config: <span id="config">1s¹</span></p>
+                    <button class="accordion-header open" onclick="toggleAccordion('cg-info')" aria-expanded="true" aria-controls="acc-info">
+                        📊 Informações do Átomo
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content open" id="acc-info">
+                        <div class="atom-info">
+                            <h4 id="atomName">Hidrogênio (H)</h4>
+                            <div class="atom-info-grid">
+                                <p>Prótons: <span id="protons">1</span></p>
+                                <p>Elétrons: <span id="electrons">1</span></p>
+                                <p style="grid-column: 1 / -1">Config: <span id="config">1s¹</span></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="control-group">
+                <!-- ─── 👁️ VISUALIZAÇÃO ─── -->
+                <div class="control-group" id="cg-vis">
                     <h3>⚡ Controles de Visualização</h3>
-                    <button class="btn" onclick="toggleRotation()">
-                        <span id="rotationBtn">⏸️ Pausar Rotação</span>
+                    <button class="accordion-header open" onclick="toggleAccordion('cg-vis')" aria-expanded="true" aria-controls="acc-vis">
+                        👁️ Visualização
+                        <span class="accordion-icon">▼</span>
                     </button>
-                    <button class="btn energy" onclick="toggleElectrons()">
-                        <span id="electronBtn">👁️ Ocultar Elétrons</span>
-                    </button>
-                    <button class="btn emission" onclick="resetView()">🔄 Resetar Visão</button>
+                    <div class="accordion-content open" id="acc-vis">
+                        <button class="btn" onclick="toggleRotation()">
+                            <span id="rotationBtn">⏸️ Pausar Rotação</span>
+                        </button>
+                        <button class="btn energy" onclick="toggleElectrons()">
+                            <span id="electronBtn">👁️ Ocultar Elétrons</span>
+                        </button>
+                        <button class="btn emission" onclick="resetView()">🔄 Resetar Visão</button>
+                    </div>
                 </div>
 
-                <div class="control-group">
+                <!-- ─── ⚛️ EFEITOS QUÂNTICOS ─── -->
+                <div class="control-group" id="cg-quantum">
                     <h3>💫 Efeitos Quânticos</h3>
-                    <button class="btn energy" onclick="exciteElectron()">⚡ Excitar Elétron</button>
-                    <button class="btn emission" onclick="emitPhoton()">💡 Emitir Fóton</button>
-                    <button class="btn" onclick="toggleEnergyWaves()">
-                        <span id="waveBtn">🌊 Ondas: OFF</span>
+                    <button class="accordion-header open" onclick="toggleAccordion('cg-quantum')" aria-expanded="true" aria-controls="acc-quantum">
+                        ⚛️ Efeitos Quânticos
+                        <span class="accordion-icon">▼</span>
                     </button>
+                    <div class="accordion-content open" id="acc-quantum">
+                        <button class="btn energy" onclick="exciteElectron()">⚡ Excitar Elétron</button>
+                        <button class="btn emission" onclick="emitPhoton()">💡 Emitir Fóton</button>
+                        <button class="btn" onclick="toggleEnergyWaves()">
+                            <span id="waveBtn">🌊 Ondas: OFF</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="control-group" style="display: none;">
+                <!-- ─── 🎨 ESTILO DE ORBITAL ─── -->
+                <div class="control-group" id="cg-orbital">
                     <h3>🎨 Estilo de Orbital</h3>
-                    <button class="btn" onclick="changeOrbitalStyle('solid')">Sólido</button>
-                    <button class="btn" onclick="changeOrbitalStyle('wireframe')">Wireframe</button>
-                    <button class="btn" onclick="changeOrbitalStyle('transparent')">Transparente</button>
-                    <button class="btn" onclick="changeOrbitalStyle('cloud')">Nuvem</button>
+                    <button class="accordion-header open" onclick="toggleAccordion('cg-orbital')" aria-expanded="true" aria-controls="acc-orbital">
+                        🎨 Estilo de Orbital
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content open" id="acc-orbital">
+                        <button class="btn" id="btnStyleCloud" onclick="changeOrbitalStyle('cloud')">☁️ Nuvem</button>
+                        <button class="btn" id="btnStyleSolid" onclick="changeOrbitalStyle('solid')">🔮 Sólido</button>
+                        <button class="btn" id="btnStyleWireframe" onclick="changeOrbitalStyle('wireframe')">🌐 Wireframe</button>
+                        <button class="btn" id="btnStyleTransparent" onclick="changeOrbitalStyle('transparent')">👻 Transparente</button>
+                    </div>
                 </div>
 
-                <div class="control-group">
+                <!-- ─── 🖼️ APARÊNCIA ─── -->
+                <div class="control-group" id="cg-bg">
                     <h3>🖼️ Fundo</h3>
-                    <button class="btn bg-btn active-bg" id="bgBlack" onclick="setBackground('black')">⬛ Preto</button>
-                    <button class="btn bg-btn" id="bgWhite" onclick="setBackground('white')">⬜ Branco</button>
+                    <button class="accordion-header" onclick="toggleAccordion('cg-bg')" aria-expanded="false" aria-controls="acc-bg">
+                        🎨 Aparência
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content" id="acc-bg">
+                        <div class="bg-btn-row">
+                            <button class="btn bg-btn active-bg" id="bgBlack" onclick="setBackground('black')">⬛ Preto</button>
+                            <button class="btn bg-btn" id="bgWhite" onclick="setBackground('white')">⬜ Branco</button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="info-text">
@@ -1568,6 +1915,7 @@
                     <span id="quantum-info"></span>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -1582,7 +1930,7 @@
         let currentMode = 'quantum';
         let currentAtom = 'H';
         let selectedAtom = 'H';
-        let orbitalStyle = 'solid';
+        let orbitalStyle = 'cloud';
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
         let rotation = { x: 0, y: 0 };
@@ -1689,12 +2037,12 @@
                         pz = (pz / d) * R;
                     }
                     
-                    // Aplicar escala e translação exatas do lóbulo correspondente (aumentado para 3.4 para afastar mais do núcleo)
+                    // Aplicar escala e translação exatas do lóbulo correspondente (afastado 4.6 para afastar do núcleo)
                     x = px;
-                    y = py * 1.8 + side * 3.4;
+                    y = py * 1.8 + side * 4.6;
                     z = pz;
                 } else if (level === 3) {
-                    // 3p — dois halteres (eixos X e Z), lóbulos de raio = 2.4 escalados por (1.5, 1, 1) centrados em ±4.2
+                    // 3p — dois halteres (eixos X e Z), lóbulos de raio = 2.4 escalados por (1.5, 1, 1) centrados em ±5.5
                     const angleIdx = Math.random() > 0.5 ? 0 : 1;
                     const angle = angleIdx === 0 ? 0 : Math.PI / 2;
                     const sideIdx = Math.random() > 0.5 ? 0 : 1;
@@ -1714,11 +2062,11 @@
                         pz = (pz / d) * R;
                     }
                     
-                    x = px * 1.5 + side * 4.2 * Math.cos(angle);
+                    x = px * 1.5 + side * 5.5 * Math.cos(angle);
                     y = py;
-                    z = pz + side * 4.2 * Math.sin(angle);
+                    z = pz + side * 5.5 * Math.sin(angle);
                 } else {
-                    // 3d cloverleaf — 4 lóbulos no plano XZ, de raio = 3.2 escalados por (1.5, 1, 1) rotacionados por angle, centrados em ±6.4
+                    // 3d cloverleaf — 4 lóbulos no plano XZ, de raio = 3.2 escalados por (1.5, 1, 1) rotacionados por angle, centrados em ±7.8
                     const lobeIdx = Math.floor(Math.random() * 4);
                     const angle = lobeIdx * (Math.PI / 2);
                     
@@ -1740,9 +2088,9 @@
                     const rx = px * Math.cos(angle) - pz * Math.sin(angle);
                     const rz = px * Math.sin(angle) + pz * Math.cos(angle);
                     
-                    x = rx + 6.4 * Math.cos(angle);
+                    x = rx + 7.8 * Math.cos(angle);
                     y = py;
-                    z = rz + 6.4 * Math.sin(angle);
+                    z = rz + 7.8 * Math.sin(angle);
                 }
                 positions[i * 3] = x;
                 positions[i * 3 + 1] = y;
@@ -2203,13 +2551,23 @@
         window.toggleRotation = function() {
             isRotating = !isRotating;
             const btn = document.getElementById('rotationBtn');
-            btn.textContent = isRotating ? '⏸️ Pausar Rotação' : '▶️ Iniciar Rotação';
+            if (btn) btn.textContent = isRotating ? '⏸️ Pausar Rotação' : '▶️ Iniciar Rotação';
+            // Sincronizar quick-bar
+            const qbIcon  = document.getElementById('qbRotationIcon');
+            const qbLabel = document.getElementById('qbRotationLabel');
+            if (qbIcon)  qbIcon.textContent  = isRotating ? '⏸️' : '▶️';
+            if (qbLabel) qbLabel.textContent = isRotating ? 'Pausar' : 'Retomar';
         };
 
         window.toggleElectrons = function() {
             showElectrons = !showElectrons;
             const btn = document.getElementById('electronBtn');
-            btn.textContent = showElectrons ? '👁️ Ocultar Elétrons' : '👁️ Mostrar Elétrons';
+            if (btn) btn.textContent = showElectrons ? '👁️ Ocultar Elétrons' : '👁️ Mostrar Elétrons';
+            // Sincronizar quick-bar
+            const qbIcon  = document.getElementById('qbElectronIcon');
+            const qbLabel = document.getElementById('qbElectronLabel');
+            if (qbIcon)  qbIcon.textContent  = showElectrons ? '👁️' : '🙈';
+            if (qbLabel) qbLabel.textContent = showElectrons ? 'Elétrons' : 'Ocultos';
             
             if (showElectrons) {
                 createAtom(currentAtom);
@@ -2224,7 +2582,7 @@
         };
 
         window.resetView = function() {
-            rotation = { x: 0, y: 0 };
+            if (scene) scene.quaternion.set(0, 0, 0, 1);
             camera.position.set(0, 5, 15);
             camera.lookAt(0, 0, 0);
         };
@@ -3164,6 +3522,28 @@
                  orbitals: [{type: 's', n: 1, count: 1}] }
         };
 
+        // ══════════════════════════════════════════════
+        // ACORDEÃO — Toggle de seções recolhíveis
+        // Funciona apenas em mobile (≤900px); em desktop os estilos
+        // mantêm o conteúdo sempre visível (display:block).
+        // ══════════════════════════════════════════════
+        window.toggleAccordion = function(groupId) {
+            // Se tela grande, não faz nada (os itens já estão sempre abertos)
+            if (window.innerWidth > 900) return;
+
+            const group   = document.getElementById(groupId);
+            if (!group) return;
+
+            const header  = group.querySelector('.accordion-header');
+            const content = group.querySelector('.accordion-content');
+            if (!header || !content) return;
+
+            const isOpen = content.classList.contains('open');
+            content.classList.toggle('open', !isOpen);
+            header.classList.toggle('open', !isOpen);
+            header.setAttribute('aria-expanded', String(!isOpen));
+        };
+
         // Inicialização
         function init() {
             const container = document.getElementById('canvas-container');
@@ -3224,37 +3604,43 @@
             setTimeout(() => onWindowResize(), 100);
         }
 
+        let targetQuaternion = new THREE.Quaternion();
+        let mouseSpeed = 0.005;
+
         function setupMouseControls(container) {
-            // Controles de Mouse
+            // Controles de Mouse com Quaternions (Arcball livre sem trava/gimbal lock)
             container.addEventListener('mousedown', (e) => {
                 isDragging = true;
                 previousMousePosition = { x: e.clientX, y: e.clientY };
             });
 
             container.addEventListener('mousemove', (e) => {
-                if (isDragging) {
+                if (isDragging && scene) {
                     const deltaX = e.clientX - previousMousePosition.x;
                     const deltaY = e.clientY - previousMousePosition.y;
-                    
-                    rotation.y += deltaX * 0.005;
-                    rotation.x += deltaY * 0.005;
-                    
+
+                    // Rotacionar no espaço da câmera para controle intuitivo em qualquer orientação
+                    const deltaRotQuaternion = new THREE.Quaternion()
+                        .setFromEuler(new THREE.Euler(
+                            deltaY * mouseSpeed,
+                            deltaX * mouseSpeed,
+                            0,
+                            'XYZ'
+                        ));
+
+                    scene.quaternion.multiplyQuaternions(deltaRotQuaternion, scene.quaternion);
+
                     previousMousePosition = { x: e.clientX, y: e.clientY };
                 }
             });
 
-            container.addEventListener('mouseup', () => {
-                isDragging = false;
-            });
-
-            container.addEventListener('mouseleave', () => {
-                isDragging = false;
-            });
+            container.addEventListener('mouseup', () => { isDragging = false; });
+            container.addEventListener('mouseleave', () => { isDragging = false; });
 
             container.addEventListener('wheel', (e) => {
                 e.preventDefault();
                 camera.position.z += e.deltaY * 0.01;
-                camera.position.z = Math.max(8, Math.min(30, camera.position.z));
+                camera.position.z = Math.max(8, Math.min(35, camera.position.z));
             });
 
             // Controles Touch para dispositivos móveis
@@ -3264,14 +3650,11 @@
 
             container.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                
                 if (e.touches.length === 1) {
-                    // Um dedo - rotação
                     isDragging = true;
                     touchStartX = e.touches[0].clientX;
                     touchStartY = e.touches[0].clientY;
                 } else if (e.touches.length === 2) {
-                    // Dois dedos - zoom (pinch)
                     isDragging = false;
                     const dx = e.touches[0].clientX - e.touches[1].clientX;
                     const dy = e.touches[0].clientY - e.touches[1].clientY;
@@ -3281,38 +3664,41 @@
 
             container.addEventListener('touchmove', (e) => {
                 e.preventDefault();
-                
-                if (e.touches.length === 1 && isDragging) {
-                    // Rotação com um dedo
+                if (e.touches.length === 1 && isDragging && scene) {
                     const deltaX = e.touches[0].clientX - touchStartX;
                     const deltaY = e.touches[0].clientY - touchStartY;
-                    
-                    rotation.y += deltaX * 0.01;
-                    rotation.x += deltaY * 0.01;
-                    
+
+                    const deltaRotQuaternion = new THREE.Quaternion()
+                        .setFromEuler(new THREE.Euler(
+                            deltaY * 0.008,
+                            deltaX * 0.008,
+                            0,
+                            'XYZ'
+                        ));
+
+                    scene.quaternion.multiplyQuaternions(deltaRotQuaternion, scene.quaternion);
+
                     touchStartX = e.touches[0].clientX;
                     touchStartY = e.touches[0].clientY;
                 } else if (e.touches.length === 2) {
-                    // Zoom com pinch (dois dedos)
                     const dx = e.touches[0].clientX - e.touches[1].clientX;
                     const dy = e.touches[0].clientY - e.touches[1].clientY;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-                    
+
                     const delta = distance - touchStartDistance;
                     camera.position.z -= delta * 0.05;
-                    camera.position.z = Math.max(8, Math.min(30, camera.position.z));
-                    
+                    camera.position.z = Math.max(8, Math.min(35, camera.position.z));
+
                     touchStartDistance = distance;
                 }
             }, { passive: false });
 
             container.addEventListener('touchend', (e) => {
-                e.preventDefault();
                 isDragging = false;
                 touchStartDistance = 0;
             }, { passive: false });
 
-            container.addEventListener('touchcancel', (e) => {
+            container.addEventListener('touchcancel', () => {
                 isDragging = false;
                 touchStartDistance = 0;
             });
@@ -3490,9 +3876,12 @@
                 const geometry = new THREE.BufferGeometry();
                 geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
                 const material = new THREE.PointsMaterial({
-                    size: isMobile ? 0.08 : 0.06, color: isWhite ? 0x111111 : 0x6496ff,
-                    transparent: true, opacity: isWhite ? 0.7 : 0.5, 
-                    blending: isWhite ? THREE.NormalBlending : THREE.AdditiveBlending, 
+                    size: isMobile ? 0.30 : 0.22,
+                    color: isWhite ? 0x111111 : 0x6496ff,
+                    map: particleTexture,
+                    transparent: true,
+                    opacity: isWhite ? 0.75 : 0.55,
+                    blending: isWhite ? THREE.NormalBlending : THREE.AdditiveBlending,
                     depthWrite: false
                 });
 
@@ -3535,6 +3924,8 @@
             }
         }
 
+
+
         function createHydrogenWaveFunction(level) {
             const segments = isMobile ? 24 : 32;
             
@@ -3543,12 +3934,22 @@
                 return;
             }
 
+
+            // Constantes compartilhadas — usadas nos orbitais e nos elétrons
+            const P2_LOBE_R   = 4 * 0.50,  P2_ELONG  = 1.90;
+            const P3_LOBE_R   = 6 * 0.36,  P3_ELONG  = 1.80;
+            const D4_LOBE_R   = 8 * 0.30,  D4_ELONG  = 1.80;
+            // lobeCenter = lobeR * elong * 1.45 → afasta completamente o lóbulo do núcleo
+            const P2_CENTER   = P2_LOBE_R * P2_ELONG * 1.45;
+            const P3_CENTER   = P3_LOBE_R * P3_ELONG * 1.45;
+            const D4_CENTER   = D4_LOBE_R * D4_ELONG * 1.45;
+
             if (level === 1) {
                 const isWhite = document.body.classList.contains('bg-white');
                 // 1s — esférico, raio = 2
                 const geometry = new THREE.SphereGeometry(2, segments, segments);
                 const material = new THREE.MeshPhongMaterial({
-                    color: isWhite ? 0x2244aa : 0x6496ff, transparent: true, 
+                    color: isWhite ? 0x2244aa : 0x6496ff, transparent: true,
                     opacity: orbitalStyle === 'transparent' ? 0.15 : 0.3,
                     wireframe: orbitalStyle === 'wireframe', side: THREE.DoubleSide
                 });
@@ -3556,26 +3957,26 @@
                 scene.add(orbital);
                 orbitals.push(orbital);
                 if (showElectrons) createElectron(2, 0, 1);
-            } 
+            }
             else if (level === 2) {
-                // 2p — halter vertical, lóbulo width=2.4, height centrado em ±2.4
+                // 2p — halter ao longo de Y; lóbulos afastados do núcleo Y=0
                 createPShapedOrbital(4, 0x64c8ff);
-                if (showElectrons) createElectronInLobe('py', 2.4, 2.4);
+                if (showElectrons) createElectronInLobe('py', P2_CENTER, P2_LOBE_R);
             }
             else if (level === 3) {
-                // 3p — dois halteres em X e Z, lóbulos centrados em ±4.2 nos eixos x e z
+                // 3p — dois halteres em X e Z; lóbulos afastados do núcleo
                 createDoublePOrbital(6, 0x64ffc8);
                 if (showElectrons) {
-                    createElectronInLobe('px', 4.2, 1.8);
-                    createElectronInLobe('pz', 4.2, 1.8);
+                    createElectronInLobe('px', P3_CENTER, P3_LOBE_R);
+                    createElectronInLobe('pz', P3_CENTER, P3_LOBE_R);
                 }
             }
             else if (level === 4) {
-                // 3d cloverleaf — lóbulos no plano XZ, centrados em ±6.4 em x e z
+                // 3d — trevo no plano XZ; lóbulos afastados do núcleo
                 createCloverleafOrbital(8, 0xff9664);
                 if (showElectrons) {
-                    createElectronInLobe('px', 6.4, 3.2);
-                    createElectronInLobe('pz', 6.4, 3.2);
+                    createElectronInLobe('px', D4_CENTER, D4_LOBE_R);
+                    createElectronInLobe('pz', D4_CENTER, D4_LOBE_R);
                 }
             }
         }
@@ -3592,17 +3993,23 @@
             });
             const electron = new THREE.Mesh(geometry, material);
 
-            // Escolher um dos dois lóbulos (+ ou -)
+            // Escolher um dos dois lóbulos (+ ou -) para orbitais com dois lóbulos
+            // Para orbitais d com 4 lóbulos, o elétron vai a um lóbulo positivo
             const side = Math.random() > 0.5 ? 1 : -1;
-            // Posição inicial: centro do lóbulo + pequeno deslocamento aleatório
-            const offset = () => (Math.random() - 0.5) * lobeRadius * 0.8;
+
+            // Deslocamento lateral (perpendicular ao eixo do lóbulo)
+            const lat = () => (Math.random() - 0.5) * lobeRadius * 0.65;
+            // Deslocamento axial: SEMPRE no mesmo lado do núcleo que o lóbulo
+            // (nunca atravessa o plano nodal)
+            const axialSpread = lobeRadius * 0.5;
+            const axialOffset = (Math.random() - 0.5) * axialSpread;
 
             if (axis === 'px') {
-                electron.position.set(side * lobeDist + offset(), offset() * 0.5, offset() * 0.5);
+                electron.position.set(side * lobeDist + axialOffset, lat(), lat());
             } else if (axis === 'py') {
-                electron.position.set(offset() * 0.5, side * lobeDist + offset(), offset() * 0.5);
+                electron.position.set(lat(), side * lobeDist + axialOffset, lat());
             } else { // pz
-                electron.position.set(offset() * 0.5, offset() * 0.5, side * lobeDist + offset());
+                electron.position.set(lat(), lat(), side * lobeDist + axialOffset);
             }
 
             electron.userData = {
@@ -3623,94 +4030,102 @@
             electrons.push(electron);
         }
 
+        // ─────────────────────────────────────────────────────────────
+        // CORREÇÃO FÍSICA: lóbulos de orbitais p e d nunca atravessam
+        // o núcleo. A fórmula lobeCenter = lobeR × elong × 1.02 garante
+        // que a base de cada lóbulo começa ligeiramente além do plano nodal.
+        // ─────────────────────────────────────────────────────────────
+
         function createPShapedOrbital(radius, color) {
+            // Orbital 2p — dumbbell ao longo do eixo Y
+            // Lóbulos nitidamente separados e totalmente limpos do núcleo
             const group = new THREE.Group();
-            const lobeHeight = radius * 1.2;
-            const lobeWidth = radius * 0.6;
-            
-            // Lóbulo superior
-            const topGeometry = new THREE.SphereGeometry(lobeWidth, 24, 24);
-            topGeometry.scale(1, 1.8, 1);
+            const lobeR    = radius * 0.50;   // raio da esfera base
+            const elongY   = 1.90;            // alongamento no eixo Y
+            const lobeCenter = lobeR * elongY * 1.45;
+
             const material = new THREE.MeshPhongMaterial({
-                color: color,
+                color,
                 transparent: true,
-                opacity: 0.35,
+                opacity: orbitalStyle === 'transparent' ? 0.18 : 0.35,
                 wireframe: orbitalStyle === 'wireframe',
                 side: THREE.DoubleSide
             });
-            const topLobe = new THREE.Mesh(topGeometry, material);
-            topLobe.position.y = lobeHeight * 0.5;
-            group.add(topLobe);
-            
-            // Lóbulo inferior
-            const bottomLobe = new THREE.Mesh(topGeometry, material.clone());
-            bottomLobe.position.y = -lobeHeight * 0.5;
-            group.add(bottomLobe);
-            
+
+            [1, -1].forEach(sign => {
+                const geo = new THREE.SphereGeometry(lobeR, 28, 28);
+                geo.scale(1, elongY, 1);
+                const lobe = new THREE.Mesh(geo, material.clone());
+                lobe.position.y = sign * lobeCenter;
+                group.add(lobe);
+            });
+
             scene.add(group);
             orbitals.push(group);
         }
 
         function createDoublePOrbital(radius, color) {
+            // Orbital 3p — dois pares de lóbulos (0° e 90° no plano XZ)
             const group = new THREE.Group();
-            
-            // Criar dois conjuntos de lóbulos em ângulo
-            for (let angle of [0, Math.PI / 2]) {
-                const subGroup = new THREE.Group();
-                const lobeSize = radius * 0.8;
-                
-                for (let side of [-1, 1]) {
-                    const geometry = new THREE.SphereGeometry(lobeSize * 0.5, 20, 20);
-                    geometry.scale(1.5, 1, 1);
-                    
-                    const material = new THREE.MeshPhongMaterial({
-                        color: color,
-                        transparent: true,
-                        opacity: 0.3,
-                        wireframe: orbitalStyle === 'wireframe',
-                        side: THREE.DoubleSide
-                    });
-                    
-                    const lobe = new THREE.Mesh(geometry, material);
-                    lobe.position.x = side * radius * 0.7 * Math.cos(angle);
-                    lobe.position.z = side * radius * 0.7 * Math.sin(angle);
-                    subGroup.add(lobe);
-                }
-                
-                group.add(subGroup);
-            }
-            
+            const lobeR    = radius * 0.36;
+            const elongXZ  = 1.80;
+            const lobeCenter = lobeR * elongXZ * 1.45;
+
+            const material = new THREE.MeshPhongMaterial({
+                color,
+                transparent: true,
+                opacity: orbitalStyle === 'transparent' ? 0.15 : 0.30,
+                wireframe: orbitalStyle === 'wireframe',
+                side: THREE.DoubleSide
+            });
+
+            [0, Math.PI / 2].forEach(angle => {
+                [1, -1].forEach(sign => {
+                    const geo = new THREE.SphereGeometry(lobeR, 24, 24);
+                    geo.scale(elongXZ, 1, 1);
+                    const lobe = new THREE.Mesh(geo, material.clone());
+                    lobe.position.set(
+                        sign * lobeCenter * Math.cos(angle),
+                        0,
+                        sign * lobeCenter * Math.sin(angle)
+                    );
+                    lobe.rotation.y = angle;
+                    group.add(lobe);
+                });
+            });
+
             scene.add(group);
             orbitals.push(group);
         }
 
         function createCloverleafOrbital(radius, color) {
+            // Orbital 3d — trevo de 4 lóbulos no plano XZ
             const group = new THREE.Group();
-            const angles = [0, Math.PI / 2, Math.PI, 3 * Math.PI / 2];
-            const lobeDistance = radius * 0.8;
-            const lobeSize = radius * 0.4;
-            
-            // Criar 4 lóbulos em formato de trevo
-            angles.forEach(angle => {
-                const geometry = new THREE.SphereGeometry(lobeSize, 20, 20);
-                geometry.scale(1.5, 1, 1);
-                
-                const material = new THREE.MeshPhongMaterial({
-                    color: color,
-                    transparent: true,
-                    opacity: 0.35,
-                    wireframe: orbitalStyle === 'wireframe',
-                    side: THREE.DoubleSide
-                });
-                
-                const lobe = new THREE.Mesh(geometry, material);
-                lobe.position.x = lobeDistance * Math.cos(angle);
-                lobe.position.z = lobeDistance * Math.sin(angle);
+            const lobeR    = radius * 0.30;
+            const elongXZ  = 1.80;
+            const lobeCenter = lobeR * elongXZ * 1.45;
+
+            const material = new THREE.MeshPhongMaterial({
+                color,
+                transparent: true,
+                opacity: orbitalStyle === 'transparent' ? 0.18 : 0.35,
+                wireframe: orbitalStyle === 'wireframe',
+                side: THREE.DoubleSide
+            });
+
+            [0, Math.PI / 2, Math.PI, 3 * Math.PI / 2].forEach(angle => {
+                const geo = new THREE.SphereGeometry(lobeR, 24, 24);
+                geo.scale(elongXZ, 1, 1);
+                const lobe = new THREE.Mesh(geo, material.clone());
+                lobe.position.set(
+                    lobeCenter * Math.cos(angle),
+                    0,
+                    lobeCenter * Math.sin(angle)
+                );
                 lobe.rotation.y = angle;
-                
                 group.add(lobe);
             });
-            
+
             scene.add(group);
             orbitals.push(group);
         }
@@ -3728,35 +4143,67 @@
 
             orientations.forEach((orient, idx) => {
                 if (orbitalStyle === 'cloud') {
-                    const particleCount = isMobile ? 1000 : 2500;
-                    const positions = new Float32Array(particleCount * 3);
-                    const rScale = scale * 1.2;
-                    for (let i = 0; i < particleCount; i++) {
-                        const r = Math.abs(gaussianRandom(rScale, rScale * 0.4));
-                        const phi = Math.random() * Math.PI * 2;
-                        const cosTheta = (Math.random() * 2 - 1);
-                        const theta = Math.acos(Math.pow(cosTheta, 3));
-                        
-                        let px = r * Math.sin(theta) * Math.cos(phi);
-                        let py = r * Math.cos(theta);
-                        let pz = r * Math.sin(theta) * Math.sin(phi);
+                    // Nuvem p correta: |ψ_{2p}|² ∝ r² · exp(-r/a₀) · cos²θ
+                    // Zero no núcleo (r=0) e no plano nodal perpendicular ao eixo
+                    const particleCount = isMobile ? 1200 : 3000;
+                    const positions     = new Float32Array(particleCount * 3);
+                    const a0 = scale * 0.9;            // escala radial em unidades Three.js
+                    const box = a0 * 3.5;              // caixa de amostragem
 
-                        // Rotacionar manualmente para o eixo correto
-                        if (orient.axis === 'x') {
-                            let temp = px; px = py; py = temp;
-                        } else if (orient.axis === 'z') {
-                            let temp = pz; pz = py; py = temp;
+                    // Densidade analítica do 2p: ∝ r² · exp(-r/a₀) · cos²θ_eixo
+                    // rMax de densidade = 2a₀, normalizado a 1
+                    const r0max = 2 * a0;
+                    const dNorm = r0max * r0max * Math.exp(-2); // ≈ max teórico
+
+                    let filled = 0;
+                    const maxIter = particleCount * 300;
+                    for (let iter = 0; iter < maxIter && filled < particleCount; iter++) {
+                        const x = (Math.random() * 2 - 1) * box;
+                        const y = (Math.random() * 2 - 1) * box;
+                        const z = (Math.random() * 2 - 1) * box;
+                        const r = Math.sqrt(x*x + y*y + z*z);
+                        if (r < 0.001) continue;
+
+                        // cosθ em relação ao eixo do orbital
+                        let cosT;
+                        if      (orient.axis === 'y') cosT = y / r;
+                        else if (orient.axis === 'x') cosT = x / r;
+                        else                          cosT = z / r;
+
+                        const rn   = r / a0;
+                        const dens = rn * rn * Math.exp(-rn) * cosT * cosT;
+
+                        if (Math.random() < dens / (4 * Math.exp(-2))) {
+                            positions[filled * 3]     = x;
+                            positions[filled * 3 + 1] = y;
+                            positions[filled * 3 + 2] = z;
+                            filled++;
                         }
-
-                        positions[i * 3] = px;
-                        positions[i * 3 + 1] = py;
-                        positions[i * 3 + 2] = pz;
                     }
+                    // Preenchimento de segurança
+                    while (filled < particleCount) {
+                        const angle  = Math.random() * Math.PI * 2;
+                        const r      = a0 * (1 + Math.random());
+                        const sign   = Math.random() > 0.5 ? 1 : -1;
+                        positions[filled * 3]     = orient.axis === 'x' ? sign * r : Math.cos(angle) * r * 0.3;
+                        positions[filled * 3 + 1] = orient.axis === 'y' ? sign * r : Math.sin(angle) * r * 0.3;
+                        positions[filled * 3 + 2] = orient.axis === 'z' ? sign * r : Math.cos(angle) * r * 0.3;
+                        filled++;
+                    }
+
                     const geometry = new THREE.BufferGeometry();
                     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                    const basePos = new Float32Array(positions);
+                    geometry.setAttribute('basePosition', new THREE.BufferAttribute(basePos, 3));
+
                     const material = new THREE.PointsMaterial({
-                        size: isMobile ? 0.08 : 0.06, color: orient.color,
-                        transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false
+                        size: isMobile ? 0.28 : 0.20,
+                        color: orient.color,
+                        map: particleTexture,
+                        transparent: true,
+                        opacity: 0.55,
+                        blending: THREE.AdditiveBlending,
+                        depthWrite: false
                     });
 
                     material.onBeforeCompile = function(shader) {
@@ -3777,27 +4224,29 @@
                     scene.add(cloud);
                     orbitals.push(cloud);
                 } else {
-                    // Criar forma de halter
+                    // Halter físico — lóbulos completamente afastados do núcleo
                     const group = new THREE.Group();
-                    
-                    // Dois lóbulos
+                    const lobeR  = scale * 0.50;
+                    const elongY = 1.90;
+                    const lobeCenter = lobeR * elongY * 1.45;
+
                     for (let side of [-1, 1]) {
-                        const lobeGeometry = new THREE.SphereGeometry(scale * 0.8, segments, segments);
-                        lobeGeometry.scale(1, 1.5, 1);
-                        
+                        const lobeGeometry = new THREE.SphereGeometry(lobeR, segments, segments);
+                        lobeGeometry.scale(1, elongY, 1);
+
                         const material = new THREE.MeshPhongMaterial({
                             color: orient.color,
                             transparent: true,
-                            opacity: orbitalStyle === 'transparent' ? 0.2 : 0.35,
+                            opacity: orbitalStyle === 'transparent' ? 0.18 : 0.35,
                             wireframe: orbitalStyle === 'wireframe',
                             side: THREE.DoubleSide
                         });
-                        
+
                         const lobe = new THREE.Mesh(lobeGeometry, material);
-                        lobe.position.y = side * scale * 1.2;
+                        lobe.position.y = side * lobeCenter;
                         group.add(lobe);
                     }
-                    
+
                     group.rotation.set(...orient.rotation);
                     scene.add(group);
                     orbitals.push(group);
@@ -4009,14 +4458,11 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Rotação automática
-            if (isRotating && !isDragging) {
-                rotation.y += 0.003;
+            // Rotação automática suave via Quaternion (funciona em qualquer ângulo)
+            if (isRotating && !isDragging && scene) {
+                const autoRot = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), 0.003);
+                scene.quaternion.multiplyQuaternions(autoRot, scene.quaternion);
             }
-
-            // Aplicar rotação
-            scene.rotation.x = rotation.x;
-            scene.rotation.y = rotation.y;
 
             // Atualizar tempo nos shaders da nuvem para efeito de piscar (twinkle)
             orbitals.forEach(orb => {
@@ -4102,18 +4548,23 @@
                     electron.position.z = r * Math.cos(data.phi);
                 } else if (data.type === 'lobe') {
                     // Orbital lobe (p ou d) — movimento volumétrico dentro do lóbulo
+                    // Garante que o elétron NUNCA cruza o plano nodal (núcleo)
                     data.angle += data.speed;
-                    const r = data.lobeRadius * 0.45;
+                    const r  = data.lobeRadius * 0.40;   // confinamento lateral
                     const c1 = Math.cos(data.angle) * r;
                     const s1 = Math.sin(data.angle) * r;
                     const c2 = Math.cos(data.angle * 1.3) * r * 0.5;
-                    
+
+                    // Componente axial: always same sign as `side` — nunca cruza o núcleo
+                    const axialRaw = data.side * data.lobeDist + c1 * 0.65;
+                    const axialSafe = data.side * Math.max(data.lobeRadius * 0.15, Math.abs(axialRaw));
+
                     if (data.axis === 'px') {
-                        electron.position.set(data.side * data.lobeDist + c1 * 0.7, s1, c2);
+                        electron.position.set(axialSafe, s1, c2);
                     } else if (data.axis === 'py') {
-                        electron.position.set(c1, data.side * data.lobeDist + s1 * 0.7, c2);
+                        electron.position.set(s1, axialSafe, c2);
                     } else { // pz
-                        electron.position.set(c1, c2, data.side * data.lobeDist + s1 * 0.7);
+                        electron.position.set(s1, c2, axialSafe);
                     }
                 } else if (data.orientation !== undefined) {
                     // Orbital p legado — centralizado

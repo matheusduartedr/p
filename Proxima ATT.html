@@ -890,7 +890,7 @@ function initThree(){
     window.addEventListener('mouseup',()=>isDragging=false);
     canvas.addEventListener('wheel',e=>{
         cameraR+=e.deltaY*0.01;
-        cameraR=Math.max(1.5,Math.min(22,cameraR));
+        cameraR=Math.max(1.5,Math.min(45,cameraR));
         updateCam(); e.preventDefault();
     },{passive:false});
 
@@ -1018,18 +1018,21 @@ function toggleViewMode(){
 }
 
 function buildCloudPoints(n, l, m, scale){
-    // Rejection sampling usando |psi|^2 — exatamente igual ao modo nuvem do PROTON
-    const N_POINTS = 18000;
-    const box = scale * 2.2;
+    // Rejection sampling usando |psi|^2 em volume esférico
+    const N_POINTS = 14000;
+    const maxR = scale * 1.85;
     const positions = new Float32Array(N_POINTS * 3);
     const colors    = new Float32Array(N_POINTS * 3);
 
     // Calcular psi2 max para normalizar rejection
     let psiMax = 0;
-    for(let k=0; k<800; k++){
-        const tx = (Math.random()-0.5)*box*2;
-        const ty = (Math.random()-0.5)*box*2;
-        const tz = (Math.random()-0.5)*box*2;
+    for(let k=0; k<1000; k++){
+        const r = Math.random() * maxR;
+        const phi = Math.random() * Math.PI * 2;
+        const theta = Math.acos(2 * Math.random() - 1);
+        const tx = r * Math.sin(theta) * Math.cos(phi);
+        const ty = r * Math.sin(theta) * Math.sin(phi);
+        const tz = r * Math.cos(theta);
         const v = psi2(n, l, m, tx, ty, tz);
         if(v > psiMax) psiMax = v;
     }
@@ -1037,12 +1040,16 @@ function buildCloudPoints(n, l, m, scale){
 
     let accepted = 0;
     let tries = 0;
-    const maxTries = N_POINTS * 80;
+    const maxTries = N_POINTS * 100;
     while(accepted < N_POINTS && tries < maxTries){
         tries++;
-        const x = (Math.random()-0.5)*box*2;
-        const y = (Math.random()-0.5)*box*2;
-        const z = (Math.random()-0.5)*box*2;
+        const r = Math.pow(Math.random(), 0.333) * maxR;
+        const phi = Math.random() * Math.PI * 2;
+        const theta = Math.acos(2 * Math.random() - 1);
+        const x = r * Math.sin(theta) * Math.cos(phi);
+        const y = r * Math.sin(theta) * Math.sin(phi);
+        const z = r * Math.cos(theta);
+
         const prob = psi2(n, l, m, x, y, z) / psiMax;
         if(Math.random() > prob) continue;
 
@@ -1050,16 +1057,14 @@ function buildCloudPoints(n, l, m, scale){
         positions[accepted*3+1] = y;
         positions[accepted*3+2] = z;
 
-        // Cor baseada na distância ao núcleo (decay quente no centro)
         const d = Math.sqrt(x*x + y*y + z*z);
-        const decayR = Math.max(1, scale * 0.6);
+        const decayR = Math.max(1, scale * 0.65);
         const f = Math.exp(-d / decayR);
 
-        // Gradiente: branco-quente no centro -> azul-ciano na borda
         const c = new THREE.Color(currentColor.c1);
-        colors[accepted*3]   = c.r * f + (1-f) * c.r * 0.3;
-        colors[accepted*3+1] = c.g * f + (1-f) * c.g * 0.3;
-        colors[accepted*3+2] = c.b * f + (1-f) * c.b * 0.3;
+        colors[accepted*3]   = c.r * f + (1-f) * c.r * 0.35;
+        colors[accepted*3+1] = c.g * f + (1-f) * c.g * 0.35;
+        colors[accepted*3+2] = c.b * f + (1-f) * c.b * 0.35;
 
         accepted++;
     }
@@ -1081,16 +1086,31 @@ function doRender(){
     const n=currentN, l=currentL, m=currentM;
     const scale = Math.max(1.8, n*n*0.28+0.9);
 
-    cameraR = scale * 2.8 + 1.5;
+    // Zoom out inicial ajustado para caber perfeitamente na tela sem cortar
+    cameraR = (viewMode === 'cloud') ? scale * 4.6 + 6.0 : scale * 2.8 + 1.5;
     updateCam();
 
     if(viewMode === 'cloud'){
+        if (!window._particleTex) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+            grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            grad.addColorStop(0.2, 'rgba(255, 255, 255, 0.7)');
+            grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');
+            grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 64, 64);
+            window._particleTex = new THREE.CanvasTexture(canvas);
+        }
         const geo = buildCloudPoints(n, l, m, scale);
         const mat = new THREE.PointsMaterial({
-            size: 0.12,
+            size: 0.28,
+            map: window._particleTex,
             vertexColors: true,
             transparent: true,
-            opacity: 0.75,
+            opacity: 0.65,
             blending: THREE.AdditiveBlending,
             depthWrite: false
         });

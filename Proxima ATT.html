@@ -18,6 +18,75 @@ body {
     display: flex;
     flex-direction: column;
     -webkit-font-smoothing: antialiased;
+    transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* ── TEMA CLARO ── */
+body.theme-light {
+    background: radial-gradient(circle at center, #f0f4f9 0%, #dbe4ee 100%);
+    color: #1e293b;
+}
+
+body.theme-light .header {
+    background: rgba(255,255,255,0.8);
+    border-bottom-color: rgba(0,150,220,0.3);
+}
+
+body.theme-light .header h1 {
+    background: linear-gradient(135deg, #0088cc, #00aa66);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+body.theme-light .mode-btn {
+    background: rgba(0,0,0,0.06);
+    border-color: rgba(0,120,200,0.25);
+    color: #334155;
+}
+
+body.theme-light .mode-btn.active {
+    background: rgba(0,180,240,0.25);
+    border-color: #0088cc;
+    color: #0f172a;
+    box-shadow: 0 0 14px rgba(0,180,240,0.4);
+}
+
+body.theme-light #orbital-canvas-wrap,
+body.theme-light .controls,
+body.theme-light .info-overlay {
+    background: rgba(255,255,255,0.65);
+    border-color: rgba(0,150,220,0.25);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+}
+
+body.theme-light .controls h3,
+body.theme-light .qn-letter,
+body.theme-light .slider-label,
+body.theme-light .info-overlay-title {
+    color: #0284c7;
+}
+
+body.theme-light .qn-cell,
+body.theme-light .node-card,
+body.theme-light .info-text {
+    background: rgba(0,0,0,0.04);
+    color: #334155;
+}
+
+body.theme-light .qn-num,
+body.theme-light .node-num,
+body.theme-light .slider-val {
+    color: #0284c7;
+}
+
+body.theme-light .btn {
+    background: rgba(0,0,0,0.05);
+    color: #1e293b;
+    border-color: rgba(0,150,220,0.3);
+}
+
+body.theme-light .btn:hover {
+    background: rgba(0,150,220,0.15);
 }
 
 /* ── HEADER ── */
@@ -533,12 +602,179 @@ input[type=range]::-webkit-slider-thumb {
     box-shadow: 0 0 5px rgba(0,204,255,0.5);
 }
 
-/* Mobile responsive */
+/* ─── QUICK BAR (Controles de Acesso Rápido no Celular) ─── */
+.quick-bar {
+    display: none;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 8px;
+    background: rgba(10, 15, 30, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 204, 255, 0.25);
+    border-radius: 16px;
+    margin: 6px 0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.qb-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(0, 204, 255, 0.25);
+    color: #fff;
+    padding: 10px 6px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.qb-btn:active {
+    transform: scale(0.95);
+    background: rgba(0, 204, 255, 0.25);
+}
+
+/* ─── ACORDEÕES RECOLHÍVEIS (Estrutura Mobile-First) ─── */
+.accordion-header {
+    display: none;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 204, 255, 0.2);
+    color: #00ccff;
+    padding: 12px 14px;
+    border-radius: 14px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    transition: all 0.3s;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.accordion-header .accordion-icon {
+    font-size: 0.7rem;
+    transition: transform 0.3s;
+}
+
+.accordion-header.open {
+    background: rgba(0, 204, 255, 0.12);
+    border-color: rgba(0, 204, 255, 0.4);
+    color: #fff;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.accordion-header.open .accordion-icon {
+    transform: rotate(180deg);
+}
+
+.accordion-content {
+    display: block;
+}
+
+/* Mobile responsive & small screens compatibility — igual ao PROTON.html */
 @media (max-width: 900px) {
-    body { height: auto; overflow: auto; }
-    .main-content { flex-direction: column; overflow: visible; padding: 6px; }
-    #orbital-canvas-wrap { flex: none; height: 70vw; min-height: 300px; max-height: 460px; }
-    .controls { width: 100%; max-width: 100%; min-width: unset; height: auto; overflow: visible; border-radius: 20px; }
+    html, body { height: auto !important; overflow: auto !important; -webkit-overflow-scrolling: touch; }
+    
+    .quick-bar {
+        display: grid !important;
+    }
+    
+    .accordion-header {
+        display: flex !important;
+    }
+    
+    .accordion-content {
+        display: none;
+        padding-top: 8px;
+    }
+    
+    .accordion-content.open {
+        display: block !important;
+    }
+    
+    .control-group > h3 {
+        display: none !important;
+    }
+
+    .main-content {
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+        overflow: visible !important;
+        min-height: 0 !important;
+        align-items: stretch !important;
+        padding: 4px !important;
+        gap: 8px !important;
+    }
+    #orbital-canvas-wrap {
+        flex: none !important;
+        width: 100% !important;
+        height: 65vw !important;
+        min-height: 270px !important;
+        max-height: 450px !important;
+        border-radius: 16px !important;
+    }
+    .controls {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: unset !important;
+        height: auto !important;
+        overflow-y: visible !important;
+        border-radius: 16px !important;
+        padding: 12px 14px !important;
+    }
+    .header {
+        padding: 6px 10px !important;
+        gap: 5px 10px !important;
+    }
+    .header h1 {
+        font-size: 1rem !important;
+    }
+    .info-overlay {
+        top: 8px !important;
+        right: 8px !important;
+        padding: 8px 12px !important;
+        min-width: auto !important;
+        max-width: 140px !important;
+        border-radius: 12px !important;
+    }
+    .info-overlay-title { font-size: 0.55rem !important; margin-bottom: 3px !important; }
+    .info-overlay-value { font-size: 1rem !important; }
+    .info-overlay-unit { font-size: 0.65rem !important; }
+    .info-overlay-sub { font-size: 0.55rem !important; }
+    .qn-item { font-size: 0.6rem !important; }
+    .rotation-hint { font-size: 0.7rem !important; padding: 5px 10px !important; bottom: 8px !important; }
+}
+
+@media (max-width: 480px) {
+    #orbital-canvas-wrap {
+        height: 70vw !important;
+        min-height: 250px !important;
+    }
+    .info-overlay {
+        top: 6px !important;
+        right: 6px !important;
+        padding: 6px 10px !important;
+        max-width: 120px !important;
+    }
+    .info-overlay-title { font-size: 0.48rem !important; }
+    .info-overlay-value { font-size: 0.88rem !important; }
+    .info-overlay-unit { font-size: 0.58rem !important; }
+    .header h1 { font-size: 0.9rem !important; }
+    .mode-btn { font-size: 0.68rem !important; padding: 4px 10px !important; }
 }
 </style>
 </head>
@@ -549,6 +785,7 @@ input[type=range]::-webkit-slider-thumb {
     <h1>PROTON — Orbitais Quânticos |ψ|²</h1>
     <div class="mode-toggle">
         <button class="mode-btn active">⬡ Orbitais |ψ|²</button>
+        <button class="mode-btn" id="btn-theme-toggle" onclick="toggleTheme()" style="margin-left: 12px; border-color: rgba(255,255,255,0.3);">☀️ Tema Claro</button>
     </div>
 </div>
 
@@ -585,128 +822,167 @@ input[type=range]::-webkit-slider-thumb {
         </div>
     </div>
 
+    <!-- ═══════════════════════════════════════
+         QUICK BAR — barra de acesso direto no celular
+         Imediatamente abaixo da área da simulação 3D
+    ═══════════════════════════════════════ -->
+    <div class="quick-bar">
+        <button class="qb-btn" onclick="toggleRotate()" title="Pausar/Retomar Rotação">
+            <span id="qbRotIcon">⏸️</span>
+            <span id="qbRotText">Pausar</span>
+        </button>
+        <button class="qb-btn" onclick="toggleViewMode()" title="Alternar Estilo">
+            <span id="qbViewIcon">☁️</span>
+            <span id="qbViewText">Estilo</span>
+        </button>
+        <button class="qb-btn" onclick="resetCamera()" title="Resetar Câmera">
+            <span>🔄 Resetar</span>
+        </button>
+    </div>
+
     <!-- CONTROLS -->
     <div class="controls">
 
-        <!-- Números quânticos -->
-        <div class="control-group">
-            <h3>📐 Números Quânticos</h3>
-
-            <div class="qn-grid">
-                <div class="qn-cell">
-                    <span class="qn-letter">n — principal</span>
-                    <span class="qn-num" id="disp-n">1</span>
-                    <span class="qn-desc">camada</span>
+        <!-- 📊 INFORMAÇÕES DO ÁTOMO -->
+        <div class="control-group" id="cg-info">
+            <h3>📊 Informações do Átomo</h3>
+            <button class="accordion-header open" onclick="toggleAccordion('cg-info')" aria-expanded="true" aria-controls="acc-info">
+                📊 Informações do Átomo
+                <span class="accordion-icon">▼</span>
+            </button>
+            <div class="accordion-content open" id="acc-info">
+                <div class="atom-info" style="margin-top:0;">
+                    <h4 id="orbital-name">1s</h4>
+                    <div class="orbital-big" id="orbital-symbol">1s</div>
+                    <div class="orbital-type" id="orbital-type">Orbital s — esférico</div>
                 </div>
-                <div class="qn-cell">
-                    <span class="qn-letter">l — angular</span>
-                    <span class="qn-num" id="disp-l">0</span>
-                    <span class="qn-desc">subnível</span>
+
+                <!-- Nódulos -->
+                <div class="node-row">
+                    <div class="node-card">
+                        <span class="node-num" id="info-nr">0</span>
+                        <span class="node-lbl">Radiais (n−l−1)</span>
+                    </div>
+                    <div class="node-card">
+                        <span class="node-num" id="info-na">0</span>
+                        <span class="node-lbl">Angulares (l)</span>
+                    </div>
                 </div>
-                <div class="qn-cell">
-                    <span class="qn-letter">m — magnético</span>
-                    <span class="qn-num" id="disp-m">0</span>
-                    <span class="qn-desc">orientação</span>
+
+                <!-- Momento angular -->
+                <div class="info-text">
+                    |<b>L</b>| = √(l(l+1)) ℏ = <b id="info-L">0</b> ℏ &nbsp;·&nbsp;
+                    L<sub>z</sub> = m ℏ = <b id="info-Lz">0</b> ℏ<br>
+                    Degenerescência: n² = <b id="info-deg2">1</b> estados
                 </div>
-            </div>
 
-            <div class="slider-wrap">
-                <div class="slider-header">
-                    <span class="slider-label">n (principal) 1→5</span>
-                    <span class="slider-val" id="val-n">1</span>
-                </div>
-                <input type="range" id="sl-n" min="1" max="5" value="1" oninput="onNChange(this.value)">
-            </div>
-
-            <div class="slider-wrap">
-                <div class="slider-header">
-                    <span class="slider-label">l (azimutal) 0→n−1</span>
-                    <span class="slider-val" id="val-l">0</span>
-                </div>
-                <input type="range" id="sl-l" min="0" max="0" value="0" oninput="onLChange(this.value)">
-            </div>
-
-            <div class="slider-wrap">
-                <div class="slider-header">
-                    <span class="slider-label">m (magnético) −l→+l</span>
-                    <span class="slider-val" id="val-m">0</span>
-                </div>
-                <input type="range" id="sl-m" min="0" max="0" value="0" oninput="onMChange(this.value)">
-            </div>
-        </div>
-
-        <!-- Orbital atual -->
-        <div class="atom-info">
-            <h4 id="orbital-name">1s</h4>
-            <div class="orbital-big" id="orbital-symbol">1s</div>
-            <div class="orbital-type" id="orbital-type">Orbital s — esférico</div>
-        </div>
-
-        <!-- Paleta -->
-        <div class="control-group">
-            <h3>🎨 Paleta de Cor</h3>
-            <div class="color-row" id="color-row">
-                <div class="color-swatch active" style="background:#6496ff" onclick="setColor('#6496ff','#64c8ff')" title="Azul PROTON"></div>
-                <div class="color-swatch" style="background:#00ccff" onclick="setColor('#00ccff','#64ffc8')" title="Cyan"></div>
-                <div class="color-swatch" style="background:#00ff88" onclick="setColor('#00ff88','#ccffee')" title="Green"></div>
-                <div class="color-swatch" style="background:#ff9664" onclick="setColor('#ff9664','#ffcc88')" title="Orange"></div>
-                <div class="color-swatch" style="background:#c864ff" onclick="setColor('#c864ff','#e8aaff')" title="Violet"></div>
-                <div class="color-swatch" style="background:#64ffc8" onclick="setColor('#64ffc8','#ccffe8')" title="Mint"></div>
-                <div class="color-swatch" style="background:#f5c842" onclick="setColor('#f5c842','#fde68a')" title="Gold"></div>
-            </div>
-        </div>
-
-        <!-- Controles de cena -->
-        <div class="control-group">
-            <h3>⚙️ Controles</h3>
-            <button class="btn" id="btn-rot" onclick="toggleRotate()">⟳ Rotação automática</button>
-            <button class="btn" onclick="resetCamera()">⌖ Resetar câmera</button>
-            <button class="btn" onclick="toggleAxes()">⊕ Eixos XYZ</button>
-            <button class="btn" onclick="triggerRender()">↻ Recalcular</button>
-            <button class="btn" id="btn-viewmode" onclick="toggleViewMode()">☁️ Nuvem de pontos</button>
-        </div>
-
-        <!-- Nódulos -->
-        <div class="control-group">
-            <h3>🔵 Nódulos</h3>
-            <div class="node-row">
-                <div class="node-card">
-                    <span class="node-num" id="info-nr">0</span>
-                    <span class="node-lbl">Radiais<br>n − l − 1</span>
-                </div>
-                <div class="node-card">
-                    <span class="node-num" id="info-na">0</span>
-                    <span class="node-lbl">Angulares<br>l</span>
+                <!-- Descrição -->
+                <div class="info-text" id="info-desc" style="margin-top:6px;">
+                    Orbital 1s: distribuição esférica perfeita. Estado fundamental do hidrogênio.
                 </div>
             </div>
         </div>
 
-        <!-- Momento angular -->
-        <div class="control-group">
-            <h3>⚛️ Momento Angular</h3>
-            <div class="info-text">
-                |<b>L</b>| = √(l(l+1)) ℏ = <b id="info-L">0</b> ℏ<br>
-                L<sub>z</sub> = m ℏ = <b id="info-Lz">0</b> ℏ<br>
-                <br>Degenerescência: n² = <b id="info-deg2">1</b> estados
+        <!-- 👁️ VISUALIZAÇÃO -->
+        <div class="control-group" id="cg-vis">
+            <h3>👁️ Visualização & Números Quânticos</h3>
+            <button class="accordion-header open" onclick="toggleAccordion('cg-vis')" aria-expanded="true" aria-controls="acc-vis">
+                👁️ Visualização
+                <span class="accordion-icon">▼</span>
+            </button>
+            <div class="accordion-content open" id="acc-vis">
+                <div class="qn-grid">
+                    <div class="qn-cell">
+                        <span class="qn-letter">n — principal</span>
+                        <span class="qn-num" id="disp-n">1</span>
+                        <span class="qn-desc">camada</span>
+                    </div>
+                    <div class="qn-cell">
+                        <span class="qn-letter">l — angular</span>
+                        <span class="qn-num" id="disp-l">0</span>
+                        <span class="qn-desc">subnível</span>
+                    </div>
+                    <div class="qn-cell">
+                        <span class="qn-letter">m — magnético</span>
+                        <span class="qn-num" id="disp-m">0</span>
+                        <span class="qn-desc">orientação</span>
+                    </div>
+                </div>
+
+                <div class="slider-wrap">
+                    <div class="slider-header">
+                        <span class="slider-label">n (principal) 1→5</span>
+                        <span class="slider-val" id="val-n">1</span>
+                    </div>
+                    <input type="range" id="sl-n" min="1" max="5" value="1" oninput="onNChange(this.value)">
+                </div>
+
+                <div class="slider-wrap">
+                    <div class="slider-header">
+                        <span class="slider-label">l (azimutal) 0→n−1</span>
+                        <span class="slider-val" id="val-l">0</span>
+                    </div>
+                    <input type="range" id="sl-l" min="0" max="0" value="0" oninput="onLChange(this.value)">
+                </div>
+
+                <div class="slider-wrap">
+                    <div class="slider-header">
+                        <span class="slider-label">m (magnético) −l→+l</span>
+                        <span class="slider-val" id="val-m">0</span>
+                    </div>
+                    <input type="range" id="sl-m" min="0" max="0" value="0" oninput="onMChange(this.value)">
+                </div>
+
+                <!-- Botões de visualização organizados lado a lado quando houver espaço -->
+                <div class="btn-grid" style="margin-top: 8px;">
+                    <button class="btn" id="btn-rot" onclick="toggleRotate()">⏸️ Pausar Rotação</button>
+                    <button class="btn" id="btn-viewmode" onclick="toggleViewMode()">☁️ Nuvem de pontos</button>
+                </div>
+                <button class="btn" onclick="resetCamera()" style="margin-top:4px;">🔄 Resetar Câmera</button>
             </div>
         </div>
 
-        <!-- Regras -->
-        <div class="control-group">
+        <!-- ⚛️ EFEITOS QUÂNTICOS -->
+        <div class="control-group" id="cg-quantum">
+            <h3>⚛️ Efeitos Quânticos & Ações</h3>
+            <button class="accordion-header open" onclick="toggleAccordion('cg-quantum')" aria-expanded="true" aria-controls="acc-quantum">
+                ⚛️ Efeitos Quânticos
+                <span class="accordion-icon">▼</span>
+            </button>
+            <div class="accordion-content open" id="acc-quantum">
+                <button class="btn" onclick="triggerRender()">↻ Recalcular Função de Onda |ψ|²</button>
+                <button class="btn" onclick="toggleAxes()">⊕ Eixos Cartesianos XYZ</button>
+            </div>
+        </div>
+
+        <!-- 🎨 APARÊNCIA -->
+        <div class="control-group" id="cg-theme">
+            <h3>🎨 Aparência & Paleta</h3>
+            <button class="accordion-header" onclick="toggleAccordion('cg-theme')" aria-expanded="false" aria-controls="acc-theme">
+                🎨 Aparência
+                <span class="accordion-icon">▼</span>
+            </button>
+            <div class="accordion-content" id="acc-theme">
+                <div class="color-row" id="color-row">
+                    <!-- As paletas serão geradas dinamicamente via renderColorPalettes() -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ⚙️ CONFIGURAÇÕES AVANÇADAS & REGRAS -->
+        <div class="control-group" id="cg-rules">
             <h3>📋 Regras Quânticas</h3>
-            <div class="rule-item"><div class="rule-dot"></div><span>n ≥ 1 (inteiro positivo)</span></div>
-            <div class="rule-item"><div class="rule-dot"></div><span>0 ≤ l ≤ n − 1</span></div>
-            <div class="rule-item"><div class="rule-dot"></div><span>−l ≤ m ≤ +l</span></div>
-            <div class="rule-item"><div class="rule-dot"></div><span>Nódulos radiais = n − l − 1</span></div>
-            <div class="rule-item"><div class="rule-dot"></div><span>Nódulos angulares = l</span></div>
-            <div class="rule-item"><div class="rule-dot"></div><span>Nódulos totais = n − 1</span></div>
-        </div>
-
-        <!-- Descrição -->
-        <div class="control-group">
-            <h3>📖 Descrição</h3>
-            <div class="info-text" id="info-desc">
-                Orbital 1s: distribuição esférica perfeita. Estado fundamental do hidrogênio. Densidade máxima no núcleo. Zero nódos radiais ou angulares.
+            <button class="accordion-header" onclick="toggleAccordion('cg-rules')" aria-expanded="false" aria-controls="acc-rules">
+                📋 Regras Quânticas & Princípios
+                <span class="accordion-icon">▼</span>
+            </button>
+            <div class="accordion-content" id="acc-rules">
+                <div class="rule-item"><div class="rule-dot"></div><span>n ≥ 1 (inteiro positivo)</span></div>
+                <div class="rule-item"><div class="rule-dot"></div><span>0 ≤ l ≤ n − 1</span></div>
+                <div class="rule-item"><div class="rule-dot"></div><span>−l ≤ m ≤ +l</span></div>
+                <div class="rule-item"><div class="rule-dot"></div><span>Nódulos radiais = n − l − 1</span></div>
+                <div class="rule-item"><div class="rule-dot"></div><span>Nódulos angulares = l</span></div>
+                <div class="rule-item"><div class="rule-dot"></div><span>Nódulos totais = n − 1</span></div>
             </div>
         </div>
 
@@ -852,12 +1128,79 @@ let viewMode='wireframe'; // 'wireframe' | 'cloud'
 let isDragging=false, prevMouse={x:0,y:0};
 let cameraTheta=0.5, cameraPhi=1.2, cameraR=6;
 
+let isLightTheme = false;
+
+const darkPalettes = [
+    { c1: '#6496ff', c2: '#64c8ff', name: 'Azul Elétrico' },
+    { c1: '#00ccff', c2: '#64ffc8', name: 'Cyan Quântico' },
+    { c1: '#00ff88', c2: '#ccffee', name: 'Verde Neon' },
+    { c1: '#ff9664', c2: '#ffcc88', name: 'Laranja Solar' },
+    { c1: '#c864ff', c2: '#e8aaff', name: 'Violeta Plasma' },
+    { c1: '#64ffc8', c2: '#ccffe8', name: 'Menta Luminosa' },
+    { c1: '#f5c842', c2: '#fde68a', name: 'Dourado' }
+];
+
+const lightPalettes = [
+    { c1: '#050a14', c2: '#1a2b4c', name: 'Preto Absoluto' },
+    { c1: '#0a1931', c2: '#15325b', name: 'Azul Noturno Ultra-Escuro' },
+    { c1: '#062912', c2: '#0d4a22', name: 'Verde Floresta Escuro' },
+    { c1: '#260438', c2: '#470966', name: 'Púrpura Escura' },
+    { c1: '#3b0606', c2: '#690b0b', name: 'Carmim Profundo' },
+    { c1: '#002b36', c2: '#004d61', name: 'Azul Marinho Escuro' },
+    { c1: '#2b1a08', c2: '#4d2e0e', name: 'Marrom Café Escuro' }
+];
+
+function renderColorPalettes() {
+    const container = document.getElementById('color-row');
+    if (!container) return;
+    container.innerHTML = '';
+    const palettes = isLightTheme ? lightPalettes : darkPalettes;
+    
+    // Se a cor atual não existir no novo conjunto, selecionar a primeira
+    let found = false;
+    palettes.forEach((p, idx) => {
+        const div = document.createElement('div');
+        const isActive = currentColor.c1 === p.c1;
+        if (isActive) found = true;
+        div.className = 'color-swatch' + (isActive ? ' active' : '');
+        div.style.background = p.c1;
+        div.title = p.name;
+        div.onclick = (e) => {
+            setColor(p.c1, p.c2);
+            document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+            div.classList.add('active');
+        };
+        container.appendChild(div);
+    });
+
+    if (!found && palettes.length > 0) {
+        currentColor = { c1: palettes[0].c1, c2: palettes[0].c2 };
+        if (container.children[0]) container.children[0].classList.add('active');
+        triggerRender();
+    }
+}
+
+function toggleTheme() {
+    isLightTheme = !isLightTheme;
+    document.body.classList.toggle('theme-light', isLightTheme);
+    const btn = document.getElementById('btn-theme-toggle');
+    if (btn) {
+        btn.textContent = isLightTheme ? '🌙 Tema Escuro' : '☀️ Tema Claro';
+    }
+    if (renderer) {
+        const bgCol = isLightTheme ? 0xf0f4f9 : 0x0a0f25;
+        renderer.setClearColor(bgCol, 1);
+    }
+    renderColorPalettes();
+    triggerRender();
+}
+
 function initThree(){
     const canvas=document.getElementById('orbital-canvas');
     const wrap=document.getElementById('orbital-canvas-wrap');
     renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setClearColor(0x0a0f25,1);
+    renderer.setClearColor(isLightTheme ? 0xf0f4f9 : 0x0a0f25, 1);
     renderer.setSize(wrap.clientWidth,wrap.clientHeight);
 
     scene=new THREE.Scene();
@@ -912,9 +1255,71 @@ function initThree(){
     });
 
     triggerRender();
+    let animTime = 0;
     (function loop(){
         requestAnimationFrame(loop);
-        if(autoRotate){cameraTheta+=0.004;updateCam();}
+        animTime += 0.02;
+
+        if(autoRotate){
+            cameraTheta += 0.003;
+            updateCam();
+        }
+
+        // Animação Quântica Viva: Troca Estocástica Contínua de Pontos + Tremor Quântico
+        if(orbitalMesh) {
+            if(viewMode === 'cloud' && orbitalMesh.geometry) {
+                const geo = orbitalMesh.geometry;
+                const posAttr = geo.attributes.position;
+                const colAttr = geo.attributes.color;
+                const userData = geo.userData;
+                
+                if (posAttr && userData && userData.poolPositions) {
+                    const posArr = posAttr.array;
+                    const colArr = colAttr.array;
+                    const poolPos = userData.poolPositions;
+                    const poolCol = userData.poolColors;
+                    const poolCount = userData.poolCount;
+                    const activeCount = posAttr.count;
+                    
+                    // 1. APARIÇÃO E DESAPARECIMENTO ALEATÓRIO: A cada frame, recolocar ~120 pontos aleatórios em novos locais do orbital!
+                    const swapCount = Math.floor(activeCount * 0.02); // 2% dos pontos trocam de lugar a cada frame
+                    for(let k=0; k<swapCount; k++) {
+                        const targetIdx = Math.floor(Math.random() * activeCount);
+                        const sourceIdx = Math.floor(Math.random() * poolCount);
+                        
+                        posArr[targetIdx * 3]     = poolPos[sourceIdx * 3];
+                        posArr[targetIdx * 3 + 1] = poolPos[sourceIdx * 3 + 1];
+                        posArr[targetIdx * 3 + 2] = poolPos[sourceIdx * 3 + 2];
+                        
+                        colArr[targetIdx * 3]     = poolCol[sourceIdx * 3];
+                        colArr[targetIdx * 3 + 1] = poolCol[sourceIdx * 3 + 1];
+                        colArr[targetIdx * 3 + 2] = poolCol[sourceIdx * 3 + 2];
+                    }
+                    
+                    // 2. Micro-tremor aleatório nos pontos para efeito vivo de formigamento
+                    for(let i=0; i<activeCount*3; i++) {
+                        posArr[i] += (Math.random() - 0.5) * 0.025;
+                    }
+
+                    posAttr.needsUpdate = true;
+                    if (colAttr) colAttr.needsUpdate = true;
+                }
+                
+                // Rotação sutil da cena
+                orbitalMesh.rotation.y = animTime * 0.02;
+            } else if(viewMode === 'wireframe') {
+                // Pulsação quântica suave e respiração da onda no modo wireframe
+                const pulse = 1 + Math.sin(animTime * 1.5) * 0.025;
+                orbitalMesh.scale.set(pulse, pulse, pulse);
+                orbitalMesh.rotation.y = animTime * 0.08;
+            }
+        }
+
+        if(nucleusMesh) {
+            nucleusMesh.rotation.y += 0.01;
+            nucleusMesh.rotation.x += 0.005;
+        }
+
         renderer.render(scene,camera);
     })();
 }
@@ -1012,21 +1417,24 @@ function toggleViewMode(){
         btn.textContent = viewMode === 'cloud' ? '🔧 Wireframe' : '☁️ Nuvem de pontos';
         btn.style.background = viewMode === 'cloud' ? 'rgba(0,204,255,0.35)' : '';
         btn.style.borderColor = viewMode === 'cloud' ? '#00ccff' : '';
-        btn.style.boxShadow = viewMode === 'cloud' ? '0 0 18px rgba(0,204,255,0.55)' : '';
     }
+    const qbIcon = document.getElementById('qbViewIcon');
+    const qbText = document.getElementById('qbViewText');
+    if(qbIcon) qbIcon.textContent = viewMode === 'cloud' ? '🔧' : '☁️';
+    if(qbText) qbText.textContent = viewMode === 'cloud' ? 'Wireframe' : 'Nuvem';
     triggerRender();
 }
 
 function buildCloudPoints(n, l, m, scale){
-    // Rejection sampling usando |psi|^2 em volume esférico
-    const N_POINTS = 14000;
+    // Rejection sampling com pool amplo de posições quânticas
+    const POOL_SIZE = 8000;
     const maxR = scale * 1.85;
-    const positions = new Float32Array(N_POINTS * 3);
-    const colors    = new Float32Array(N_POINTS * 3);
+    const positions = new Float32Array(POOL_SIZE * 3);
+    const colors    = new Float32Array(POOL_SIZE * 3);
 
     // Calcular psi2 max para normalizar rejection
     let psiMax = 0;
-    for(let k=0; k<1000; k++){
+    for(let k=0; k<1500; k++){
         const r = Math.random() * maxR;
         const phi = Math.random() * Math.PI * 2;
         const theta = Math.acos(2 * Math.random() - 1);
@@ -1040,8 +1448,8 @@ function buildCloudPoints(n, l, m, scale){
 
     let accepted = 0;
     let tries = 0;
-    const maxTries = N_POINTS * 100;
-    while(accepted < N_POINTS && tries < maxTries){
+    const maxTries = POOL_SIZE * 40;
+    while(accepted < POOL_SIZE && tries < maxTries){
         tries++;
         const r = Math.pow(Math.random(), 0.333) * maxR;
         const phi = Math.random() * Math.PI * 2;
@@ -1069,68 +1477,82 @@ function buildCloudPoints(n, l, m, scale){
         accepted++;
     }
 
-    const usedPositions = positions.slice(0, accepted*3);
-    const usedColors    = colors.slice(0, accepted*3);
+    // Selecionar N_DISPLAY pontos visíveis iniciais
+    const N_DISPLAY = Math.min(5000, accepted);
+    const activePositions = positions.slice(0, N_DISPLAY * 3);
+    const activeColors    = colors.slice(0, N_DISPLAY * 3);
 
     const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position',     new THREE.BufferAttribute(usedPositions, 3));
-    geo.setAttribute('color',        new THREE.BufferAttribute(usedColors,    3));
-    geo.setAttribute('basePosition', new THREE.BufferAttribute(new Float32Array(usedPositions), 3));
+    geo.setAttribute('position', new THREE.BufferAttribute(activePositions, 3));
+    geo.setAttribute('color',    new THREE.BufferAttribute(activeColors, 3));
+    
+    // Armazenar todo o reservatório (POOL) de posições válidas para recolocação contínua
+    geo.userData = {
+        poolPositions: positions.slice(0, accepted * 3),
+        poolColors: colors.slice(0, accepted * 3),
+        poolCount: accepted
+    };
     return geo;
 }
 
 function doRender(){
     if(!scene) return;
-    if(orbitalMesh){ scene.remove(orbitalMesh); if(orbitalMesh.geometry) orbitalMesh.geometry.dispose(); if(orbitalMesh.material) orbitalMesh.material.dispose(); }
+    try {
+        if(orbitalMesh){ scene.remove(orbitalMesh); if(orbitalMesh.geometry) orbitalMesh.geometry.dispose(); if(orbitalMesh.material) orbitalMesh.material.dispose(); }
 
-    const n=currentN, l=currentL, m=currentM;
-    const scale = Math.max(1.8, n*n*0.28+0.9);
+        const n=currentN, l=currentL, m=currentM;
+        const scale = Math.max(1.8, n*n*0.28+0.9);
 
-    // Zoom out inicial ajustado para caber perfeitamente na tela sem cortar
-    cameraR = (viewMode === 'cloud') ? scale * 4.6 + 6.0 : scale * 2.8 + 1.5;
-    updateCam();
+        // Zoom out inicial ajustado para caber perfeitamente na tela sem cortar
+        cameraR = (viewMode === 'cloud') ? scale * 4.6 + 6.0 : scale * 2.8 + 1.5;
+        updateCam();
 
-    if(viewMode === 'cloud'){
-        if (!window._particleTex) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 64; canvas.height = 64;
-            const ctx = canvas.getContext('2d');
-            const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-            grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-            grad.addColorStop(0.2, 'rgba(255, 255, 255, 0.7)');
-            grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');
-            grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, 64, 64);
-            window._particleTex = new THREE.CanvasTexture(canvas);
+        if(viewMode === 'cloud'){
+            if (!window._particleTex) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 64; canvas.height = 64;
+                const ctx = canvas.getContext('2d');
+                const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+                grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                grad.addColorStop(0.2, 'rgba(255, 255, 255, 0.7)');
+                grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');
+                grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 64, 64);
+                window._particleTex = new THREE.CanvasTexture(canvas);
+            }
+            const geo = buildCloudPoints(n, l, m, scale);
+            const mat = new THREE.PointsMaterial({
+                size: 0.28,
+                map: window._particleTex,
+                vertexColors: true,
+                transparent: true,
+                opacity: isLightTheme ? 0.9 : 0.65,
+                blending: isLightTheme ? THREE.NormalBlending : THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            orbitalMesh = new THREE.Points(geo, mat);
+        } else {
+            // Wireframe deformado original
+            const { geo } = buildOrbitalGeometry(n, l, m);
+            const mat = new THREE.MeshPhongMaterial({
+                color: new THREE.Color(currentColor.c1),
+                transparent: true,
+                opacity: isLightTheme ? 0.75 : 0.3,
+                wireframe: true,
+                side: THREE.DoubleSide
+            });
+            orbitalMesh = new THREE.Mesh(geo, mat);
         }
-        const geo = buildCloudPoints(n, l, m, scale);
-        const mat = new THREE.PointsMaterial({
-            size: 0.28,
-            map: window._particleTex,
-            vertexColors: true,
-            transparent: true,
-            opacity: 0.65,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false
-        });
-        orbitalMesh = new THREE.Points(geo, mat);
-    } else {
-        // Wireframe deformado original
-        const { geo } = buildOrbitalGeometry(n, l, m);
-        const mat = new THREE.MeshPhongMaterial({
-            color: new THREE.Color(currentColor.c1),
-            transparent: true,
-            opacity: 0.3,
-            wireframe: true,
-            side: THREE.DoubleSide
-        });
-        orbitalMesh = new THREE.Mesh(geo, mat);
-    }
 
-    scene.add(orbitalMesh);
-    document.getElementById('loading').style.display='none';
-    updatePanel();
+        scene.add(orbitalMesh);
+        updatePanel();
+    } catch(err) {
+        console.error("Erro na renderização:", err);
+    } finally {
+        const ld = document.getElementById('loading');
+        if(ld) ld.style.display = 'none';
+    }
 }
 
 // ── UI ──
@@ -1184,8 +1606,30 @@ function setColor(c1,c2){
 
 function toggleRotate(){
     autoRotate=!autoRotate;
-    document.getElementById('btn-rot').classList.toggle('active',autoRotate);
+    const btn = document.getElementById('btn-rot');
+    if (btn) btn.classList.toggle('active',autoRotate);
+    const qbBtn = document.getElementById('qbRotText');
+    if (qbBtn) qbBtn.textContent = autoRotate ? 'Continuar' : 'Pausar';
 }
+
+// ══════════════════════════════════════════════
+// ACORDEÃO — Toggle de seções recolhíveis (Mobile-First)
+// ══════════════════════════════════════════════
+window.toggleAccordion = function(groupId) {
+    if (window.innerWidth > 900) return; // Em desktop mantem tudo aberto e visivel
+
+    const group = document.getElementById(groupId);
+    if (!group) return;
+
+    const header = group.querySelector('.accordion-header');
+    const content = group.querySelector('.accordion-content');
+    if (!header || !content) return;
+
+    const isOpen = content.classList.contains('open');
+    content.classList.toggle('open', !isOpen);
+    header.classList.toggle('open', !isOpen);
+    header.setAttribute('aria-expanded', String(!isOpen));
+};
 
 function resetCamera(){
     cameraTheta=0.5; cameraPhi=1.2;
@@ -1231,7 +1675,7 @@ if(/Mobi|Android|iPhone/i.test(navigator.userAgent)){
     document.querySelector('.mobile-hint').style.display='inline';
 }
 
-window.addEventListener('load',()=>{ initThree(); updatePanel(); });
+window.addEventListener('load',()=>{ initThree(); renderColorPalettes(); updatePanel(); });
 </script>
 </body>
 </html>

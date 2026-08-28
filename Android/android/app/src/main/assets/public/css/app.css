@@ -1,0 +1,427 @@
+/* ==========================================================================
+   QUANTUM HUB — Mobile & Tablet Master Application Stylesheet
+   Modern Hybrid Architecture for Capacitor Android
+   ========================================================================== */
+
+:root {
+  --primary-cyan: #00ccff;
+  --primary-glow: rgba(0, 204, 255, 0.45);
+  --accent-green: #00ff88;
+  --accent-red: #ff4500;
+  --accent-purple: #aa55ff;
+  --accent-gold: #ffaa00;
+  
+  --bg-dark-deep: #060914;
+  --bg-dark-card: rgba(12, 20, 42, 0.85);
+  --bg-dark-card-hover: rgba(20, 32, 64, 0.92);
+  --bg-dark-border: rgba(0, 204, 255, 0.25);
+  
+  --text-main: #f1f5f9;
+  --text-muted: rgba(241, 245, 249, 0.65);
+  --text-sub: rgba(241, 245, 249, 0.45);
+
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'Space Grotesk', 'Courier New', monospace;
+
+  /* Safe Area Insets (Android Notch, Gesture Navigation & Status Bar) */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+
+  --header-height: 56px;
+  --bottom-nav-height: 64px;
+}
+
+/* Light Theme Variables */
+body.theme-light {
+  --primary-cyan: #0077b6;
+  --primary-glow: rgba(0, 119, 182, 0.3);
+  --accent-green: #008855;
+  --accent-red: #cc3300;
+  --accent-purple: #7733cc;
+  --accent-gold: #d97706;
+  
+  --bg-dark-deep: #f0f4f9;
+  --bg-dark-card: rgba(255, 255, 255, 0.92);
+  --bg-dark-card-hover: #ffffff;
+  --bg-dark-border: rgba(0, 119, 182, 0.22);
+  
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-sub: #64748b;
+}
+
+/* Global Reset & Base Setup */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
+  background-color: var(--bg-dark-deep);
+  color: var(--text-main);
+  font-family: var(--font-family);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* Master Layout Grid */
+#app-root {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+
+/* Header Bar */
+.app-header {
+  height: var(--header-height);
+  min-height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(10px, 3vw, 20px);
+  background: rgba(6, 9, 20, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--bg-dark-border);
+  z-index: 999;
+  transition: background-color 0.3s ease;
+}
+
+body.theme-light .app-header {
+  background: rgba(240, 244, 249, 0.95);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.header-logo-icon {
+  font-size: 1.4rem;
+  filter: drop-shadow(0 0 8px var(--primary-cyan));
+  animation: logoSpin 16s linear infinite;
+}
+
+@keyframes logoSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.header-title {
+  font-size: clamp(1rem, 3.5vw, 1.25rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  background: linear-gradient(135deg, var(--primary-cyan), var(--accent-green));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px var(--primary-glow);
+}
+
+.header-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(0, 204, 255, 0.15);
+  border: 1px solid var(--bg-dark-border);
+  color: var(--primary-cyan);
+  text-transform: uppercase;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-btn {
+  background: var(--bg-dark-card);
+  border: 1px solid var(--bg-dark-border);
+  color: var(--text-main);
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.25s ease;
+  min-width: 44px; /* Accessible touch target */
+  min-height: 44px;
+}
+
+.icon-btn:active {
+  transform: scale(0.92);
+  background: var(--primary-glow);
+}
+
+/* Main Content Views Area */
+.app-content {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: calc(100% - var(--header-height) - var(--bottom-nav-height));
+  overflow: hidden;
+}
+
+.app-view {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(12px) scale(0.99);
+  transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1), transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: clamp(10px, 2.5vw, 20px);
+}
+
+.app-view.active-view {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+  transform: translateY(0) scale(1);
+}
+
+/* Bottom Navigation Bar for Mobile */
+.app-bottom-nav {
+  height: var(--bottom-nav-height);
+  min-height: var(--bottom-nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: rgba(6, 9, 20, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--bg-dark-border);
+  z-index: 999;
+  padding: 0 4px;
+}
+
+body.theme-light .app-bottom-nav {
+  background: rgba(240, 244, 249, 0.95);
+}
+
+.nav-tab-btn {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  gap: 3px;
+  min-width: 48px;
+  padding: 4px 0;
+}
+
+.nav-tab-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  transition: transform 0.25s ease;
+}
+
+.nav-tab-label {
+  font-size: clamp(0.65rem, 2vw, 0.72rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.nav-tab-indicator {
+  position: absolute;
+  top: 0;
+  left: 25%;
+  right: 25%;
+  height: 3px;
+  border-radius: 0 0 4px 4px;
+  background: var(--primary-cyan);
+  box-shadow: 0 0 10px var(--primary-cyan);
+  opacity: 0;
+  transform: scaleX(0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-tab-btn.active-tab {
+  color: var(--primary-cyan);
+}
+
+.nav-tab-btn.active-tab .nav-tab-icon {
+  transform: translateY(-2px) scale(1.12);
+  filter: drop-shadow(0 0 6px var(--primary-glow));
+}
+
+.nav-tab-btn.active-tab .nav-tab-indicator {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+/* Tablet & Desktop Large Screen Enhancements */
+@media (min-width: 900px) {
+  #app-root {
+    flex-direction: row;
+  }
+
+  .app-header {
+    display: none; /* Merged into tablet sidebar */
+  }
+
+  .app-bottom-nav {
+    width: 220px;
+    height: 100%;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 20px 10px;
+    border-top: none;
+    border-right: 1px solid var(--bg-dark-border);
+    gap: 12px;
+  }
+
+  .nav-tab-btn {
+    width: 100%;
+    height: 52px;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0 16px;
+    border-radius: 12px;
+    gap: 12px;
+  }
+
+  .nav-tab-btn.active-tab {
+    background: rgba(0, 204, 255, 0.12);
+    border: 1px solid var(--bg-dark-border);
+  }
+
+  .nav-tab-indicator {
+    left: 0;
+    top: 15%;
+    bottom: 15%;
+    width: 4px;
+    height: 70%;
+    right: auto;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .app-content {
+    height: 100%;
+    flex: 1;
+  }
+}
+
+/* Generic Simulation Canvas Wrappers (Universal Touch & Orientation Adaptive) */
+.simulation-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--bg-dark-border);
+  background: #02040a;
+  touch-action: none; /* Crucial for gesture pointer events */
+}
+
+.simulation-canvas-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* Fullscreen Overlays & Modals */
+.app-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.app-modal-backdrop.modal-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.app-modal-window {
+  background: var(--bg-dark-card);
+  border: 1px solid var(--bg-dark-border);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: clamp(16px, 4vw, 24px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px var(--primary-glow);
+  transform: translateY(20px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-modal-backdrop.modal-open .app-modal-window {
+  transform: translateY(0) scale(1);
+}
+
+/* Utility Animations */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.pulse-glow {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+/* Scrollbar polish */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 204, 255, 0.25);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 204, 255, 0.5);
+}

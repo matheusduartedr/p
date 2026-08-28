@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>QUANTUM HUB — Plataforma de Física e Química Quântica</title>
+  
+  <!-- Local Offline Three.js r128 Library -->
+  <script src="vendor/three.min.js"></script>
+
+  <!-- Application Stylesheets -->
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/hub.css">
+  <link rel="stylesheet" href="css/proton.css">
+  <link rel="stylesheet" href="css/proxima-att.css">
+</head>
+<body>
+
+  <!-- App Main Container -->
+  <div id="app-root">
+    
+    <!-- App Mobile Top Header -->
+    <header class="app-header">
+      <div class="header-brand" data-view-target="hub">
+        <span class="header-logo-icon">⚛️</span>
+        <span class="header-title">QUANTUM HUB</span>
+        <span class="header-badge">Android</span>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="btn-global-theme-toggle" title="Alternar Tema" aria-label="Alternar Tema">☀️</button>
+      </div>
+    </header>
+
+    <!-- App Views Content Area -->
+    <main class="app-content">
+
+      <!-- ==========================================
+           1. VIEW: HUB (Página Inicial & Seletor)
+           ========================================== -->
+      <section id="view-hub" class="app-view active-view">
+        <canvas id="particles-canvas"></canvas>
+        <div class="container home-content">
+          <h1 class="home-title">QUANTUM HUB</h1>
+          <p class="home-sub">Plataforma interativa de Física Quântica e Química. Explore átomos, orbitais, ondas e espectros com visualizações 3D em tempo real.</p>
+          
+          <!-- Grid de Módulos Principais -->
+          <div class="modules-grid">
+            <div class="module-card" data-view-target="proton" data-sim-mode="quantum">
+              <span class="card-icon">⚛️</span>
+              <div class="card-title">Orbitais e Bohr</div>
+              <div class="card-desc">Simulador 3D com modelo Semi-clássico e Quântico (s, p, d, f em Nuvem, Sólido e Wireframe).</div>
+              <span class="card-tag">Simulador 3D</span>
+            </div>
+            
+            <div class="module-card" data-view-target="espectro">
+              <span class="card-icon">📊</span>
+              <div class="card-title">Espectro do Hidrogênio</div>
+              <div class="card-desc">Bancada de espectroscopia 3D, faixas de Lyman, Balmer, Paschen e Brackett e diagrama de níveis.</div>
+              <span class="card-tag">Bancada Óptica</span>
+            </div>
+
+            <div class="module-card" data-view-target="tabela">
+              <span class="card-icon">🧪</span>
+              <div class="card-title">Tabela Periódica</div>
+              <div class="card-desc">Explore todos os elementos, configurações eletrônicas, propriedades atômicas e raios.</div>
+              <span class="card-tag">Química Quântica</span>
+            </div>
+
+            <div class="module-card" data-view-target="construcao">
+              <span class="card-icon">🚧</span>
+              <div class="card-title">Shader Quântico |ψ|²</div>
+              <div class="card-desc">Prévia de alta resolução com Marching Cubes e cálculo volumétrico rigoroso de Schrödinger.</div>
+              <span class="card-tag">Prévia Avançada</span>
+            </div>
+          </div>
+
+          <!-- Seletor de Modo Rápido -->
+          <div style="margin-top: 36px; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:clamp(20px, 4vw, 36px);">
+            <div class="sim-launch-area">
+              <div class="sim-btn-wrapper" id="sim-intro-wrapper">
+                <div style="font-size:2.4rem;margin-bottom:6px;filter:drop-shadow(0 0 16px rgba(0,204,255,0.5));">🚀</div>
+                <h3 style="color:var(--cyan);margin-bottom:6px;font-size:1.2rem;">Configuração Rápida de Simulação</h3>
+                <p style="color:rgba(255,255,255,0.6);margin-bottom:18px;max-width:440px;text-align:center;font-size:0.85rem;">
+                  Selecione o modelo desejado para iniciar diretamente no modo configurado:
+                </p>
+                <button id="btn-abrir-sim" onclick="startSimSelection()">Configurar Modo</button>
+              </div>
+
+              <!-- Abas de Configuração -->
+              <div class="sim-tabs-section" id="sim-tabs-section">
+                <div class="sim-tabs-label">— Selecione o Modelo —</div>
+                <div style="display:flex; justify-content:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
+                  <div class="sim-tab-card" style="min-width:110px;flex:1;" id="main-bohr" onclick="selectMainMode('bohr', this)">
+                    <div class="sim-tab-badge"></div>
+                    <div class="sim-tab-icon">🪐</div>
+                    <div class="sim-tab-name">Semi-clássico</div>
+                    <div class="sim-tab-desc">Órbitas circulares e saltos</div>
+                  </div>
+                  <div class="sim-tab-card selected" style="min-width:110px;flex:1;" id="main-quantum" onclick="selectMainMode('quantum', this)">
+                    <div class="sim-tab-badge"></div>
+                    <div class="sim-tab-icon">⚛️</div>
+                    <div class="sim-tab-name">Quântico</div>
+                    <div class="sim-tab-desc">Orbitais s, p, d, f 3D</div>
+                  </div>
+                  <div class="sim-tab-card" style="min-width:110px;flex:1;border-color:rgba(255,170,0,0.4);" id="main-construcao" onclick="selectMainMode('construcao', this)">
+                    <div class="sim-tab-badge" style="background:#ffaa00;"></div>
+                    <div class="sim-tab-icon">🚧</div>
+                    <div class="sim-tab-name" style="color:#ffaa00;">Shader |ψ|²</div>
+                    <div class="sim-tab-desc">Cálculo contínuo</div>
+                  </div>
+                </div>
+
+                <div id="quantum-sub-options" style="transition:all 0.3s;">
+                  <div class="sim-tabs-label">— Visualização do Modelo Quântico —</div>
+                  <div class="sim-tabs-grid">
+                    <div class="sim-tab-card" id="tab-solido" onclick="selectSimTab('solid', this)">
+                      <div class="sim-tab-badge"></div>
+                      <div class="sim-tab-icon">🔵</div>
+                      <div class="sim-tab-name">Sólido</div>
+                      <div class="sim-tab-desc">Superfície volumétrica</div>
+                    </div>
+                    <div class="sim-tab-card" id="tab-wireframe" onclick="selectSimTab('wireframe', this)">
+                      <div class="sim-tab-badge"></div>
+                      <div class="sim-tab-icon">🔷</div>
+                      <div class="sim-tab-name">Wireframe</div>
+                      <div class="sim-tab-desc">Grade estrutural</div>
+                    </div>
+                    <div class="sim-tab-card" id="tab-nuvem" onclick="selectSimTab('cloud', this)">
+                      <div class="sim-tab-badge"></div>
+                      <div class="sim-tab-icon">✨</div>
+                      <div class="sim-tab-name">Nuvem</div>
+                      <div class="sim-tab-desc">Probabilidade em pontos</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- CTA -->
+                <div class="sim-open-cta" id="sim-open-cta">
+                  <div style="display:flex;flex-direction:column;align-items:center;">
+                    <button id="btn-launch-mode" onclick="launchSimulator()">
+                      <span id="btn-launch-icon">🚀</span>
+                      <span id="btn-launch-text">Abrir Simulador</span>
+                    </button>
+                    <div class="sim-selected-label" id="sim-selected-label">modo selecionado: —</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           2. VIEW: PROTON (Simulador Quântico & Bohr)
+           ========================================== -->
+      <section id="view-proton" class="app-view">
+        <div class="container proton-view-container">
+          
+          <!-- Mode Switcher Bar -->
+          <div class="mode-toggle">
+            <button class="mode-btn active" data-mode="quantum" onclick="changeMode('quantum', this)">⚛️ Orbitais Quânticos</button>
+            <button class="mode-btn" data-mode="bohr" onclick="changeMode('bohr', this)">🪐 Modelo Semi-clássico</button>
+          </div>
+
+          <!-- Legenda de Orbitais -->
+          <div class="orbital-legend">
+            <div class="legend-item"><div class="legend-color legend-s"></div><span>Orbital s</span></div>
+            <div class="legend-item"><div class="legend-color legend-p"></div><span>Orbital p</span></div>
+            <div class="legend-item"><div class="legend-color legend-d"></div><span>Orbital d</span></div>
+          </div>
+
+          <!-- Layout Principal da Simulação -->
+          <div class="main-content">
+            
+            <!-- 3D Canvas Container -->
+            <div id="canvas-container" class="simulation-canvas-wrapper">
+              <div class="energy-display">
+                <div class="energy-display-title">⚡ Energia</div>
+                <div class="energy-value">
+                  <span id="energyDisplayValue">-13.6</span>
+                  <span class="energy-unit">eV</span>
+                </div>
+                <div class="energy-level-info" id="energyLevelInfo">Nível: 1s (n=1)</div>
+                <div class="quantum-numbers" id="quantumNumbers">
+                  <span class="qn-item"><b>n</b> = 1</span>
+                  <span class="qn-item"><b>ℓ</b> = 0</span>
+                  <span class="qn-item"><b>m<sub>ℓ</sub></b> = 0</span>
+                  <span class="qn-item"><b>m<sub>s</sub></b> = +½</span>
+                </div>
+              </div>
+              <div class="rotation-hint">
+                <span>👆 Arraste para rotacionar 3D • Pinch para zoom</span>
+              </div>
+            </div>
+
+            <!-- Bohr Container (Semi-clássico) -->
+            <div id="bohr-container" class="simulation-canvas-wrapper" style="display:none;">
+              <div class="energy-display">
+                <div class="energy-display-title">⚡ Energia</div>
+                <div class="energy-value">
+                  <span id="energyDisplayValueBohr">-13.6</span>
+                  <span class="energy-unit">eV</span>
+                </div>
+                <div class="energy-level-info" id="energyLevelInfoBohr">Camada K (n=1)</div>
+                <div class="quantum-numbers" id="quantumNumbersBohr">
+                  <span class="qn-item"><b>n</b> = 1</span>
+                  <span class="qn-item"><b>ℓ</b> = 0</span>
+                  <span class="qn-item"><b>m<sub>ℓ</sub></b> = 0</span>
+                  <span class="qn-item"><b>m<sub>s</sub></b> = +½</span>
+                </div>
+              </div>
+              <div class="bohr-nucleus"></div>
+              <div class="rotation-hint">⚛️ Modelo Semi-clássico — Órbitas de Bohr</div>
+            </div>
+
+            <!-- Quick Action Toolbar -->
+            <div class="quick-bar">
+              <button class="qb-btn" onclick="toggleRotation()" title="Pausar/Retomar">
+                <span id="qbRotationIcon">⏸️</span>
+                <span id="qbRotationLabel">Pausar</span>
+              </button>
+              <button class="qb-btn qb-energy" onclick="toggleElectrons()" title="Elétrons">
+                <span id="qbElectronIcon">👁️</span>
+                <span id="qbElectronLabel">Elétrons</span>
+              </button>
+              <button class="qb-btn qb-emission" onclick="resetView()" title="Resetar Câmera">
+                🔄 Resetar
+              </button>
+            </div>
+
+            <!-- Painel de Controles & Informações Quânticas -->
+            <div class="controls">
+              
+              <!-- Informações do Átomo -->
+              <div class="control-group" id="cg-info">
+                <button class="accordion-header open" onclick="toggleAccordion('cg-info')">
+                  📊 Informações do Átomo
+                  <span class="accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content open" id="acc-info">
+                  <div class="atom-info">
+                    <h4 id="atomName">Hidrogênio (H)</h4>
+                    <div class="atom-info-grid">
+                      <p>Prótons: <span id="protons">1</span></p>
+                      <p>Elétrons: <span id="electrons">1</span></p>
+                      <p style="grid-column: 1 / -1">Config: <span id="config">1s¹</span></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Efeitos Quânticos & Transições -->
+              <div class="control-group" id="cg-quantum">
+                <button class="accordion-header open" onclick="toggleAccordion('cg-quantum')">
+                  💫 Efeitos Quânticos & Transições
+                  <span class="accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content open" id="acc-quantum">
+                  <button class="btn energy" onclick="exciteElectron()">⚡ Excitar Elétron (Salto)</button>
+                  <button class="btn emission" onclick="emitPhoton()">💡 Emitir Fóton (Decaimento)</button>
+                  <button class="btn" onclick="toggleEnergyWaves()">
+                    <span id="waveBtn">🌊 Ondas: OFF</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Estilo de Visualização 3D -->
+              <div class="control-group" id="cg-orbital">
+                <button class="accordion-header open" onclick="toggleAccordion('cg-orbital')">
+                  🎨 Estilo do Orbital Quântico
+                  <span class="accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content open" id="acc-orbital">
+                  <button class="btn" id="btnStyleCloud" onclick="changeOrbitalStyle('cloud')">✨ Nuvem de Probabilidade</button>
+                  <button class="btn" id="btnStyleSolid" onclick="changeOrbitalStyle('solid')">🔮 Superfície Sólida</button>
+                  <button class="btn" id="btnStyleWireframe" onclick="changeOrbitalStyle('wireframe')">🌐 Grade Wireframe</button>
+                  <button class="btn" id="btnStyleTransparent" onclick="changeOrbitalStyle('transparent')">👻 Translúcido</button>
+                </div>
+              </div>
+
+              <!-- Aparência e Tema -->
+              <div class="control-group" id="cg-bg">
+                <button class="accordion-header" onclick="toggleAccordion('cg-bg')">
+                  🖼️ Fundo da Simulação
+                  <span class="accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content" id="acc-bg">
+                  <div class="bg-btn-row">
+                    <button class="btn bg-btn active-bg" id="bgBlack" onclick="setBackground('black')">⬛ Escuro</button>
+                    <button class="btn bg-btn" id="bgWhite" onclick="setBackground('white')">⬜ Claro</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-text">
+                <strong>💡 Interação:</strong> Arraste com um dedo para rotacionar o orbital em 3D. Use o gesto de pinça (pinch) para dar zoom.
+                <span id="quantum-info"></span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           3. VIEW: ESPECTRO (Laboratório de Espectroscopia)
+           ========================================== -->
+      <section id="view-espectro" class="app-view">
+        <div class="container">
+          <div class="sec-header">
+            <h2 class="sec-title">📊 Espectro do Hidrogênio</h2>
+            <p class="sec-sub">Laboratório Virtual de Espectroscopia Quântica • Modelo de Rydberg & Bohr (Z = 1)</p>
+          </div>
+
+          <div id="spectrum-container">
+            <!-- 1. Toolbar de Instrumentação Científica -->
+            <div id="specToolbar" class="spec-toolbar">
+              <div class="spec-lab-status">
+                <span class="spec-status-dot"></span>
+                <div class="spec-lab-info">
+                  <span class="spec-lab-title">Espectrômetro Óptico Digital</span>
+                  <span class="spec-lab-element">Hidrogênio (¹H) &bull; Z = 1 &bull; E₀ = -13.60 eV</span>
+                </div>
+              </div>
+
+              <!-- Modos: Emissão / Absorção -->
+              <div class="spec-ctrl-group">
+                <span class="spec-ctrl-label">Fenômeno:</span>
+                <div class="spec-btn-toggle">
+                  <button class="spec-mode-btn emission active" id="btnEmission" onclick="setSpecMode('emission')">
+                    <span>⚡</span> EMISSÃO
+                  </button>
+                  <button class="spec-mode-btn absorption" id="btnAbsorption" onclick="setSpecMode('absorption')">
+                    <span>🔳</span> ABSORÇÃO
+                  </button>
+                </div>
+              </div>
+
+              <!-- Modos de Layout -->
+              <div class="spec-ctrl-group">
+                <span class="spec-ctrl-label">Layout:</span>
+                <div class="spec-btn-toggle">
+                  <button class="spec-view-btn active" id="btnViewAll" onclick="setSpecViewMode('all')">
+                    <span>🔲</span> Completo
+                  </button>
+                  <button class="spec-view-btn" id="btnView2D" onclick="setSpecViewMode('2d')">
+                    <span>📊</span> 2D
+                  </button>
+                  <button class="spec-view-btn" id="btnView3D" onclick="setSpecViewMode('3d')">
+                    <span>🔬</span> 3D
+                  </button>
+                </div>
+              </div>
+
+              <!-- Fundo -->
+              <div class="spec-ctrl-group">
+                <span class="spec-ctrl-label">Fundo:</span>
+                <div class="spec-btn-toggle">
+                  <button class="spec-theme-btn active" id="specBgBlack" onclick="setBackground('black')">⬛</button>
+                  <button class="spec-theme-btn" id="specBgWhite" onclick="setBackground('white')">⬜</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Bancada Experimental 3D Three.js -->
+            <div id="spec3DContainer" class="spec-3d-card simulation-canvas-wrapper">
+              <div class="spec-card-header">
+                <span class="spec-card-tag">BANCADA EXPERIMENTAL 3D</span>
+                <span class="spec-3d-hint-tag">🖱️ Arraste para orbitar &bull; Toque na linha espectral</span>
+              </div>
+              <canvas id="spec3DCanvas"></canvas>
+              <div id="spec3DInfo" style="display:none;">
+                <div id="spec3DTitle"></div>
+                <div id="spec3DDetails"></div>
+              </div>
+              <div id="spec3DHint">ARRASte PARA ROTACIONAR &nbsp;&bull;&nbsp; TOQUE NA LINHA</div>
+            </div>
+
+            <!-- 3. Seletor de Séries Espectrais -->
+            <div class="spec-series-bar" id="specSeriesBar">
+              <div class="spec-series-title">SÉRIES DE TRANSIÇÃO DO HIDROGÊNIO:</div>
+              <div class="spec-series-tabs" id="specSeriesTabs">
+                <button class="spec-series-tab active" data-serie="all" onclick="selectSeriesFilter('all', this)">
+                  <span class="spec-tab-dot" style="background:#00ccff"></span>
+                  Todas
+                </button>
+                <button class="spec-series-tab" data-serie="1" onclick="selectSeriesFilter('1', this)">
+                  <span class="spec-tab-dot" style="background:#aa55ff"></span>
+                  Lyman <span class="spec-tab-sub">(UV)</span>
+                </button>
+                <button class="spec-series-tab" data-serie="2" onclick="selectSeriesFilter('2', this)">
+                  <span class="spec-tab-dot" style="background:#00cc66"></span>
+                  Balmer <span class="spec-tab-sub">(Visível)</span>
+                </button>
+                <button class="spec-series-tab" data-serie="3" onclick="selectSeriesFilter('3', this)">
+                  <span class="spec-tab-dot" style="background:#ff7722"></span>
+                  Paschen <span class="spec-tab-sub">(IV)</span>
+                </button>
+                <button class="spec-series-tab" data-serie="4" onclick="selectSeriesFilter('4', this)">
+                  <span class="spec-tab-dot" style="background:#ffaa00"></span>
+                  Brackett <span class="spec-tab-sub">(IV)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 4. Faixas Espectrais 2D -->
+            <div id="specBandsContainer" class="spec-bands-container">
+              <div class="spec-band-wrapper" id="bandWrapper1" data-band="1">
+                <div class="spec-band-meta">
+                  <span class="spec-band-badge" style="color:#c580ff;border-color:rgba(170,85,255,0.4)">SÉRIE DE LYMAN</span>
+                  <span class="spec-band-desc">Transições para n₁ = 1 &bull; Ultravioleta</span>
+                </div>
+                <canvas class="serie-canvas" id="band1" data-serie="1"></canvas>
+              </div>
+
+              <div class="spec-band-wrapper" id="bandWrapper2" data-band="2">
+                <div class="spec-band-meta">
+                  <span class="spec-band-badge" style="color:#00ff88;border-color:rgba(0,204,102,0.4)">SÉRIE DE BALMER</span>
+                  <span class="spec-band-desc">Transições para n₁ = 2 &bull; Espectro Visível (Hα, Hβ, Hγ, Hδ)</span>
+                </div>
+                <canvas class="serie-canvas" id="band2" data-serie="2"></canvas>
+              </div>
+
+              <div class="spec-band-wrapper" id="bandWrapper3" data-band="3">
+                <div class="spec-band-meta">
+                  <span class="spec-band-badge" style="color:#ff9955;border-color:rgba(255,119,34,0.4)">SÉRIE DE PASCHEN</span>
+                  <span class="spec-band-desc">Transições para n₁ = 3 &bull; Infravermelho Próximo</span>
+                </div>
+                <canvas class="serie-canvas" id="band3" data-serie="3"></canvas>
+              </div>
+
+              <div class="spec-band-wrapper" id="bandWrapper4" data-band="4">
+                <div class="spec-band-meta">
+                  <span class="spec-band-badge" style="color:#ffcc44;border-color:rgba(255,170,0,0.4)">SÉRIE DE BRACKETT</span>
+                  <span class="spec-band-desc">Transições para n₁ = 4 &bull; Infravermelho Médio</span>
+                </div>
+                <canvas class="serie-canvas" id="band4" data-serie="4"></canvas>
+              </div>
+            </div>
+
+            <!-- 5. Grid Científico: Cartão de Transição + Diagrama de Níveis -->
+            <div class="spec-analysis-grid" id="specAnalysisGrid">
+              
+              <!-- Cartão de Dados da Linha -->
+              <div class="spec-card spec-data-card" id="spectrumPanel">
+                <div class="spec-card-head">
+                  <div class="spec-card-head-left">
+                    <span class="spec-card-icon">🔬</span>
+                    <span class="spec-card-title">LINHA ESPECTRAL ANALISADA</span>
+                  </div>
+                  <div id="specLineBadge" class="spec-line-badge">Balmer Hα</div>
+                </div>
+
+                <div class="spec-data-body">
+                  <div class="spec-color-hero">
+                    <div id="specColorSwatch" class="spec-color-swatch"></div>
+                    <div class="spec-hero-info">
+                      <div class="spec-hero-name" id="specLineName">Linha Hα (Vermelho)</div>
+                      <div class="spec-hero-sub" id="specLineSub">Transição n=3 &rarr; n=2 &bull; Série de Balmer</div>
+                    </div>
+                  </div>
+
+                  <div class="spec-metrics-grid">
+                    <div class="spec-metric-item">
+                      <span class="spec-metric-label">Transição</span>
+                      <span class="spec-metric-value" id="specTransition">n3 &rarr; n2 (Balmer)</span>
+                    </div>
+                    <div class="spec-metric-item">
+                      <span class="spec-metric-label">Comprimento λ</span>
+                      <span class="spec-metric-value highlight-cyan" id="specLambda">656 nm (6563 Å)</span>
+                    </div>
+                    <div class="spec-metric-item">
+                      <span class="spec-metric-label">Energia ΔE</span>
+                      <span class="spec-metric-value highlight-gold" id="specDeltaE">1.8891 eV</span>
+                    </div>
+                    <div class="spec-metric-item">
+                      <span class="spec-metric-label">Região EM</span>
+                      <span class="spec-metric-value" id="specRegion">Visível</span>
+                    </div>
+                    <div class="spec-metric-item">
+                      <span class="spec-metric-label">Frequência ν</span>
+                      <span class="spec-metric-value" id="specFrequency">456.8 THz</span>
+                    </div>
+                    <div class="spec-metric-item">
+                      <span class="spec-metric-label">Série</span>
+                      <span class="spec-metric-value" id="specSerieName">Balmer (n₁ = 2)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Diagrama de Níveis de Energia -->
+              <div class="spec-card spec-levels-card" id="specLevelsCard">
+                <div class="spec-card-head spec-levels-head" onclick="toggleLevelsAccordion()">
+                  <div class="spec-card-head-left">
+                    <span class="spec-card-icon">⚛️</span>
+                    <span class="spec-card-title">DIAGRAMA DE NÍVEIS DE ENERGIA</span>
+                  </div>
+                  <button class="spec-acc-toggle" id="specLevelsAccToggle" type="button">
+                    <span class="spec-acc-arrow" id="specLevelsAccArrow">▼</span>
+                  </button>
+                </div>
+
+                <div class="spec-levels-content" id="specLevelsContent">
+                  <canvas id="specLevelsCanvas" class="spec-levels-canvas"></canvas>
+                  <div class="spec-levels-footer">
+                    <div class="spec-formula-box">
+                      <div><strong>ΔE</strong> = 13.6 &times; (1/n₁² &minus; 1/n₂²) eV</div>
+                      <div><strong>λ</strong> = hc / ΔE = 1239.84 / ΔE nm</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- 6. Guia Didático -->
+            <div class="spec-didactic-strip">
+              <div class="spec-didactic-header">
+                <span class="spec-didactic-badge">FUNDAMENTAÇÃO DIDÁTICA</span>
+                <span class="spec-didactic-title">Como a Linha Espectral é Gerada?</span>
+              </div>
+              <div class="spec-flow-chain">
+                <div class="spec-flow-step">
+                  <div class="spec-step-num">1</div>
+                  <div class="spec-step-icon">⚛️</div>
+                  <div class="spec-step-text"><strong>Nível n₂</strong><span>Energia E₂</span></div>
+                </div>
+                <div class="spec-flow-arrow">➔</div>
+                <div class="spec-flow-step">
+                  <div class="spec-step-num">2</div>
+                  <div class="spec-step-icon">⚡</div>
+                  <div class="spec-step-text"><strong>Salto</strong><span>Transição n₂ &rarr; n₁</span></div>
+                </div>
+                <div class="spec-flow-arrow">➔</div>
+                <div class="spec-flow-step">
+                  <div class="spec-step-num">3</div>
+                  <div class="spec-step-icon">💡</div>
+                  <div class="spec-step-text"><strong>Fóton</strong><span>ΔE = |E₂ - E₁|</span></div>
+                </div>
+                <div class="spec-flow-arrow">➔</div>
+                <div class="spec-flow-step">
+                  <div class="spec-step-num">4</div>
+                  <div class="spec-step-icon">🌈</div>
+                  <div class="spec-step-text"><strong>Comprimento λ</strong><span>λ = hc / ΔE</span></div>
+                </div>
+                <div class="spec-flow-arrow">➔</div>
+                <div class="spec-flow-step">
+                  <div class="spec-step-num">5</div>
+                  <div class="spec-step-icon">📊</div>
+                  <div class="spec-step-text"><strong>Linha</strong><span>Registro Óptico</span></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           4. VIEW: TABELA PERIÓDICA INTERATIVA
+           ========================================== -->
+      <section id="view-tabela" class="app-view">
+        <div class="container">
+          <div class="sec-header">
+            <h2 class="sec-title">🧪 Tabela Periódica dos Elementos</h2>
+            <p class="sec-sub">Classificação periódica, distribuição eletrônica e propriedades quânticas</p>
+          </div>
+
+          <!-- Filtros de Categorias -->
+          <div class="pt-filters" id="pt-filters" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:16px;">
+            <button class="pt-btn active" onclick="filterElements('all', this)">Todos</button>
+            <button class="pt-btn" onclick="filterElements('metal-a', this)">Alcalinos</button>
+            <button class="pt-btn" onclick="filterElements('metal-b', this)">Alcalino-terrosos</button>
+            <button class="pt-btn" onclick="filterElements('metal-t', this)">Transição</button>
+            <button class="pt-btn" onclick="filterElements('nomet', this)">Não Metais</button>
+            <button class="pt-btn" onclick="filterElements('nob', this)">Gases Nobres</button>
+            <button class="pt-btn" onclick="filterElements('hal', this)">Halogênios</button>
+            <button class="pt-btn" onclick="filterElements('lan', this)">Lantanídeos</button>
+            <button class="pt-btn" onclick="filterElements('act', this)">Actinídeos</button>
+          </div>
+
+          <!-- Card de Detalhes do Elemento Selecionado -->
+          <div id="el-detail" class="el-detail" style="margin-bottom: 20px;"></div>
+
+          <!-- Grid dos Elementos -->
+          <div class="pt-wrap" style="overflow-x:auto;padding-bottom:20px;">
+            <div id="pt-grid" class="pt-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           5. VIEW: PRÉVIA QUÂNTICA (|ψ|² SHADER)
+           ========================================== -->
+      <section id="view-construcao" class="app-view">
+        <div class="container">
+          <div class="sec-header">
+            <h2 class="sec-title">🚧 Motor Quântico |ψ|²</h2>
+            <p class="sec-sub">Cálculo contínuo de densidade eletrônica com Marching Cubes volumétrico</p>
+          </div>
+
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:20px;">
+            <!-- Controles de Orbital n, l, m -->
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;">
+              <button class="mode-btn active" onclick="setQuantumAttOrbital(1,0,0, this)">1s</button>
+              <button class="mode-btn" onclick="setQuantumAttOrbital(2,0,0, this)">2s</button>
+              <button class="mode-btn" onclick="setQuantumAttOrbital(2,1,0, this)">2p_z</button>
+              <button class="mode-btn" onclick="setQuantumAttOrbital(3,2,0, this)">3d_z²</button>
+              <button class="mode-btn" onclick="setQuantumAttOrbital(4,3,0, this)">4f</button>
+            </div>
+
+            <!-- Canvas 3D do Shader -->
+            <div id="att-canvas-container" class="simulation-canvas-wrapper" style="height:380px;">
+              <canvas id="att-webgl-canvas"></canvas>
+              <div class="rotation-hint">👆 Toque e arraste para inspecionar a iso-superfície |ψ|²</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- App Navigation Bar (Bottom on Mobile / Sidebar on Tablet) -->
+    <nav class="app-bottom-nav">
+      <button class="nav-tab-btn active-tab" data-view="hub" data-view-target="hub" aria-label="Início">
+        <div class="nav-tab-indicator"></div>
+        <span class="nav-tab-icon">🏠</span>
+        <span class="nav-tab-label">Início</span>
+      </button>
+
+      <button class="nav-tab-btn" data-view="proton" data-view-target="proton" data-sim-mode="quantum" aria-label="Orbitais">
+        <div class="nav-tab-indicator"></div>
+        <span class="nav-tab-icon">⚛️</span>
+        <span class="nav-tab-label">Orbitais</span>
+      </button>
+
+      <button class="nav-tab-btn" data-view="espectro" data-view-target="espectro" aria-label="Espectro">
+        <div class="nav-tab-indicator"></div>
+        <span class="nav-tab-icon">📊</span>
+        <span class="nav-tab-label">Espectro</span>
+      </button>
+
+      <button class="nav-tab-btn" data-view="tabela" data-view-target="tabela" aria-label="Tabela">
+        <div class="nav-tab-indicator"></div>
+        <span class="nav-tab-icon">🧪</span>
+        <span class="nav-tab-label">Tabela</span>
+      </button>
+
+      <button class="nav-tab-btn" data-view="construcao" data-view-target="construcao" aria-label="Shader">
+        <div class="nav-tab-indicator"></div>
+        <span class="nav-tab-icon">🚧</span>
+        <span class="nav-tab-label">Shader</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- Engines and Orchestrators -->
+  <script src="js/gesture-controls.js"></script>
+  <script src="js/app-navigation.js"></script>
+  <script src="js/hub-engine.js"></script>
+  <script src="js/proton-engine.js"></script>
+  <script src="js/proxima-att-engine.js"></script>
+
+  <!-- App Bootstrap -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // 1. Initialize Router & Back Button
+      QuantumRouter.init();
+
+      // 2. Initialize Periodic Table
+      if (typeof buildPeriodicTable === 'function') {
+        buildPeriodicTable();
+      }
+
+      // 3. Attach gesture controls to main canvas
+      var protonCanvas = document.querySelector('#canvas-container canvas');
+      if (protonCanvas && window.QuantumGestures) {
+        QuantumGestures.attachCanvasGestures(protonCanvas, {
+          onRotate: function (dx, dy) {
+            if (typeof rotation !== 'undefined') {
+              rotation.y += dx * 0.008;
+              rotation.x += dy * 0.008;
+            }
+          },
+          onZoom: function (delta) {
+            if (typeof camera !== 'undefined' && camera) {
+              camera.position.z = Math.max(5, Math.min(60, camera.position.z - delta * 2));
+            }
+          },
+          onReset: function () {
+            if (typeof resetView === 'function') resetView();
+          }
+        });
+      }
+
+      // 4. Attach Universal ResizeObserver
+      var canvasWrap = document.getElementById('canvas-container');
+      if (canvasWrap && window.QuantumGestures) {
+        QuantumGestures.observeContainer(canvasWrap, function (w, h) {
+          if (typeof onWindowResize === 'function') onWindowResize();
+        });
+      }
+
+      var specWrap = document.getElementById('spec3DContainer');
+      if (specWrap && window.QuantumGestures) {
+        QuantumGestures.observeContainer(specWrap, function (w, h) {
+          if (typeof resizeSpec3D === 'function') resizeSpec3D();
+        });
+      }
+    });
+  </script>
+</body>
+</html>

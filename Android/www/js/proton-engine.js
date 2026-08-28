@@ -50,6 +50,15 @@ window.ProtonEngine = (function () {
     const container = document.getElementById('canvas-container');
     if (!container) return;
 
+    // Clean up previous renderer if it exists
+    if (renderer) {
+      if (renderer.domElement && renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      }
+      renderer.dispose();
+      renderer = null;
+    }
+
     const rect = container.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;

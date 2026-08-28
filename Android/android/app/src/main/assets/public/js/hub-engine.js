@@ -797,6 +797,21 @@ window.HubEngine = (function () {
 
   function drawSpectrum() { drawAllBands(); drawSpecLevelsCanvas(); bindAllBandEvents(); }
 
+  function showToast(message) {
+    var toast = document.getElementById('app-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'app-toast';
+      toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(6,12,28,0.92);color:#00ccff;border:1px solid rgba(0,204,255,0.4);padding:10px 20px;border-radius:24px;font-size:0.85rem;z-index:99999;box-shadow:0 8px 30px rgba(0,0,0,0.5);backdrop-filter:blur(8px);transition:opacity 0.3s;pointer-events:none;';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    setTimeout(function () {
+      toast.style.opacity = '0';
+    }, 2000);
+  }
+
   // PUBLIC API
   return {
     init: initHub,
@@ -807,6 +822,7 @@ window.HubEngine = (function () {
     buildPeriodicTable,
     filterElements,
     showElement,
+    showToast,
     setSpecMode,
     setSpecViewMode,
     selectSeriesFilter,

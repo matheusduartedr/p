@@ -8,7 +8,7 @@ window.ProximaEngine = (function () {
   // Physics & Math
   function psi2(n, l, m, x, y, z) {
     const r = Math.sqrt(x * x + y * y + z * z);
-    if (r < 1e-10) return (l === 0) ? Math.pow(QuantumUtils.radialWF ? QuantumUtils.radialWF(n, 0, 1e-10, 1) : 1, 2) : 0;
+    if (r < 1e-10) return (l === 0) ? Math.pow(localRadialWF(n, 0, 1e-10, 1), 2) : 0;
     const theta = Math.acos(Math.max(-1, Math.min(1, z / r)));
     const phi = Math.atan2(y, x);
     // Note: This engine needs local math because QuantumUtils doesn't have sphericalHarmonic yet
@@ -42,6 +42,15 @@ window.ProximaEngine = (function () {
     const canvas = document.getElementById('att-webgl-canvas');
     const wrap = document.getElementById('att-canvas-container');
     if (!canvas || !wrap) return;
+
+    // Clean up previous renderer if it exists
+    if (renderer) {
+      if (renderer.domElement && renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      }
+      renderer.dispose();
+      renderer = null;
+    }
 
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);

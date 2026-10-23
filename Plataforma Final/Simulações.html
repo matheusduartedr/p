@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -2077,9 +2077,7 @@
                     <div class="accordion-content open" id="acc-quantum">
                         <button class="btn energy" onclick="exciteElectron()">⚡ Excitar Elétron</button>
                         <button class="btn emission" onclick="emitPhoton()">💡 Emitir Fóton</button>
-                        <button class="btn" onclick="toggleEnergyWaves()">
-                            <span id="waveBtn">🌊 Ondas: OFF</span>
-                        </button>
+
                     </div>
                 </div>
 
@@ -2138,8 +2136,7 @@
         let previousMousePosition = { x: 0, y: 0 };
         let rotation = { x: 0, y: 0 };
         let photons = [];
-        let energyWaves = [];
-        let showEnergyWaves = false;
+
         let nucleusGlow;
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         let pixelRatio = Math.min(window.devicePixelRatio, 2);
@@ -2211,6 +2208,12 @@
                 getRandomOffset(3.2 * 0.45)
             ];
 
+            // Hidrogênio: escolher UM ÚNICO lóbulo aleatório para concentrar todas as partículas
+            // (o elétron está em apenas um lóbulo de cada vez)
+            const fixedAngleIdx3 = Math.random() > 0.5 ? 0 : 1;
+            const fixedSide3 = Math.random() > 0.5 ? 1 : -1;
+            const fixedLobeIdx4 = Math.floor(Math.random() * 4);
+
             for (let i = 0; i < particleCount; i++) {
                 let x, y, z;
                 if (level === 1) {
@@ -2245,13 +2248,13 @@
                     y = py * 1.8 + side * 4.6;
                     z = pz;
                 } else if (level === 3) {
-                    // 3p — dois halteres (eixos X e Z), lóbulos de raio = 2.4 escalados por (1.5, 1, 1) centrados em ±5.5
-                    const angleIdx = Math.random() > 0.5 ? 0 : 1;
+                    // 3p — Hidrogênio: concentrar toda a nuvem em UM ÚNICO lóbulo
+                    const angleIdx = fixedAngleIdx3;
                     const angle = angleIdx === 0 ? 0 : Math.PI / 2;
-                    const sideIdx = Math.random() > 0.5 ? 0 : 1;
-                    const side = sideIdx === 0 ? 1 : -1;
+                    const side = fixedSide3;
                     
                     const R = 2.4;
+                    const sideIdx = side === 1 ? 0 : 1;
                     const off = offsetsLevel3[angleIdx * 2 + sideIdx];
                     
                     let px = off.x + gaussianRandom(0, R * 0.35);
@@ -2269,8 +2272,8 @@
                     y = py;
                     z = pz + side * 5.5 * Math.sin(angle);
                 } else {
-                    // 3d cloverleaf — 4 lóbulos no plano XZ, de raio = 3.2 escalados por (1.5, 1, 1) rotacionados por angle, centrados em ±7.8
-                    const lobeIdx = Math.floor(Math.random() * 4);
+                    // 3d cloverleaf — Hidrogênio: concentrar toda a nuvem em UM ÚNICO lóbulo
+                    const lobeIdx = fixedLobeIdx4;
                     const angle = lobeIdx * (Math.PI / 2);
                     
                     const R = 3.2;
@@ -2818,7 +2821,7 @@
                 clearAtom();
                 createNucleus();
                 createHydrogenWaveFunction(hydrogenExcitedLevel);
-                createEnergyWave();
+
 
                 const displayValue = document.getElementById('energyDisplayValue');
                 const levelInfo    = document.getElementById('energyLevelInfo');
@@ -3732,22 +3735,7 @@
         function drawSpectrum()   { drawAllBands(); bindAllBandEvents(); }
         function redrawSpectrum() { drawSpectrum(); }
 
-        window.toggleEnergyWaves = function() {
-            showEnergyWaves = !showEnergyWaves;
-            const btn = document.getElementById('waveBtn');
-            if (btn) {
-                btn.textContent = showEnergyWaves ? '🌊 Ondas: ON' : '🌊 Ondas: OFF';
-            }
-            
-            if (!showEnergyWaves) {
-                energyWaves.forEach(wave => {
-                    wave.geometry.dispose();
-                    wave.material.dispose();
-                    scene.remove(wave);
-                });
-                energyWaves = [];
-            }
-        };
+
 
         // Dados dos átomos
         const atomicData = {
@@ -4055,34 +4043,7 @@
             }
         }
 
-        function createEnergyWave() {
-            if (!showEnergyWaves || !scene || !nucleus) return;
-            
-            // Limitar ondas em mobile
-            if (isMobile && energyWaves.length > 2) return;
-            if (!isMobile && energyWaves.length > 5) return;
-            
-            const segments = isMobile ? 24 : 32;
-            const geometry = new THREE.SphereGeometry(0.5, segments, segments);
-            const material = new THREE.MeshBasicMaterial({
-                color: 0x00ffff,
-                transparent: true,
-                opacity: 0.35,
-                side: THREE.FrontSide,
-                depthWrite: false
-            });
-            const wave = new THREE.Mesh(geometry, material);
-            
-            wave.position.copy(nucleus.position);
-            wave.userData = {
-                scale: 0.5,
-                maxScale: isMobile ? 6 : 8,
-                speed: isMobile ? 0.12 : 0.08
-            };
-            
-            scene.add(wave);
-            energyWaves.push(wave);
-        }
+
 
         function createSOrbital(n, count) {
             const radius = n * 2;
@@ -4199,17 +4160,19 @@
             else if (level === 3) {
                 // 3p — dois halteres em X e Z; lóbulos afastados do núcleo
                 createDoublePOrbital(6, 0x64ffc8);
+                // Hidrogênio tem apenas 1 elétron — escolher aleatoriamente um dos lóbulos
                 if (showElectrons) {
-                    createElectronInLobe('px', P3_CENTER, P3_LOBE_R);
-                    createElectronInLobe('pz', P3_CENTER, P3_LOBE_R);
+                    const axis = Math.random() > 0.5 ? 'px' : 'pz';
+                    createElectronInLobe(axis, P3_CENTER, P3_LOBE_R);
                 }
             }
             else if (level === 4) {
                 // 3d — trevo no plano XZ; lóbulos afastados do núcleo
                 createCloverleafOrbital(8, 0xff9664);
+                // Hidrogênio tem apenas 1 elétron — escolher aleatoriamente um dos lóbulos
                 if (showElectrons) {
-                    createElectronInLobe('px', D4_CENTER, D4_LOBE_R);
-                    createElectronInLobe('pz', D4_CENTER, D4_LOBE_R);
+                    const axis = Math.random() > 0.5 ? 'px' : 'pz';
+                    createElectronInLobe(axis, D4_CENTER, D4_LOBE_R);
                 }
             }
         }
@@ -4616,12 +4579,7 @@
             });
             photons = [];
 
-            // Remover ondas de energia
-            energyWaves.forEach(wave => {
-                disposeObject(wave);
-                scene.remove(wave);
-            });
-            energyWaves = [];
+
         }
 
         function createAtom(atomSymbol) {
@@ -4830,9 +4788,7 @@
                 }
                 
                 // Emissão periódica de energia (menos frequente em mobile)
-                if (showEnergyWaves && Math.random() < (isMobile ? 0.005 : 0.01)) {
-                    createEnergyWave();
-                }
+
             }
 
             // Animar fótons
@@ -4858,25 +4814,7 @@
                 }
             }
 
-            // Animar ondas de energia
-            for (let i = energyWaves.length - 1; i >= 0; i--) {
-                const wave = energyWaves[i];
-                const data = wave.userData;
-                
-                data.scale += data.speed;
-                wave.scale.set(data.scale, data.scale, data.scale);
-                
-                // Fade out
-                wave.material.opacity = 0.6 * (1 - data.scale / data.maxScale);
-                
-                // Remover quando atingir tamanho máximo
-                if (data.scale >= data.maxScale) {
-                    wave.geometry.dispose();
-                    wave.material.dispose();
-                    scene.remove(wave);
-                    energyWaves.splice(i, 1);
-                }
-            }
+
 
             // Animar nuvem eletrônica (pulsar e formigamento com ondas harmônicas)
             if (orbitalStyle === 'cloud') {

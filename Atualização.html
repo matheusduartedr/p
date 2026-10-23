@@ -1522,6 +1522,12 @@
                 getRandomOffset(3.2 * 0.45)
             ];
 
+            // Hidrogênio: escolher UM ÚNICO lóbulo aleatório para concentrar todas as partículas
+            // (o elétron está em apenas um lóbulo de cada vez)
+            const fixedAngleIdx3 = Math.random() > 0.5 ? 0 : 1;
+            const fixedSide3 = Math.random() > 0.5 ? 1 : -1;
+            const fixedLobeIdx4 = Math.floor(Math.random() * 4);
+
             for (let i = 0; i < particleCount; i++) {
                 let x, y, z;
                 if (level === 1) {
@@ -1555,13 +1561,13 @@
                     y = py * 1.8 + side * 2.4;
                     z = pz;
                 } else if (level === 3) {
-                    // 3p — dois halteres (eixos X e Z), lóbulos de raio = 2.4 escalados por (1.5, 1, 1) centrados em ±4.2
-                    const angleIdx = Math.random() > 0.5 ? 0 : 1;
+                    // 3p — Hidrogênio: concentrar toda a nuvem em UM ÚNICO lóbulo
+                    const angleIdx = fixedAngleIdx3;
                     const angle = angleIdx === 0 ? 0 : Math.PI / 2;
-                    const sideIdx = Math.random() > 0.5 ? 0 : 1;
-                    const side = sideIdx === 0 ? 1 : -1;
+                    const side = fixedSide3;
                     
                     const R = 2.4;
+                    const sideIdx = side === 1 ? 0 : 1;
                     const off = offsetsLevel3[angleIdx * 2 + sideIdx];
                     
                     let px = off.x + gaussianRandom(0, R * 0.35);
@@ -1579,8 +1585,8 @@
                     y = py;
                     z = pz + side * 4.2 * Math.sin(angle);
                 } else {
-                    // 3d cloverleaf — 4 lóbulos no plano XZ, de raio = 3.2 escalados por (1.5, 1, 1) rotacionados por angle, centrados em ±6.4
-                    const lobeIdx = Math.floor(Math.random() * 4);
+                    // 3d cloverleaf — Hidrogênio: concentrar toda a nuvem em UM ÚNICO lóbulo
+                    const lobeIdx = fixedLobeIdx4;
                     const angle = lobeIdx * (Math.PI / 2);
                     
                     const R = 3.2;
@@ -3367,17 +3373,19 @@
             else if (level === 3) {
                 // 3p — dois halteres em X e Z, lóbulos centrados em ±4.2 nos eixos x e z
                 createDoublePOrbital(6, 0x64ffc8);
+                // Hidrogênio tem apenas 1 elétron — escolher aleatoriamente um dos lóbulos
                 if (showElectrons) {
-                    createElectronInLobe('px', 4.2, 1.8);
-                    createElectronInLobe('pz', 4.2, 1.8);
+                    const axis = Math.random() > 0.5 ? 'px' : 'pz';
+                    createElectronInLobe(axis, 4.2, 1.8);
                 }
             }
             else if (level === 4) {
                 // 3d cloverleaf — lóbulos no plano XZ, centrados em ±6.4 em x e z
                 createCloverleafOrbital(8, 0xff9664);
+                // Hidrogênio tem apenas 1 elétron — escolher aleatoriamente um dos lóbulos
                 if (showElectrons) {
-                    createElectronInLobe('px', 6.4, 3.2);
-                    createElectronInLobe('pz', 6.4, 3.2);
+                    const axis = Math.random() > 0.5 ? 'px' : 'pz';
+                    createElectronInLobe(axis, 6.4, 3.2);
                 }
             }
         }
